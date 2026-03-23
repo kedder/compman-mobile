@@ -22,3 +22,6 @@ android/key.properties
 
 # OS
 .DS_Store
+
+# Other
+tmp
