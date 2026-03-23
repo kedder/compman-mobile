@@ -18,6 +18,10 @@ ARG ANDROID_PLATFORM=35
 ARG ANDROID_BUILD_TOOLS=35.0.0
 # Numeric ID from the cmdline-tools download URL on developer.android.com
 ARG ANDROID_CMDLINE_TOOLS=11076708
+# Host user/group IDs — set in .env (copy from sample.env) so container files
+# are owned by the host developer rather than root.
+ARG HOST_UID=1000
+ARG HOST_GID=1000
 
 FROM ubuntu:24.04
 
@@ -69,5 +73,25 @@ RUN wget -q \
     && mkdir -p "$PUB_CACHE"
 
 WORKDIR /app
+
+# --- Developer user -----------------------------------------------------------
+# Re-declare ARGs: Docker ARG values declared before FROM are not in scope
+# after FROM, so we must re-declare them here to use their values.
+ARG HOST_UID
+ARG HOST_GID
+RUN if getent group "${HOST_GID}" > /dev/null 2>&1; then \
+        groupmod -n dev "$(getent group ${HOST_GID} | cut -d: -f1)"; \
+    else \
+        groupadd --gid "${HOST_GID}" dev; \
+    fi \
+    && if getent passwd "${HOST_UID}" > /dev/null 2>&1; then \
+        usermod -l dev -d /home/dev -m "$(getent passwd ${HOST_UID} | cut -d: -f1)"; \
+    else \
+        useradd --uid "${HOST_UID}" --gid "${HOST_GID}" --create-home dev; \
+    fi \
+    && chown -R dev:dev "$PUB_CACHE" \
+                        "$FLUTTER_HOME/bin/cache" \
+                        "$FLUTTER_HOME/packages/flutter_tools/.dart_tool"
+USER dev
 
 CMD ["bash"]

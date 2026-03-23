@@ -42,10 +42,14 @@ There are **two ways** to use the container, depending on your workflow:
 git clone <repo-url> compman-mobile
 cd compman-mobile
 
-# 2. Build the Docker image (one-time, takes a few minutes)
+# 2. Configure your host user identity
+cp sample.env .env
+# Edit .env: set HOST_UID=$(id -u) and HOST_GID=$(id -g)
+
+# 3. Build the Docker image (one-time, takes a few minutes)
 make build-image
 
-# 3. Install Dart dependencies
+# 4. Install Dart dependencies
 make deps
 ```
 
@@ -159,9 +163,14 @@ docker compose build --no-cache
 ```
 
 ### Permission errors on mounted files
-The container runs as root. If files created inside the container are owned by root on the host, run:
+
+This is solved by the `.env` user-identity setup above. After running `make build-image` with a correct `.env`, files created inside the container are owned by your host user.
+
+If you cloned the repo before setting up `.env` and have root-owned files, fix them once and then rebuild:
 ```bash
 sudo chown -R $(id -u):$(id -g) .
+cp sample.env .env   # fill in HOST_UID / HOST_GID
+make build-image
 ```
 
 ### Pub cache or Gradle cache is stale

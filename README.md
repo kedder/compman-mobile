@@ -19,13 +19,17 @@ This is the mobile companion to [openvario-compman](https://github.com/kedder/op
 All SDKs are in Docker — nothing to install on your machine except Docker and `make`.
 
 ```bash
-# 1. Build the development Docker image (one-time, takes a few minutes)
+# 1. Copy the environment template and fill in your user/group IDs
+cp sample.env .env
+# edit .env: HOST_UID=$(id -u)  HOST_GID=$(id -g)
+
+# 2. Build the development Docker image (one-time, takes a few minutes)
 make build-image
 
-# 2. Install Dart dependencies
+# 3. Install Dart dependencies
 make deps
 
-# 3. Run tests to verify everything works
+# 4. Run tests to verify everything works
 make test
 ```
 
