@@ -196,7 +196,7 @@ On Linux, `--network=host` lets the container reach the host's ADB server direct
 emulator -avd compman
 
 # Terminal 2: flutter run from inside the container
-docker compose run --rm --network=host dev flutter run
+make flutter-run
 # Press 'r' to hot reload, 'R' for hot restart, 'q' to quit
 ```
 

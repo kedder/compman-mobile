@@ -24,6 +24,14 @@ services:
     environment:
       - PUB_CACHE=/opt/pub-cache
 
+  # Used by `make flutter-run` on Linux to connect to a host emulator/device
+  # via ADB. network_mode: host gives the container access to the host's ADB
+  # server (localhost:5037). Does not work on macOS or Windows Docker Desktop.
+  flutter-run:
+    extends:
+      service: dev
+    network_mode: host
+
 volumes:
   pub_cache:
   gradle_cache:

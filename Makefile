@@ -21,6 +21,7 @@ RUN     := $(COMPOSE) run --rm dev
         test test-coverage \
         analyze format format-check \
         build build-release \
+        flutter-run \
         clean doctor shell
 
 .DEFAULT_GOAL := help
@@ -69,6 +70,9 @@ build: ## Build a debug APK  (output: build/app/outputs/flutter-apk/)
 
 build-release: ## Build a release APK
 	$(RUN) flutter build apk --release
+
+flutter-run: ## Run app on a host emulator/device with hot reload  (Linux only — requires emulator running on host)
+	$(COMPOSE) run --rm -it flutter-run flutter run
 
 # ── Maintenance ───────────────────────────────────────────────────────────────
 
