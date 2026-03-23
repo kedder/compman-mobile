@@ -96,4 +96,9 @@ RUN if getent group "${HOST_GID}" > /dev/null 2>&1; then \
     && chown dev:dev /home/dev/.gradle
 USER dev
 
+# Configure Flutter for the dev user so every container starts pre-initialised
+# (avoids "Building flutter tool..." and the analytics banner on every run).
+RUN flutter config --no-analytics \
+    && flutter config --android-sdk "$ANDROID_SDK_ROOT"
+
 CMD ["bash"]

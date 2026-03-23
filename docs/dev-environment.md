@@ -77,6 +77,10 @@ make help            # full target list with descriptions
 
 All targets start a fresh container (`--rm`), run the command, then exit. Dart and Gradle caches are persisted in named Docker volumes so subsequent runs are fast.
 
+> **Build performance note** — After the first `make build` warms the Gradle build cache
+> (stored in the `gradle_cache` volume), subsequent builds skip unchanged tasks automatically
+> thanks to `org.gradle.caching=true` in `android/gradle.properties`.
+
 ---
 
 ## Running on a Device (`flutter run`)
@@ -143,7 +147,7 @@ To update:
 
 ```bash
 # 1. Edit Dockerfile ARG defaults
-# 2. Rebuild from scratch
+# 2. Rebuild from scratch (also re-runs flutter config as the dev user)
 make build-image  # (docker compose build --no-cache internally)
 # 3. Re-install dependencies
 make deps
