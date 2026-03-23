@@ -93,6 +93,10 @@ The Android emulator is installed directly on the host using Google's command-li
 
 **~2 GB total download:** cmdline-tools (~150 MB) + emulator (~400 MB) + system image (~1.5 GB).
 
+**Java 17+ required** for `sdkmanager` and `avdmanager` (the container uses Java 21 — install the same on the host to match):
+- Linux: `sudo apt install openjdk-21-jdk-headless`
+- macOS: `brew install openjdk@21`
+
 #### Linux
 
 ```bash
