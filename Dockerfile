@@ -91,7 +91,9 @@ RUN if getent group "${HOST_GID}" > /dev/null 2>&1; then \
     fi \
     && chown -R dev:dev "$PUB_CACHE" \
                         "$FLUTTER_HOME/bin/cache" \
-                        "$FLUTTER_HOME/packages/flutter_tools/.dart_tool"
+                        "$FLUTTER_HOME/packages/flutter_tools/.dart_tool" \
+    && mkdir -p /home/dev/.gradle \
+    && chown dev:dev /home/dev/.gradle
 USER dev
 
 CMD ["bash"]
