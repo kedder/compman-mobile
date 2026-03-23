@@ -1,0 +1,113 @@
+# Compman Mobile — AI Model Instructions
+
+This file provides instructions and rules for AI models (Claude, Copilot, etc.) working on this project. Read this file first, then load relevant documentation before making any changes.
+
+---
+
+## Quick Context Load
+
+For any task, load these in order:
+
+1. **[docs/architecture.md](docs/architecture.md)** — understand the layer structure and dependency rules
+2. **[docs/plan.md](docs/plan.md)** — understand what is built, what is in progress, and what is planned
+3. **Feature doc** for the area you're working in, e.g. [docs/features/competitions.md](docs/features/competitions.md)
+4. **API doc** if touching network code: [docs/api/soaringspot.md](docs/api/soaringspot.md)
+
+---
+
+## Project Rules
+
+### Code Quality
+
+- Add `///` Dart doc comments to **every** new public class, method, and field.
+- Follow the folder structure defined in `docs/architecture.md` exactly. Do not create files outside the defined structure without updating the architecture doc.
+- Use `freezed` for all domain entities and data models (immutable, `copyWith`, `==`).
+- Use `Riverpod` (`AsyncNotifier` / `Notifier`) for all state management. No `setState` in feature screens.
+
+### Architecture: Dependency Rule
+
+```
+presentation  →  domain  ←  data
+```
+
+- `domain` must **never** import from `data` or `presentation`.
+- `data` implements interfaces defined in `domain`.
+- `presentation` depends only on `domain` entities and Riverpod providers.
+- `core` may be imported by all layers.
+
+If you need to break this rule, create an ADR first.
+
+### Documentation Maintenance (REQUIRED)
+
+When you make any code change, you **must** also:
+
+| Change type | Documentation to update |
+|---|---|
+| Add / change a feature | Update or create `docs/features/<feature>.md` |
+| Add / change scraping or network code | Update `docs/api/soaringspot.md` |
+| Add a new architectural pattern or dependency | Update `docs/architecture.md` |
+| Make a significant technology/design decision | Add a new `docs/adr/NNN-title.md` |
+| Complete a planned task | Mark it ✅ in `docs/plan.md` with a brief implementation note |
+| Identify new work during implementation | Add 📋 item to `docs/plan.md` |
+
+Documentation updates belong in the **same commit** as the code change.
+
+### Tests
+
+- Run tests before considering any task done: `flutter test`
+- Every use case class must have a unit test.
+- Every repository implementation must have a unit test with mocked data sources.
+- Widget tests are required for screens that have user interaction.
+
+### Git
+
+- Commit messages: `<type>(<scope>): <description>` (conventional commits)
+  - Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+  - Example: `feat(competitions): add bookmark toggle to competition list`
+- Each commit should be atomic: one logical change.
+
+---
+
+## Key File Locations
+
+```
+lib/
+  main.dart                         # Entry point
+  app.dart                          # App widget and router
+  core/                             # Shared: HTTP, errors, DI
+  features/
+    competitions/
+      domain/                       # Entities, repository interface, use cases
+      data/                         # Remote/local datasources, repository impl
+      presentation/                 # Riverpod providers, screens, widgets
+docs/
+  architecture.md
+  plan.md
+  features/competitions.md
+  api/soaringspot.md
+  adr/
+CLAUDE.md                           # ← you are here
+README.md
+pubspec.yaml
+```
+
+---
+
+## Technology Stack
+
+| Purpose | Package |
+|---|---|
+| UI framework | Flutter (Dart) |
+| State management | `flutter_riverpod` |
+| HTTP client | `dio` |
+| HTML parsing (scraping) | `html` |
+| Local persistence | `hive_flutter` |
+| Navigation | `go_router` |
+| Immutable models | `freezed` + `json_serializable` |
+| Testing mocks | `mockito` |
+
+---
+
+## SoaringSpot Data Source
+
+SoaringSpot does not provide a useful public REST API for competition listings. The app scrapes HTML from `https://www.soaringspot.com` — the same approach used by openvario-compman. See [docs/api/soaringspot.md](docs/api/soaringspot.md) for details.
