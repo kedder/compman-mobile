@@ -16,15 +16,20 @@ This is the mobile companion to [openvario-compman](https://github.com/kedder/op
 
 ## Quick Start
 
+All SDKs are in Docker — nothing to install on your machine except Docker and `make`.
+
 ```bash
-# 1. Install Flutter (https://flutter.dev/docs/get-started/install)
+# 1. Build the development Docker image (one-time, takes a few minutes)
+make build-image
 
-# 2. Get dependencies
-flutter pub get
+# 2. Install Dart dependencies
+make deps
 
-# 3. Run on connected Android device or emulator
-flutter run
+# 3. Run tests to verify everything works
+make test
 ```
+
+For running on a device, opening in VS Code, or updating SDK versions see [docs/dev-environment.md](docs/dev-environment.md).
 
 ## Architecture
 
@@ -34,6 +39,7 @@ The app follows Clean Architecture with a feature-based folder structure. See [d
 
 | Document | Description |
 |---|---|
+| [docs/dev-environment.md](docs/dev-environment.md) | Docker dev environment: setup, commands, updating SDKs |
 | [docs/architecture.md](docs/architecture.md) | Layers, folder structure, dependency rules |
 | [docs/plan.md](docs/plan.md) | Living implementation plan |
 | [docs/features/competitions.md](docs/features/competitions.md) | Competitions feature: entities, use cases, screens |

@@ -1,0 +1,26 @@
+# Development environment service definition.
+#
+# Use `make <target>` rather than calling docker compose directly.
+#
+# Volumes:
+#   .:/app              — live source code (changes are reflected immediately)
+#   pub_cache           — Dart pub cache  (survives container restarts)
+#   gradle_cache        — Gradle cache    (survives container restarts)
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: compman-mobile-dev:latest
+    working_dir: /app
+    volumes:
+      - .:/app
+      - pub_cache:/opt/pub-cache
+      - gradle_cache:/root/.gradle
+    environment:
+      - PUB_CACHE=/opt/pub-cache
+
+volumes:
+  pub_cache:
+  gradle_cache:

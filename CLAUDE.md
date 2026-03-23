@@ -4,14 +4,49 @@ This file provides instructions and rules for AI models (Claude, Copilot, etc.) 
 
 ---
 
+## Development Environment
+
+**All Flutter/Dart/Android SDKs run inside Docker.** Do not assume these tools are installed on the host.
+
+### If you are running on the host machine
+
+Use `make` targets to run all project commands. The Makefile handles Docker transparently:
+
+```bash
+make deps            # flutter pub get
+make codegen         # dart run build_runner build --delete-conflicting-outputs
+make test            # flutter test
+make analyze         # flutter analyze
+make format          # dart format lib test
+make build           # flutter build apk --debug
+make help            # full list of available targets
+```
+
+### If you are running inside the dev container (.devcontainer)
+
+All tools are available directly — use Flutter/Dart commands without `make`:
+
+```bash
+flutter pub get
+flutter test
+flutter analyze
+dart run build_runner build --delete-conflicting-outputs
+flutter build apk
+```
+
+Full details: [docs/dev-environment.md](docs/dev-environment.md)
+
+---
+
 ## Quick Context Load
 
 For any task, load these in order:
 
-1. **[docs/architecture.md](docs/architecture.md)** — understand the layer structure and dependency rules
-2. **[docs/plan.md](docs/plan.md)** — understand what is built, what is in progress, and what is planned
-3. **Feature doc** for the area you're working in, e.g. [docs/features/competitions.md](docs/features/competitions.md)
-4. **API doc** if touching network code: [docs/api/soaringspot.md](docs/api/soaringspot.md)
+1. **[docs/dev-environment.md](docs/dev-environment.md)** — understand how to run commands (Docker / Makefile)
+2. **[docs/architecture.md](docs/architecture.md)** — understand the layer structure and dependency rules
+3. **[docs/plan.md](docs/plan.md)** — understand what is built, what is in progress, and what is planned
+4. **Feature doc** for the area you're working in, e.g. [docs/features/competitions.md](docs/features/competitions.md)
+5. **API doc** if touching network code: [docs/api/soaringspot.md](docs/api/soaringspot.md)
 
 ---
 

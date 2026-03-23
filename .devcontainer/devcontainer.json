@@ -1,0 +1,52 @@
+{
+  // Dev container for Compman Mobile.
+  // Used by VS Code Remote Containers and AI agents (Copilot CLI, Claude Dev, etc.)
+  // that operate from *inside* the container rather than shelling out via Docker.
+  //
+  // Inside this container every Flutter/Dart/Android tool is available directly —
+  // no `make` wrappers needed. Run `flutter test`, `flutter analyze`, etc. as-is.
+
+  "name": "Compman Mobile",
+
+  // Reuse the same image as the Makefile workflow — single source of truth.
+  "build": {
+    "context": "..",
+    "dockerfile": "../Dockerfile"
+  },
+
+  "workspaceFolder": "/app",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+
+  "mounts": [
+    // Persist Dart pub cache across rebuilds.
+    "source=compman-mobile-pub-cache,target=/opt/pub-cache,type=volume",
+    // Persist Gradle cache across rebuilds.
+    "source=compman-mobile-gradle-cache,target=/root/.gradle,type=volume"
+  ],
+
+  "remoteEnv": {
+    "PUB_CACHE": "/opt/pub-cache"
+  },
+
+  // Run after the container is created (first-time setup).
+  "postCreateCommand": "flutter pub get",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code",
+        "eamodio.gitlens",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "dart.flutterSdkPath": "/opt/flutter",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+        "[dart]": {
+          "editor.rulers": [80]
+        }
+      }
+    }
+  }
+}
