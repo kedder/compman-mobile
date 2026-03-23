@@ -47,6 +47,7 @@ For any task, load these in order:
 3. **[docs/plan.md](docs/plan.md)** — understand what is built, what is in progress, and what is planned
 4. **Feature doc** for the area you're working in, e.g. [docs/features/competitions.md](docs/features/competitions.md)
 5. **API doc** if touching network code: [docs/api/soaringspot.md](docs/api/soaringspot.md)
+6. **[docs/features/overview.md](docs/features/overview.md)** — UI specification: screens, user flows, and UX requirements. **Required reading for any UI or presentation-layer work.**
 
 ---
 

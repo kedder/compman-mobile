@@ -8,6 +8,8 @@ This document describes the Competitions feature — the core MVP feature of Com
 
 Users can browse all gliding competitions currently listed on SoaringSpot, view basic details, and bookmark competitions they plan to attend. Bookmarked competitions appear in a dedicated "My Competitions" tab for quick access.
 
+For the full UI specification — screens, user flows, visual states, error handling, and UX requirements — see **[overview.md](overview.md)**.
+
 ---
 
 ## Domain Entities

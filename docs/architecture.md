@@ -88,6 +88,12 @@ New features follow the same pattern: create a new folder under `lib/features/<f
 
 ---
 
+## UI Specification
+
+The expected screens, user flows, visual states, and UX requirements are documented in **[docs/features/overview.md](features/overview.md)**. This is the authoritative reference for all presentation-layer work. When implementing or modifying any screen, read that document first.
+
+---
+
 ## State Management
 
 **Riverpod** (`flutter_riverpod`) is used throughout. Key conventions:
