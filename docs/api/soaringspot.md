@@ -25,14 +25,40 @@ The homepage lists all current and recent competitions. Each competition is repr
 
 | Field | Source | Notes |
 |---|---|---|
-| `id` | Last path segment of `<a href>` | e.g. `"barron-2024"` |
-| `title` | Text content of `<a>` inside `<h3>` | e.g. `"Barron 2024"` |
-| `url` | `https://www.soaringspot.com` + `href` attribute | Full URL |
-| `description` | Text content of `.info` div | Dates and location |
+| `id` | Last non-empty path segment of `<a href>` | Trailing slash stripped; e.g. `/en_gb/barron-2024/` → `"barron-2024"` |
+| `title` | Text content of `<a>` inside `<h3>` | Trimmed |
+| `url` | `https://www.soaringspot.com` + `href` | `href` is always relative on soaringspot.com |
+| `description` | Text content of `.info` element | Whitespace-normalised: collapse `\s+` to single space, trim |
+
+### Selector Note
+
+Use `.contest` (any element with that class), not `div.contest` specifically. In Dart: `document.querySelectorAll('.contest')`. Malformed entries (missing `<h3><a>`) are skipped silently. An empty result list is not an error.
 
 ### Implementation File
 
 `lib/features/competitions/data/datasources/soaringspot_remote_datasource.dart`
+
+---
+
+## Testing: HTML Snapshot
+
+Scraper tests use a **committed snapshot** of the real soaringspot.com homepage rather than hand-crafted fixture HTML. This means tests exercise real-world markup and failures are easy to diagnose.
+
+**No network access during `flutter test`.** The snapshot is read from disk by model tests, and injected as a string via a mocked `Dio` in datasource tests. The live site is never contacted during automated test runs.
+
+**Snapshot location:** `test/fixtures/soaringspot_home.html`
+
+**Assertions** are intentionally loose (non-empty strings, URL prefix checks) so they don't break just because the competition list changes between snapshot refreshes.
+
+### Refreshing the snapshot
+
+Run this command manually when the site structure changes and tests break:
+
+```bash
+curl -L -A "Mozilla/5.0" https://www.soaringspot.com/ -o test/fixtures/soaringspot_home.html
+```
+
+Then re-run the tests. If assertions fail, adjust them to match the new structure (or fix the scraper if the HTML changed fundamentally). Commit the updated snapshot together with any code/test changes.
 
 ---
 

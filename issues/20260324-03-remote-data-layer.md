@@ -21,6 +21,34 @@ Read these files before starting:
 
 Session 2 must be complete before this session. This session is independent of Session 3 (local data layer) — both can run in parallel.
 
+## Research Notes (openvario-compman)
+
+The Python TUI app at `/home/dev/openvario-compman/src/compman/soaringspot.py` implements the same scraping logic. Key findings to guide this implementation:
+
+**Selector:** Use `.contest` (any element with that class), not `div.contest` specifically. The `html` package method is `document.querySelectorAll('.contest')`.
+
+**Field extraction logic (per element):**
+```
+anchor  = element.querySelector('h3 a')       // null → skip element
+title   = anchor.text.trim()
+href    = anchor.attributes['href']           // always relative on soaringspot.com
+url     = 'https://www.soaringspot.com' + href
+id      = Uri.parse(href).pathSegments
+             .lastWhere((s) => s.isNotEmpty)  // last non-empty segment; strips trailing slash
+descr   = element.querySelector('.info')?.text
+          normalised: RegExp(r'\s+').replaceAllMapped → single space, trimmed
+```
+
+**Malformed elements:** If `querySelector('h3 a')` returns null, skip the element silently and continue — do not throw.
+
+**Empty results:** Return an empty list (do not throw `ParseException`). Matches openvario-compman behaviour.
+
+**`fromElement` signature:** Return `CompetitionModel?` (nullable). The datasource filters out nulls before returning the list.
+
+**Exceptions:** `ServerException` and `ParseException` do not exist yet — create `lib/core/error/exceptions.dart`. These are throw-site types; the repository layer (Session 5) maps them to `Failure`.
+
+**No fixture HTML in openvario-compman:** The Python project uses live API tests, not HTML fixtures. We use a **real snapshot** of the soaringspot.com homepage instead (see Testing section below).
+
 ## Tasks
 
 ### Model
@@ -28,11 +56,12 @@ Session 2 must be complete before this session. This session is independent of S
 1. **`lib/features/competitions/data/models/competition_model.dart`**:
    - Plain Dart class (no Hive, no freezed required — but freezed is fine if preferred)
    - Fields: `id` (String), `title` (String), `url` (String), `description` (String)
-   - Factory constructor `CompetitionModel.fromElement(Element element)` — parses a single `div.contest` HTML element using the `html` package
-     - `id` — extracted from the href of the `<a>` tag inside the `<h3>` (URL slug, last path segment)
-     - `title` — text content of that `<a>` tag
-     - `url` — full href (prefix `https://www.soaringspot.com` if the href is relative)
-     - `description` — text content of `div.info` or equivalent (see `docs/api/soaringspot.md`)
+   - Factory constructor `CompetitionModel.fromElement(Element element)` returning `CompetitionModel?`:
+     - Find anchor with `element.querySelector('h3 a')` — return `null` if not found
+     - `title` — `anchor.text.trim()`
+     - `url` — `href` is always relative; prepend `https://www.soaringspot.com`
+     - `id` — last non-empty path segment: `Uri.parse(href).pathSegments.lastWhere((s) => s.isNotEmpty)`
+     - `description` — `element.querySelector('.info')?.text`, whitespace-normalised (collapse `\s+` to single space, trim)
    - Method `toEntity()` returning a `Competition`
 
 ### Data source
@@ -44,12 +73,12 @@ Session 2 must be complete before this session. This session is independent of S
      - Constructor receives `Dio dio`
      - Fetches `https://www.soaringspot.com` (GET)
      - Parses the HTML response body using the `html` package
-     - Selects all `div.contest` elements
-     - Maps each to `CompetitionModel.fromElement(element)`
+     - Selects all `.contest` elements: `document.querySelectorAll('.contest')`
+     - Maps each through `CompetitionModel.fromElement()`, filters nulls
+     - Returns the list (may be empty — empty is not an error)
      - Throws `ServerException(message)` on network error (caught from `DioException`)
-     - Throws `ParseException(message)` if no competitions are found or parsing fails
 
-   Define `ServerException` and `ParseException` as simple exception classes in a suitable location (e.g. `lib/core/error/exceptions.dart`) if they don't exist yet.
+   Create `lib/core/error/exceptions.dart` with `ServerException` and `ParseException` as plain Dart exception classes (no freezed). These are throw-site types; the repository layer maps them to `Failure`.
 
 ### Documentation
 
@@ -58,18 +87,34 @@ Session 2 must be complete before this session. This session is independent of S
 
 ## Tests
 
-Write unit tests in `test/features/competitions/data/`:
+> **No network access during tests.** `flutter test` must never make real HTTP requests. `competition_model_test` reads the snapshot from disk; `soaringspot_remote_datasource_test` injects a mock `Dio` that returns the snapshot string. The snapshot is refreshed manually (see `docs/api/soaringspot.md`).
+
+### Snapshot fixture
+
+Before implementing tests, download a real snapshot of the soaringspot.com homepage **manually** and save it as `test/fixtures/soaringspot_home.html`:
+
+```bash
+curl -L -A "Mozilla/5.0" https://www.soaringspot.com/ -o test/fixtures/soaringspot_home.html
+```
+
+Commit this file to git. Tests read it from disk — no network call is made at test time.
+
+### Test files in `test/features/competitions/data/`:
 
 - **`competition_model_test.dart`**:
-  - Include a **fixture HTML string** (a representative snippet of the SoaringSpot HTML with 2–3 `div.contest` blocks, realistic but not real scraped data) stored as a constant in the test file or in `test/fixtures/soaringspot_competitions.html`
-  - Test that `CompetitionModel.fromElement()` correctly extracts `id`, `title`, `url`, `description` from a single element
-  - Test that `toEntity()` returns a `Competition` with matching fields
+  - Load `test/fixtures/soaringspot_home.html`, parse it, and pick the **first** `.contest` element as the subject
+  - Test `fromElement()` returns a non-null model with non-empty `id`, `title`, `url`, `description`
+  - Test `url` starts with `https://www.soaringspot.com`
+  - Test `id` contains no slashes or spaces
+  - Test `description` contains no leading/trailing whitespace and no consecutive spaces
+  - Test `fromElement()` returns `null` for a hand-crafted malformed element (no `<h3><a>`) — this case cannot come from the snapshot but must still be tested
+  - Test `toEntity()` on a parsed element returns a `Competition` with matching fields
 
 - **`soaringspot_remote_datasource_test.dart`**:
-  - Mock `Dio` using `mockito`
-  - Test happy path: mock returns the fixture HTML → `fetchCompetitions()` returns a non-empty list of `CompetitionModel`
-  - Test network error: mock throws `DioException` → datasource throws `ServerException`
-  - Test parse error: mock returns HTML with no `div.contest` elements → datasource throws `ParseException`
+  - Mock `Dio` using `mockito` — the mock must return the snapshot HTML string, never make a real HTTP call
+  - Happy path: mock returns the snapshot HTML → `fetchCompetitions()` returns a non-empty list; spot-check that each model has non-empty `id`, `title`, `url`
+  - Network error: mock throws `DioException` → datasource throws `ServerException`
+  - No-contest page: mock returns a minimal HTML string with no `.contest` elements → `fetchCompetitions()` returns empty list
 
 - Run `flutter test` — all tests must pass
 - Run `flutter analyze` — must be clean
@@ -78,4 +123,5 @@ Write unit tests in `test/features/competitions/data/`:
 
 - `flutter test` passes with all remote datasource and model tests green
 - `flutter analyze` reports no errors
+- `flutter build apk --debug` succeeds
 - `docs/plan.md` updated
