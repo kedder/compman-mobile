@@ -35,14 +35,14 @@
 - ✅ **Project bootstrap** — added all deps to `pubspec.yaml`, created full `lib/` folder skeleton with stub files, wrapped `runApp` in `ProviderScope`, created `lib/app.dart` stub, added `INTERNET` permission to `AndroidManifest.xml`; `flutter analyze` clean
 
 ### Core Layer (`lib/core/`)
-- 📋 **Error types** — `Failure` sealed class (`NetworkFailure`, `ParseFailure`, `StorageFailure`) using `freezed`
-- 📋 **HTTP client** — `Dio` instance configured with base URL, timeouts, logging interceptor
-- 📋 **DI root** — Riverpod providers for `Dio` instance and Hive box
+- ✅ **Error types** — `Failure` sealed class (`NetworkFailure`, `ParseFailure`, `StorageFailure`) using `freezed`
+- ✅ **HTTP client** — `Dio` instance configured with base URL, timeouts, logging interceptor
+- ✅ **DI root** — Riverpod providers for `Dio` instance and Hive box
 
 ### Domain Layer (`lib/features/competitions/domain/`)
-- 📋 **Entities** — `Competition`, `BookmarkedCompetition` (freezed, immutable)
-- 📋 **Repository interface** — `CompetitionsRepository` abstract class
-- 📋 **Use cases** — `FetchCompetitions`, `GetBookmarkedCompetitions`, `BookmarkCompetition`, `RemoveBookmark`
+- ✅ **Entities** — `Competition`, `BookmarkedCompetition` (freezed, immutable)
+- ✅ **Repository interface** — `CompetitionsRepository` abstract class
+- ✅ **Use cases** — `FetchCompetitions`, `GetBookmarkedCompetitions`, `BookmarkCompetition`, `RemoveBookmark`
 
 ### Data Layer (`lib/features/competitions/data/`)
 - 📋 **Remote datasource** — `SoaringSpotRemoteDataSource`: scrape competition list from soaringspot.com (parse `div.contest` elements)
@@ -58,7 +58,7 @@
 - 📋 **Routing** — `go_router` with bottom navigation shell, named routes
 
 ### Tests
-- 📋 **Use case tests** — unit tests for all 4 use cases with mocked repository
+- ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository
 - 📋 **Repository impl tests** — unit tests with mocked datasources
 - 📋 **Widget tests** — Competition List Screen, Bookmarks Screen
 
