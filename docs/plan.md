@@ -32,7 +32,7 @@
 *Goal: A working Android app that fetches competitions from SoaringSpot and lets users bookmark the ones they plan to attend.*
 
 ### Project Setup
-- 📋 **Project bootstrap** — `flutter create compman_mobile`, configure `pubspec.yaml` with all dependencies, set up `analysis_options.yaml`, `android/app/src/main/AndroidManifest.xml` INTERNET permission
+- ✅ **Project bootstrap** — added all deps to `pubspec.yaml`, created full `lib/` folder skeleton with stub files, wrapped `runApp` in `ProviderScope`, created `lib/app.dart` stub, added `INTERNET` permission to `AndroidManifest.xml`; `flutter analyze` clean
 
 ### Core Layer (`lib/core/`)
 - 📋 **Error types** — `Failure` sealed class (`NetworkFailure`, `ParseFailure`, `StorageFailure`) using `freezed`

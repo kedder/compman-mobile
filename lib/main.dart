@@ -1,31 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app.dart';
+
+/// Entry point. Wraps the app in a [ProviderScope] to enable Riverpod throughout.
 void main() {
-  runApp(const CompmanApp());
-}
-
-class CompmanApp extends StatelessWidget {
-  const CompmanApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Compman Mobile',
-      home: HelloScreen(),
-    );
-  }
-}
-
-class HelloScreen extends StatelessWidget {
-  const HelloScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Compman Mobile')),
-      body: const Center(
-        child: Text('Hello, World!'),
-      ),
-    );
-  }
+  runApp(const ProviderScope(child: CompmanApp()));
 }

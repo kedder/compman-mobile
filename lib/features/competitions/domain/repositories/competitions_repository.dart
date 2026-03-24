@@ -1,0 +1,1 @@
+// TODO: CompetitionsRepository abstract interface
