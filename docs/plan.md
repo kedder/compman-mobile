@@ -46,8 +46,8 @@
 
 ### Data Layer (`lib/features/competitions/data/`)
 - 📋 **Remote datasource** — `SoaringSpotRemoteDataSource`: scrape competition list from soaringspot.com (parse `div.contest` elements)
-- 📋 **Local datasource** — `CompetitionsLocalDataSource`: Hive CRUD for bookmarked competitions
-- 📋 **Models** — `CompetitionModel` (fromHtml), `BookmarkedCompetitionModel` (Hive adapter + `toEntity()`)
+- ✅ **Local datasource** — `CompetitionsLocalDataSource`: Hive CRUD for bookmarked competitions (`getAll`, `save`, `delete`); `HiveCompetitionsLocalDataSource` backed by typed `Box<BookmarkedCompetitionModel>`
+- 🚧 **Models** — `BookmarkedCompetitionModel` ✅ (Hive TypeAdapter typeId:0, `toEntity()`, `fromEntity()`; `.g.dart` generated); `CompetitionModel` (fromHtml) 📋 pending
 - 📋 **Repository impl** — `CompetitionsRepositoryImpl` wiring remote + local, wrapping exceptions in `Failure`
 
 ### Presentation Layer (`lib/features/competitions/presentation/`)
