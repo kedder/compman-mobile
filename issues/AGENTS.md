@@ -53,6 +53,8 @@ When you are assigned an issue:
 Issues are plain Markdown files — just a prompt describing the task. No required frontmatter or metadata.
 
 A good issue includes:
+- **Feature summary** — a short, high-level description of the overall feature or area being worked on, so the agent understands the broader goal before reading the specifics
+- **Scope** — a clear statement of what *this particular ticket* is responsible for, distinct from related issues in the same batch
 - What to build or fix (the task)
 - Acceptance criteria or a completion condition (so the agent knows when to close it)
 - Any relevant context, constraints, or links to docs
