@@ -51,16 +51,16 @@
 - ✅ **Repository impl** — `CompetitionsRepositoryImpl` wiring remote + local, wrapping exceptions in `Failure`; DI providers for remote datasource, local datasource, and repository wired in `lib/core/di/providers.dart`; 9 unit tests covering all 4 methods and both success/failure paths
 
 ### Presentation Layer (`lib/features/competitions/presentation/`)
-- 📋 **Riverpod providers** — `competitionListProvider` (AsyncNotifier), `bookmarkedCompetitionsProvider` (AsyncNotifier)
-- 📋 **Competition List Screen** — scrollable list, pull-to-refresh, bookmark toggle, loading/error states
-- 📋 **My Competitions Screen** — bookmarked competitions tab, empty state, remove bookmark
-- 📋 **Competition Detail Screen** — title, description, URL, bookmark button, placeholder sections for Phase 2+
-- 📋 **Routing** — `go_router` with bottom navigation shell, named routes
+- ✅ **Riverpod providers** — `competitionListProvider` (AsyncNotifier), `bookmarkedCompetitionsProvider` (AsyncNotifier); both await Hive box before accessing repository
+- ✅ **Competition List Screen** — search bar, checkbox multi-select via `CompetitionCard` widget, pre-populated from existing bookmarks, footer Back/Done actions
+- ✅ **My Competitions Screen** — pull-to-refresh, empty/loading/error states, title + bookmarked date cards, remove with confirmation dialog
+- ✅ **Competition Detail Screen** — stub only ("Coming soon"); full implementation planned for Phase 2
+- ✅ **Routing** — `GoRouter` with named routes `/`, `/add`, `/competitions/:id`, `/about`; no bottom nav per ui-guidelines
 
 ### Tests
 - ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository
 - ✅ **Repository impl tests** — unit tests with mocked datasources
-- 📋 **Widget tests** — Competition List Screen, Bookmarks Screen
+- ✅ **Widget tests** — BookmarksScreen (4 tests: empty/data/error/dialog) and CompetitionListScreen (4 tests: list/search/no-results/selection)
 
 ---
 
