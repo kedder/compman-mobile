@@ -48,7 +48,8 @@ For any task, load these in order:
 4. **Feature doc** for the area you're working in, e.g. [docs/features/competitions.md](docs/features/competitions.md)
 5. **API doc** if touching network code: [docs/api/soaringspot.md](docs/api/soaringspot.md)
 6. **[docs/features/overview.md](docs/features/overview.md)** — UI specification: screens, user flows, and UX requirements. **Required reading for any UI or presentation-layer work.**
-7. **If working on an issue**: read [issues/AGENTS.md](issues/AGENTS.md) before starting, then open the assigned issue file.
+7. **[docs/ui-guidelines.md](docs/ui-guidelines.md)** — visual theme, touch targets, typography, status badges, loading/error/empty state patterns, button hierarchy, and accessibility rules. **Required reading for any UI or presentation-layer work.**
+8. **If working on an issue**: read [issues/AGENTS.md](issues/AGENTS.md) before starting, then open the assigned issue file.
 
 ---
 

@@ -12,6 +12,7 @@ We are implementing **bookmarked competitions management** — the core MVP feat
 
 Read these files before starting:
 - `CLAUDE.md` — project rules, architecture dependency rule, test and doc requirements
+- `docs/ui-guidelines.md` — **required reading for all UI work**: visual theme, touch target sizes, typography, status badges, loading/error/empty state patterns, button hierarchy, accessibility rules.
 - `docs/features/overview.md` — **primary UI specification**: screens, user flows, visual states, UX requirements. Read this carefully.
 - `docs/features/competitions.md` — providers, screen list, data flows
 - `lib/features/competitions/domain/entities/competition.dart`
