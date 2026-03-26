@@ -27,9 +27,12 @@ sudo apt-get install google-android-platform-tools-installer \
                      google-android-cmdline-tools-13.0-installer \
                      google-android-emulator-installer
 
-# 2. Install the Android 35 system image
+# 2. Install the Android 35 system image and platform
 yes | sdkmanager --licenses
 sdkmanager "system-images;android-35;google_apis;x86_64"
+sudo apt-get install android-sdk-platform-35
+# The emulator requires the platforms/ directory to be present — without it you get:
+# "PANIC: Cannot find AVD system path. Please define ANDROID_SDK_ROOT"
 
 # 3. Create an AVD named "compman"
 echo no | avdmanager create avd -n compman \
