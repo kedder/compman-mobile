@@ -48,7 +48,7 @@
 - ✅ **Remote datasource** — `SoaringSpotRemoteDataSource`: scrapes `.contest` elements from soaringspot.com homepage; `ServerException` on network error; empty result not an error; HTML fixture committed to `test/fixtures/`
 - ✅ **Local datasource** — `CompetitionsLocalDataSource`: Hive CRUD for bookmarked competitions (`getAll`, `save`, `delete`); `HiveCompetitionsLocalDataSource` backed by typed `Box<BookmarkedCompetitionModel>`
 - ✅ **Models** — `BookmarkedCompetitionModel` (Hive TypeAdapter typeId:0, `toEntity()`, `fromEntity()`; `.g.dart` generated); `CompetitionModel` (`fromElement()` parses `.contest` DOM element, `toEntity()`)
-- 📋 **Repository impl** — `CompetitionsRepositoryImpl` wiring remote + local, wrapping exceptions in `Failure`
+- ✅ **Repository impl** — `CompetitionsRepositoryImpl` wiring remote + local, wrapping exceptions in `Failure`; DI providers for remote datasource, local datasource, and repository wired in `lib/core/di/providers.dart`; 9 unit tests covering all 4 methods and both success/failure paths
 
 ### Presentation Layer (`lib/features/competitions/presentation/`)
 - 📋 **Riverpod providers** — `competitionListProvider` (AsyncNotifier), `bookmarkedCompetitionsProvider` (AsyncNotifier)
@@ -59,7 +59,7 @@
 
 ### Tests
 - ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository
-- 📋 **Repository impl tests** — unit tests with mocked datasources
+- ✅ **Repository impl tests** — unit tests with mocked datasources
 - 📋 **Widget tests** — Competition List Screen, Bookmarks Screen
 
 ---
