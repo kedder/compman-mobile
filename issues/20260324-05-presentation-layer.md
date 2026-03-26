@@ -47,51 +47,56 @@ Session 5 must be complete before this session.
    - **Empty state:** large "Add Competition" button centered on screen
    - **Data state:** `ListView` of competition cards, each showing:
      - Competition title
-     - Location + dates from description (parse or display raw description string)
-     - Status badge: "Live" (green), "Upcoming" (blue), "Past" (gray) — derive from description dates or display a placeholder badge for now
+     - Bookmarked date formatted as "Bookmarked MMM d, yyyy" (use `bookmarkedAt` from `BookmarkedCompetition`)
+     - **No status badge and no location/dates** — `BookmarkedCompetition` carries no `description` field; displaying those fields is out of scope for this session
      - Trash icon button → shows a `showDialog` confirmation ("Remove [title]?") → on confirm calls `bookmarkedCompetitionsProvider.notifier.removeBookmark(id)`
    - `RefreshIndicator` wrapping the list for pull-to-refresh (calls `ref.invalidate(bookmarkedCompetitionsProvider)`)
    - Tapping a card navigates to `/competitions/:id`
    - Header has an "Add" button (or `+` icon) linking to `/add`
    - Header has a menu icon linking to `/about` (stub route)
 
-3. **`lib/features/competitions/presentation/screens/competition_list_screen.dart`** — "Add Competition":
+3. **`lib/features/competitions/presentation/widgets/competition_card.dart`** — shared widget:
+   - Accepts a `Competition`, `bool isSelected`, and `VoidCallback onTap`
+   - Displays: title (`titleMedium`), raw `description` string (`bodySmall`, grey), a status badge (placeholder "Upcoming" for all — parsing dates from the raw description string is out of scope)
+   - When `isSelected`: show a leading blue `Icons.check_circle` icon; row has a blue left border or highlighted background
+   - Used by `CompetitionListScreen`. **Not** used on the `BookmarksScreen` (different entity type)
+
+4. **`lib/features/competitions/presentation/screens/competition_list_screen.dart`** — "Add Competition":
    - Watches `competitionListProvider`
    - Local state: `Set<String> selectedIds` (tracks which competitions are checked), `String searchQuery`
    - **Loading state:** centered `CircularProgressIndicator`
    - **Error state:** error message + "Retry" button
    - **Search bar** at top: filters displayed competitions by title (case-insensitive)
    - **Empty search state:** "No competitions found" message when search matches nothing
-   - `ListView` of competitions showing:
-     - Checkbox (or `ListTile` with `leading` checkmark)
-     - Title, description, status badge
-     - Tapping the row toggles selection; selected rows show a blue border or checkmark
+   - `ListView` of `CompetitionCard` widgets:
+     - `isSelected` driven by `selectedIds`
+     - Tapping the row toggles selection
    - Footer: "Back" button (navigates back) + "Done" button
      - "Done" calls `bookmarkedCompetitionsProvider.notifier.bookmark(competition)` for each newly selected competition, then navigates back
    - Pre-populate `selectedIds` from already-bookmarked competition ids so existing bookmarks appear checked
 
-4. **`lib/features/competitions/presentation/screens/competition_detail_screen.dart`** — stub only:
+5. **`lib/features/competitions/presentation/screens/competition_detail_screen.dart`** — stub only:
    - Accepts a `competitionId` route parameter
    - Displays `Scaffold` with `AppBar` titled "Competition" and a centered `Text('Coming soon')`
 
 ### Routing
 
-5. **`lib/app.dart`** — replace the placeholder `MaterialApp` with a full `GoRouter`-based app:
+6. **`lib/app.dart`** — replace the placeholder `MaterialApp` with a full `GoRouter`-based app:
    - Routes:
-     - `/` → `BookmarksScreen` (shell with bottom nav or plain)
+     - `/` → `BookmarksScreen`
      - `/add` → `CompetitionListScreen`
      - `/competitions/:id` → `CompetitionDetailScreen`
      - `/about` → stub `AboutScreen` (`Scaffold` with `AppBar` titled "About" and version placeholder text)
    - Use `GoRouter` with `MaterialApp.router`
-   - Bottom navigation bar with two tabs: "My Competitions" (`/`) and a way to reach "Add" — or just a single screen with the Add button in the header (follow `docs/features/overview.md`)
+   - **No `BottomNavigationBar`.** Per `docs/ui-guidelines.md`: bottom nav is not used unless a future feature explicitly requires peer-level navigation. The home screen is a plain `Scaffold`; the Add Competition entry point is the `+` icon in the `AppBar`.
 
 ### Update `lib/main.dart`
 
-6. Ensure `main.dart` uses `CompmanApp` from `lib/app.dart` and is wrapped in `ProviderScope`. Also call `Hive.initFlutter()` before `runApp` (or ensure it's handled in the DI provider).
+7. Ensure `main.dart` uses `CompmanApp` from `lib/app.dart` and is wrapped in `ProviderScope`. Also call `Hive.initFlutter()` before `runApp` (or ensure it's handled in the DI provider).
 
 ### Documentation
 
-7. **Update `docs/plan.md`** — mark the following Phase 1 tasks as ✅:
+8. **Update `docs/plan.md`** — mark the following Phase 1 tasks as ✅:
    - "Riverpod providers"
    - "Competition List Screen"
    - "My Competitions Screen"
