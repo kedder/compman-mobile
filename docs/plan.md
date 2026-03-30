@@ -79,6 +79,7 @@
 
 *Goal: Fetch today's task from soarscore.com and generate a `.tsk` file for XCSoar.*
 
+- ✅ `docs/adr/005-soarscore-html-scraping.md` — why HTML scraping is used for SoarScore task downloads
 - 📋 SoarScore API integration (`soarscore.com`)
 - 📋 `.tsk` XML file generator
 - 📋 Competition class selection
