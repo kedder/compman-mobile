@@ -28,6 +28,7 @@ class BookmarksScreen extends ConsumerWidget {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) => context.push(value),
             itemBuilder: (context) => const [
+              PopupMenuItem(value: '/settings/xcsoar-directory', child: Text('Settings')),
               PopupMenuItem(value: '/saf-test', child: Text('Try SAF')),
               PopupMenuItem(value: '/about', child: Text('About')),
             ],

@@ -56,6 +56,7 @@
 - ✅ **My Competitions Screen** — pull-to-refresh, empty/loading/error states, title + bookmarked date cards, remove with confirmation dialog
 - ✅ **Competition Detail Screen** — full implementation: class picker (chips from SoarScore task list), task display (day/task/title/timestamp), "Install as XCSoar Default Task" button with SAF write and SnackBar feedback, XCSoar directory info row, pull-to-refresh; new providers: `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`; new `/settings/xcsoar-directory` route with `XcsoarDirectorySettingsScreen`
 - ✅ **Routing** — `GoRouter` with named routes `/`, `/add`, `/competitions/:id`, `/about`; no bottom nav per ui-guidelines
+- ✅ **XCSoar Directory Settings Screen** — screen reworked to `ListView`+`ListTile` layout, AppBar title "XCSoar Folder", "Change Directory" button, always-visible `OutlinedButton` "Reset Permission" (red), cancelled-selection SnackBar, info text paragraph; "Settings" entry added first in home screen three-dot menu
 
 ### Tests
 - ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository

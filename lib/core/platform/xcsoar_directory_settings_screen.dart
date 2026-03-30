@@ -31,9 +31,13 @@ class _XcsoarDirectorySettingsScreenState
         ref.invalidate(xcsoarDirectoryUriProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('XCSoar folder configured successfully'),
+            content: Text('XCSoar folder configured'),
             backgroundColor: Color(0xFF2E7D32),
           ),
+        );
+      } else if (result == 'cancelled') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Folder selection cancelled')),
         );
       }
     } on PlatformException catch (e) {
@@ -54,44 +58,39 @@ class _XcsoarDirectorySettingsScreenState
     if (!mounted) return;
     ref.invalidate(xcsoarDirectoryUriProvider);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('XCSoar folder cleared')),
+      const SnackBar(content: Text('Permission cleared')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final uriAsync = ref.watch(xcsoarDirectoryUriProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('XCSoar Directory')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('XCSoar data folder', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            uriAsync.when(
-              loading: () => const CircularProgressIndicator(),
-              error: (_, __) => Text('Could not read folder',
-                  style: theme.textTheme.bodyMedium),
+      appBar: AppBar(title: const Text('XCSoar Folder')),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.folder_outlined),
+            title: const Text('XCSoar folder'),
+            subtitle: uriAsync.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (_, __) => const Text('Could not read folder'),
               data: (uri) => Text(
                 uri != null && uri.isNotEmpty ? uri : 'Not configured',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
-                ),
               ),
             ),
-            const SizedBox(height: 24),
-            SizedBox(
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: SizedBox(
               height: 56,
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: _pickDirectory,
                       child: const Text(
-                        'Choose XCSoar Folder',
+                        'Change Directory',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -99,21 +98,27 @@ class _XcsoarDirectorySettingsScreenState
                       ),
                     ),
             ),
-            const SizedBox(height: 12),
-            uriAsync.maybeWhen(
-              data: (uri) => uri != null && uri.isNotEmpty
-                  ? TextButton(
-                      onPressed: _clearDirectory,
-                      child: Text(
-                        'Clear configured folder',
-                        style: TextStyle(color: Colors.red.shade700),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              orElse: () => const SizedBox.shrink(),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: OutlinedButton(
+              onPressed: _clearDirectory,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red.shade700,
+              ),
+              child: const Text('Reset Permission'),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'Compman needs access to XCSoar\'s data folder to install task files. '
+              'Tap Change Directory to open the folder picker and grant access. '
+              'If XCSoar is not installed or the folder picker shows an unexpected '
+              'location, tap Reset Permission and try again.',
+            ),
+          ),
+        ],
       ),
     );
   }
