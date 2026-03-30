@@ -54,7 +54,7 @@
 - ✅ **Riverpod providers** — `competitionListProvider` (AsyncNotifier), `bookmarkedCompetitionsProvider` (AsyncNotifier); both await Hive box before accessing repository
 - ✅ **Competition List Screen** — search bar, checkbox multi-select via `CompetitionCard` widget, pre-populated from existing bookmarks, footer Back/Done actions
 - ✅ **My Competitions Screen** — pull-to-refresh, empty/loading/error states, title + bookmarked date cards, remove with confirmation dialog
-- ✅ **Competition Detail Screen** — stub only ("Coming soon"); full implementation planned for Phase 2
+- ✅ **Competition Detail Screen** — full implementation: class picker (chips from SoarScore task list), task display (day/task/title/timestamp), "Install as XCSoar Default Task" button with SAF write and SnackBar feedback, XCSoar directory info row, pull-to-refresh; new providers: `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`; new `/settings/xcsoar-directory` route with `XcsoarDirectorySettingsScreen`
 - ✅ **Routing** — `GoRouter` with named routes `/`, `/add`, `/competitions/:id`, `/about`; no bottom nav per ui-guidelines
 
 ### Tests

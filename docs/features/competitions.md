@@ -97,6 +97,9 @@ Operations: `getAll()`, `save(model)`, `delete(id)`.
 |---|---|---|
 | `competitionListProvider` | `AsyncNotifier<List<Competition>>` | Fetches and caches competition list; exposes loading/error/data |
 | `bookmarkedCompetitionsProvider` | `AsyncNotifier<List<BookmarkedCompetition>>` | Loads bookmarks; refreshed after bookmark/unbookmark actions |
+| `competitionDetailProvider(id)` | `FutureProvider.autoDispose.family<BookmarkedCompetition?, String>` | Looks up a single bookmarked competition by ID |
+| `latestTasksProvider(id)` | `FutureProvider.autoDispose.family<List<TaskInfo>, String>` | Fetches task list from SoarScore for a given competition |
+| `xcsoarDirectoryUriProvider` | `FutureProvider.autoDispose<String?>` | Returns the stored SAF tree URI, or null if not configured |
 
 ---
 
@@ -120,11 +123,19 @@ Operations: `getAll()`, `save(model)`, `delete(id)`.
 
 ### Competition Detail Screen (`/competitions/:id`)
 
-- Shows competition title, description, full SoaringSpot URL (tappable)
-- Bookmark/unbookmark button
-- Placeholder sections for future features:
-  - "Waypoints & Airspace" (Phase 2)
-  - "Task" (Phase 3)
+- **Header:** Competition title and SoaringSpot URL.
+- **Class selection:** If no class is chosen, fetches available class names from SoarScore and renders them as tappable chips. Tapping a chip persists the selection via `SetCompetitionClass` and refreshes the task section.
+- **Class display:** If a class is already set, shows the name and a "Change" button that clears the selection.
+- **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Displays day/task number, title, and generation timestamp. "Install as XCSoar Default Task" button calls `DownloadTask` then `XcsoarSafService.writeFile(bytes, 'Default.tsk')`. Shows a green SnackBar on success; if `SAF_NOT_CONFIGURED`, shows a SnackBar with a Settings action button.
+- **XCSoar directory row:** Shows the current SAF directory URI from `XcsoarSafService.getSafDirectoryUri()`, or a "Set up" link to `/settings/xcsoar-directory` if not configured.
+- **Providers used:** `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`.
+- Pull-to-refresh and AppBar refresh icon both invalidate `latestTasksProvider` and `xcsoarDirectoryUriProvider`.
+
+### XCSoar Directory Settings Screen (`/settings/xcsoar-directory`)
+
+- Displays the current SAF directory URI or "Not configured".
+- "Choose XCSoar Folder" button triggers `XcsoarSafService.tryWriteHelloFile()` which opens the Android folder picker on first use.
+- "Clear configured folder" button calls `XcsoarSafService.clearSafPermission()`.
 
 ---
 

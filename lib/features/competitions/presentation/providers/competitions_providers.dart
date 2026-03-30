@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../core/platform/xcsoar_saf_service.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/competition.dart';
+import '../../domain/entities/task_info.dart';
 import '../../domain/usecases/bookmark_competition.dart';
 import '../../domain/usecases/fetch_competitions.dart';
 import '../../domain/usecases/get_bookmarked_competitions.dart';
@@ -62,3 +64,35 @@ class BookmarkedCompetitionsNotifier
     ref.invalidateSelf();
   }
 }
+
+/// Provider that looks up a single [BookmarkedCompetition] by its ID.
+///
+/// Returns `null` if the competition is not in the user's bookmarks.
+final competitionDetailProvider =
+    FutureProvider.autoDispose.family<BookmarkedCompetition?, String>(
+  (ref, competitionId) async {
+    final bookmarks = await ref.watch(bookmarkedCompetitionsProvider.future);
+    try {
+      return bookmarks.firstWhere((b) => b.id == competitionId);
+    } catch (_) {
+      return null;
+    }
+  },
+);
+
+/// Provider that fetches the latest task list from SoarScore for a competition.
+///
+/// Throws the [Failure] if the use case returns a [Left].
+final latestTasksProvider =
+    FutureProvider.autoDispose.family<List<TaskInfo>, String>(
+  (ref, competitionId) async {
+    final useCase = ref.read(fetchLatestTasksProvider);
+    final result = await useCase(competitionId);
+    return result.fold((f) => throw f, (tasks) => tasks);
+  },
+);
+
+/// Provider that returns the stored SAF directory URI, or null if not set.
+final xcsoarDirectoryUriProvider = FutureProvider.autoDispose<String?>((ref) {
+  return XcsoarSafService().getSafDirectoryUri();
+});
