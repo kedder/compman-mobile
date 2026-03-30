@@ -20,6 +20,7 @@ mixin _$BookmarkedCompetition {
   String get title => throw _privateConstructorUsedError;
   String get soaringspotUrl => throw _privateConstructorUsedError;
   DateTime get bookmarkedAt => throw _privateConstructorUsedError;
+  String? get selectedClass => throw _privateConstructorUsedError;
 
   /// Create a copy of BookmarkedCompetition
   /// with the given fields replaced by the non-null parameter values.
@@ -35,7 +36,11 @@ abstract class $BookmarkedCompetitionCopyWith<$Res> {
       _$BookmarkedCompetitionCopyWithImpl<$Res, BookmarkedCompetition>;
   @useResult
   $Res call(
-      {String id, String title, String soaringspotUrl, DateTime bookmarkedAt});
+      {String id,
+      String title,
+      String soaringspotUrl,
+      DateTime bookmarkedAt,
+      String? selectedClass});
 }
 
 /// @nodoc
@@ -58,6 +63,7 @@ class _$BookmarkedCompetitionCopyWithImpl<$Res,
     Object? title = null,
     Object? soaringspotUrl = null,
     Object? bookmarkedAt = null,
+    Object? selectedClass = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -76,6 +82,10 @@ class _$BookmarkedCompetitionCopyWithImpl<$Res,
           ? _value.bookmarkedAt
           : bookmarkedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      selectedClass: freezed == selectedClass
+          ? _value.selectedClass
+          : selectedClass // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -90,7 +100,11 @@ abstract class _$$BookmarkedCompetitionImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id, String title, String soaringspotUrl, DateTime bookmarkedAt});
+      {String id,
+      String title,
+      String soaringspotUrl,
+      DateTime bookmarkedAt,
+      String? selectedClass});
 }
 
 /// @nodoc
@@ -111,6 +125,7 @@ class __$$BookmarkedCompetitionImplCopyWithImpl<$Res>
     Object? title = null,
     Object? soaringspotUrl = null,
     Object? bookmarkedAt = null,
+    Object? selectedClass = freezed,
   }) {
     return _then(_$BookmarkedCompetitionImpl(
       id: null == id
@@ -129,6 +144,10 @@ class __$$BookmarkedCompetitionImplCopyWithImpl<$Res>
           ? _value.bookmarkedAt
           : bookmarkedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      selectedClass: freezed == selectedClass
+          ? _value.selectedClass
+          : selectedClass // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -140,7 +159,8 @@ class _$BookmarkedCompetitionImpl implements _BookmarkedCompetition {
       {required this.id,
       required this.title,
       required this.soaringspotUrl,
-      required this.bookmarkedAt});
+      required this.bookmarkedAt,
+      this.selectedClass});
 
   @override
   final String id;
@@ -150,10 +170,12 @@ class _$BookmarkedCompetitionImpl implements _BookmarkedCompetition {
   final String soaringspotUrl;
   @override
   final DateTime bookmarkedAt;
+  @override
+  final String? selectedClass;
 
   @override
   String toString() {
-    return 'BookmarkedCompetition(id: $id, title: $title, soaringspotUrl: $soaringspotUrl, bookmarkedAt: $bookmarkedAt)';
+    return 'BookmarkedCompetition(id: $id, title: $title, soaringspotUrl: $soaringspotUrl, bookmarkedAt: $bookmarkedAt, selectedClass: $selectedClass)';
   }
 
   @override
@@ -166,12 +188,14 @@ class _$BookmarkedCompetitionImpl implements _BookmarkedCompetition {
             (identical(other.soaringspotUrl, soaringspotUrl) ||
                 other.soaringspotUrl == soaringspotUrl) &&
             (identical(other.bookmarkedAt, bookmarkedAt) ||
-                other.bookmarkedAt == bookmarkedAt));
+                other.bookmarkedAt == bookmarkedAt) &&
+            (identical(other.selectedClass, selectedClass) ||
+                other.selectedClass == selectedClass));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, title, soaringspotUrl, bookmarkedAt);
+  int get hashCode => Object.hash(
+      runtimeType, id, title, soaringspotUrl, bookmarkedAt, selectedClass);
 
   /// Create a copy of BookmarkedCompetition
   /// with the given fields replaced by the non-null parameter values.
@@ -188,7 +212,8 @@ abstract class _BookmarkedCompetition implements BookmarkedCompetition {
       {required final String id,
       required final String title,
       required final String soaringspotUrl,
-      required final DateTime bookmarkedAt}) = _$BookmarkedCompetitionImpl;
+      required final DateTime bookmarkedAt,
+      final String? selectedClass}) = _$BookmarkedCompetitionImpl;
 
   @override
   String get id;
@@ -198,6 +223,8 @@ abstract class _BookmarkedCompetition implements BookmarkedCompetition {
   String get soaringspotUrl;
   @override
   DateTime get bookmarkedAt;
+  @override
+  String? get selectedClass;
 
   /// Create a copy of BookmarkedCompetition
   /// with the given fields replaced by the non-null parameter values.

@@ -10,6 +10,7 @@ import '../../features/competitions/data/repositories/competitions_repository_im
 import '../../features/competitions/domain/repositories/competitions_repository.dart';
 import '../../features/competitions/domain/usecases/download_task.dart';
 import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
+import '../../features/competitions/domain/usecases/set_competition_class.dart';
 import '../network/http_client.dart';
 
 /// Provides the configured [Dio] instance.
@@ -65,4 +66,9 @@ final fetchLatestTasksProvider = Provider<FetchLatestTasks>(
 /// Provides a [DownloadTask] use case instance.
 final downloadTaskProvider = Provider<DownloadTask>(
   (ref) => DownloadTask(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [SetCompetitionClass] use case instance.
+final setCompetitionClassProvider = Provider<SetCompetitionClass>(
+  (ref) => SetCompetitionClass(ref.read(competitionsRepositoryProvider)),
 );

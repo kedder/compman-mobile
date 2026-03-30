@@ -83,7 +83,7 @@
 - ✅ **SoarScore data layer** — `TaskInfo` entity (freezed), `fetchLatestTasks` + `downloadTask` on `CompetitionsRepository`, `FetchLatestTasks` + `DownloadTask` use cases, `DioSoarScoreRemoteDataSource` (HTML scraping of `#Downloads` tab), repository impl + DI wired; `docs/api/soarscore.md` created; unit tests for datasource, use cases, and repository methods
 - ✅ **SAF bridge extended** — `writeFile`, `getSafDirectoryUri`, `clearSafPermission` added to Kotlin `MainActivity.kt` and `XcsoarSafService` Dart wrapper
 - 📋 `.tsk` XML file writer (write bytes to XCSoar data directory as `Default.tsk`)
-- 📋 Competition class selection
+- ✅ **Competition class selection persistence** — `selectedClass` field added to `BookmarkedCompetition` (freezed) and `BookmarkedCompetitionModel` (HiveField 4); `getById` on local datasource; `setCompetitionClass` on repository interface and impl; `SetCompetitionClass` use case; DI wired; unit tests for use case and repository; old records deserialise with `selectedClass == null`
 - 📋 `docs/features/tasks.md`
 
 ---

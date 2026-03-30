@@ -31,4 +31,12 @@ abstract class CompetitionsRepository {
 
   /// Download the raw bytes of a `.tsk` file from [taskUrl].
   Future<Either<Failure, Uint8List>> downloadTask(String taskUrl);
+
+  /// Persists the selected competition class for a bookmarked competition.
+  ///
+  /// A [selectedClass] of null clears the selection.
+  Future<Either<Failure, Unit>> setCompetitionClass(
+    String competitionId,
+    String? selectedClass,
+  );
 }

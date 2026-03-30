@@ -25,12 +25,17 @@ class BookmarkedCompetitionModel {
   @HiveField(3)
   final DateTime bookmarkedAt;
 
+  /// The competition class the user has selected (e.g. "Club", "Open").
+  @HiveField(4)
+  final String? selectedClass;
+
   /// Creates a [BookmarkedCompetitionModel].
   BookmarkedCompetitionModel({
     required this.id,
     required this.title,
     required this.soaringspotUrl,
     required this.bookmarkedAt,
+    this.selectedClass,
   });
 
   /// Converts this model to the domain [BookmarkedCompetition] entity.
@@ -39,6 +44,7 @@ class BookmarkedCompetitionModel {
         title: title,
         soaringspotUrl: soaringspotUrl,
         bookmarkedAt: bookmarkedAt,
+        selectedClass: selectedClass,
       );
 
   /// Creates a [BookmarkedCompetitionModel] from a domain [BookmarkedCompetition].
@@ -48,5 +54,6 @@ class BookmarkedCompetitionModel {
         title: entity.title,
         soaringspotUrl: entity.soaringspotUrl,
         bookmarkedAt: entity.bookmarkedAt,
+        selectedClass: entity.selectedClass,
       );
 }

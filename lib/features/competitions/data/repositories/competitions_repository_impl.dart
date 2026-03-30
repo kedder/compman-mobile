@@ -103,4 +103,28 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       return Left(NetworkFailure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> setCompetitionClass(
+    String competitionId,
+    String? selectedClass,
+  ) async {
+    try {
+      final existing = await local.getById(competitionId);
+      if (existing == null) {
+        return const Left(StorageFailure('Competition not found'));
+      }
+      final updated = BookmarkedCompetitionModel(
+        id: existing.id,
+        title: existing.title,
+        soaringspotUrl: existing.soaringspotUrl,
+        bookmarkedAt: existing.bookmarkedAt,
+        selectedClass: selectedClass,
+      );
+      await local.save(updated);
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure(e.toString()));
+    }
+  }
 }

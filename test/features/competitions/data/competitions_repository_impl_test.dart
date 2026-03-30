@@ -171,4 +171,55 @@ void main() {
       );
     });
   });
+
+  group('setCompetitionClass', () {
+    test('updates model with new class and returns Right(unit)', () async {
+      when(mockLocal.getById('barron-2024'))
+          .thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenAnswer((_) async {});
+
+      final result =
+          await repository.setCompetitionClass('barron-2024', 'Club');
+
+      expect(result, equals(const Right<Failure, Unit>(unit)));
+      verify(mockLocal.getById('barron-2024')).called(1);
+      verify(mockLocal.save(any)).called(1);
+    });
+
+    test('clears class when null is passed', () async {
+      when(mockLocal.getById('barron-2024'))
+          .thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenAnswer((_) async {});
+
+      final result = await repository.setCompetitionClass('barron-2024', null);
+
+      expect(result, equals(const Right<Failure, Unit>(unit)));
+    });
+
+    test('returns Left(StorageFailure) when competition not found', () async {
+      when(mockLocal.getById('missing')).thenAnswer((_) async => null);
+
+      final result = await repository.setCompetitionClass('missing', 'Club');
+
+      expect(
+          result,
+          equals(const Left<Failure, Unit>(
+              StorageFailure('Competition not found'))));
+    });
+
+    test('returns Left(StorageFailure) on save exception', () async {
+      when(mockLocal.getById('barron-2024'))
+          .thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenThrow(Exception('disk full'));
+
+      final result =
+          await repository.setCompetitionClass('barron-2024', 'Club');
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure, isA<StorageFailure>()),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
 }

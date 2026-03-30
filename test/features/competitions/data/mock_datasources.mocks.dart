@@ -76,6 +76,16 @@ class MockCompetitionsLocalDataSource extends _i1.Mock
       ) as _i3.Future<List<_i6.BookmarkedCompetitionModel>>);
 
   @override
+  _i3.Future<_i6.BookmarkedCompetitionModel?> getById(String? id) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getById,
+          [id],
+        ),
+        returnValue: _i3.Future<_i6.BookmarkedCompetitionModel?>.value(),
+      ) as _i3.Future<_i6.BookmarkedCompetitionModel?>);
+
+  @override
   _i3.Future<void> save(_i6.BookmarkedCompetitionModel? model) =>
       (super.noSuchMethod(
         Invocation.method(

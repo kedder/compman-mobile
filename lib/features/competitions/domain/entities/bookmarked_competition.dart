@@ -13,5 +13,6 @@ class BookmarkedCompetition with _$BookmarkedCompetition {
     required String title,
     required String soaringspotUrl,
     required DateTime bookmarkedAt,
+    String? selectedClass,
   }) = _BookmarkedCompetition;
 }

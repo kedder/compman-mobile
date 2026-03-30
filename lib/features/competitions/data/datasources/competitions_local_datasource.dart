@@ -7,6 +7,9 @@ abstract class CompetitionsLocalDataSource {
   /// Returns all persisted [BookmarkedCompetitionModel] objects.
   Future<List<BookmarkedCompetitionModel>> getAll();
 
+  /// Returns the [BookmarkedCompetitionModel] with the given [id], or null.
+  Future<BookmarkedCompetitionModel?> getById(String id);
+
   /// Persists [model], keyed by its [BookmarkedCompetitionModel.id].
   Future<void> save(BookmarkedCompetitionModel model);
 
@@ -29,6 +32,9 @@ class HiveCompetitionsLocalDataSource implements CompetitionsLocalDataSource {
   @override
   Future<List<BookmarkedCompetitionModel>> getAll() async =>
       box.values.toList();
+
+  @override
+  Future<BookmarkedCompetitionModel?> getById(String id) async => box.get(id);
 
   @override
   Future<void> save(BookmarkedCompetitionModel model) =>
