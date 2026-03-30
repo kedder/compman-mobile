@@ -38,6 +38,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
             tooltip: 'Refresh',
             onPressed: () {
               ref.invalidate(latestTasksProvider(competitionId));
+              ref.invalidate(competitionClassesProvider(competitionId));
               ref.invalidate(xcsoarDirectoryUriProvider);
             },
           ),
@@ -82,6 +83,7 @@ class _CompetitionDetailBody extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(latestTasksProvider(competitionId));
+        ref.invalidate(competitionClassesProvider(competitionId));
         ref.invalidate(xcsoarDirectoryUriProvider);
       },
       child: ListView(
@@ -200,7 +202,7 @@ class _ClassPicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasksAsync = ref.watch(latestTasksProvider(competitionId));
+    final classesAsync = ref.watch(competitionClassesProvider(competitionId));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,22 +212,21 @@ class _ClassPicker extends ConsumerWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
-        tasksAsync.when(
+        classesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => _ErrorRetry(
             message:
                 'No classes found — tasks may not be available for this competition.',
-            onRetry: () => ref.invalidate(latestTasksProvider(competitionId)),
+            onRetry: () =>
+                ref.invalidate(competitionClassesProvider(competitionId)),
           ),
-          data: (tasks) {
-            final classes = tasks.map((t) => t.compClass).toSet().toList()
-              ..sort();
+          data: (classes) {
             if (classes.isEmpty) {
               return _ErrorRetry(
                 message:
                     'No classes found — tasks may not be available for this competition.',
                 onRetry: () =>
-                    ref.invalidate(latestTasksProvider(competitionId)),
+                    ref.invalidate(competitionClassesProvider(competitionId)),
               );
             }
             return Wrap(

@@ -92,6 +92,19 @@ final latestTasksProvider =
   },
 );
 
+/// Fetches the available competition class names from SoaringSpot.
+///
+/// Used by the class picker on the competition detail screen.
+/// Throws [Failure] on network error; returns empty list when none found.
+final competitionClassesProvider =
+    FutureProvider.autoDispose.family<List<String>, String>(
+  (ref, competitionId) async {
+    final useCase = ref.read(fetchCompetitionClassesProvider);
+    final result = await useCase(competitionId);
+    return result.fold((f) => throw f, (classes) => classes);
+  },
+);
+
 /// Provider that returns the stored SAF directory URI, or null if not set.
 final xcsoarDirectoryUriProvider = FutureProvider.autoDispose<String?>((ref) {
   return XcsoarSafService().getSafDirectoryUri();
