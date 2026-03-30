@@ -45,8 +45,9 @@ lib/
 │   │   └── providers.dart           # Root Riverpod providers (Dio, Hive, etc.)
 │   ├── error/
 │   │   └── failures.dart            # Failure sealed class (freezed)
-│   └── network/
-│       └── http_client.dart         # Dio instance configuration
+│   ├── network/
+│   │   └── http_client.dart         # Dio instance configuration
+│   └── platform/                    # MethodChannel service classes (Android/iOS bridges)
 │
 └── features/
     └── competitions/                # One folder per feature
@@ -127,6 +128,29 @@ Providers translate failures into `AsyncError` states, which screens display as 
 ## Local Storage
 
 **Hive** is used for persisting bookmarked competitions. It is fast, requires no schema migrations for this use case, and works well with Flutter. Each feature that needs persistence defines its own Hive box name constant in the `data/datasources/` layer.
+
+---
+
+## Platform Services
+
+`lib/core/platform/` contains Dart-side `MethodChannel` service classes that wrap Android (and future iOS) platform APIs. These classes are plain Dart — no Riverpod providers, no domain entities.
+
+**Dependency rule:** platform services may be imported by the presentation layer and by other `core/` modules. They must not import from any feature's `domain/` or `data/` layer.
+
+**Android bridge pattern:** The Kotlin implementation lives in `MainActivity.kt`. For operations that require an `Activity` result (e.g. SAF document tree picker), register an `ActivityResultLauncher` in `configureFlutterEngine` and store a `pendingResult: MethodChannel.Result?` field to bridge the async gap between the method call and the launcher callback:
+
+```kotlin
+override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+    super.configureFlutterEngine(flutterEngine)
+    safLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        // resolve pendingResult here
+    }
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "xcsoar.saf")
+        .setMethodCallHandler { call, result -> /* store result as pendingResult, launch */ }
+}
+```
+
+**Tree URI persistence:** SAF tree URI grants are stored in Android `SharedPreferences` (not Hive) because they must be accessible from Kotlin before Flutter initialises.
 
 ---
 

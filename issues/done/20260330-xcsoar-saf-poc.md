@@ -6,7 +6,7 @@ Integrate Android's Storage Access Framework (SAF) to write files into XCSoar's 
 
 **This ticket** delivers a "Try SAF" menu item on the home screen that, when tapped, asks the user to grant folder access to XCSoar's data directory (once), then writes a `hello-from-compman.txt` file into it.
 
-Read `docs/xcsoar-saf.md` before starting — it documents the XCSoar `DocumentsProvider` authority, supported operations, and the Flutter integration approach.
+Read `docs/xcsoar-saf.md` before starting — it documents the XCSoar `DocumentsProvider` authority, supported operations, and the Flutter integration approach. **Note:** the "Flutter Integration" subsection of that doc shows a deprecated `onActivityResult` approach and different method names — ignore it. Follow the pattern specified in Task 1 below instead.
 
 ---
 
@@ -17,6 +17,7 @@ Read `docs/xcsoar-saf.md` before starting — it documents the XCSoar `Documents
 - `android/app/src/main/kotlin/lt/lebedev/compman_mobile/MainActivity.kt` — currently an empty `FlutterActivity` stub; add the Kotlin bridge here
 - `android/app/src/main/AndroidManifest.xml` — no new permissions needed (SAF is intent-based)
 - `docs/xcsoar-saf.md` — integration reference
+- `docs/architecture.md` — must be updated (see Task 6)
 
 Architecture constraint: this is platform infrastructure. It lives under `lib/core/platform/` and does **not** involve the domain layer.
 
@@ -28,9 +29,20 @@ Architecture constraint: this is platform infrastructure. It lives under `lib/co
 
 Implement a `MethodChannel` named `xcsoar.saf` with one method: `tryWriteHelloFile`.
 
+Register the channel and the `ActivityResultLauncher` in `configureFlutterEngine`:
+
+```kotlin
+override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+    super.configureFlutterEngine(flutterEngine)
+    safLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> /* ... */ }
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "xcsoar.saf")
+        .setMethodCallHandler { call, result -> /* ... */ }
+}
+```
+
 **Use `ActivityResultLauncher` (not the deprecated `onActivityResult`).** This is the reference pattern for all future SAF work in this project.
 
-The method must:
+The `tryWriteHelloFile` method must:
 
 1. Check `SharedPreferences` (key `xcsoar_tree_uri`) for a previously stored tree URI. If one exists, verify it still has a persisted read+write grant via `contentResolver.persistedUriPermissions`. If valid, skip the picker and go straight to writing.
 2. If no valid URI: launch the registered `ActivityResultLauncher<Uri?>` with hint URI `Uri.parse("content://org.xcsoar.allfiles/document/root:")`, and hold the `MethodChannel.Result` reference in a `pendingResult` field for the async callback.
@@ -47,7 +59,7 @@ The method must:
    - Invoke `result.success("ok")`.
 5. Wrap the entire file-write block in a try/catch; on exception invoke `result.error("SAF_ERROR", e.message, null)`.
 
-**Launcher registration:** `ActivityResultLauncher` must be registered before the activity starts. Declare it as a `lateinit var` field and register it in `configureFlutterEngine` (or `onCreate`) using `registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> ... }`. Hold a `private var pendingResult: MethodChannel.Result? = null` field to bridge the async gap.
+**Launcher registration:** `ActivityResultLauncher` must be registered before the activity starts. Declare it as a `lateinit var` field. Hold a `private var pendingResult: MethodChannel.Result? = null` field to bridge the async gap.
 
 ### 2. Dart platform service — `lib/core/platform/xcsoar_saf_service.dart`
 
@@ -81,6 +93,18 @@ Replace the `IconButton(icon: Icon(Icons.more_vert), ...)` in `BookmarksScreen`'
 - Item `"Try SAF"` → `context.push('/saf-test')`
 - Item `"About"` → `context.push('/about')`
 
+### 6. Architecture documentation — `docs/architecture.md`
+
+Add a **`Platform Services`** section to `docs/architecture.md` documenting the `lib/core/platform/` folder. Insert it after the "Local Storage" section and before the "Navigation" section. The section should cover:
+
+- **Purpose:** `lib/core/platform/` contains Dart-side `MethodChannel` service classes that wrap Android (and future iOS) platform APIs. These classes are plain Dart — no Riverpod providers, no domain entities.
+- **Dependency rule:** platform services may be imported by the presentation layer and by other `core/` modules. They must not import from any feature's `domain/` or `data/` layer.
+- **Android bridge pattern:** The Kotlin implementation lives in `MainActivity.kt`. For operations that require an `Activity` result (e.g. SAF document tree picker), use `ActivityResultLauncher` registered in `configureFlutterEngine`. Store a `pendingResult: MethodChannel.Result?` field to bridge the async gap between the method call and the launcher callback.
+- **Tree URI persistence:** SAF tree URI grants are stored in Android `SharedPreferences` (not Hive) because they must be accessible from Kotlin before Flutter initialises.
+- Also add `platform/` to the `core/` folder tree in the existing structure diagram, with a brief inline comment.
+
+Write the section without any reference to this being a PoC or test — document it as the established project pattern for platform channel integration.
+
 ---
 
 ## Acceptance Criteria
@@ -92,8 +116,8 @@ Replace the `IconButton(icon: Icon(Icons.more_vert), ...)` in `BookmarksScreen`'
 5. Second use: tapping "Write file to XCSoar" again writes the file without re-showing the picker (tree URI is cached in `SharedPreferences`).
 6. If `hello-from-compman.txt` already exists it is replaced — no duplicate files.
 7. The file is present at `/sdcard/Android/data/org.xcsoar/files/hello-from-compman.txt` and contains `Hello from Compman Mobile!`.
+8. `docs/architecture.md` documents `lib/core/platform/` and the `ActivityResultLauncher` bridge pattern.
 
 ---
 
-Do not add widget tests — this is a PoC.
-Do not update documentation files.
+Do not add widget tests — this is a PoC screen.

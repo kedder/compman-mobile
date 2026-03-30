@@ -24,10 +24,13 @@ class BookmarksScreen extends ConsumerWidget {
             tooltip: 'Add competition',
             onPressed: () => context.push('/add'),
           ),
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            tooltip: 'About',
-            onPressed: () => context.push('/about'),
+            onSelected: (value) => context.push(value),
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: '/saf-test', child: Text('Try SAF')),
+              PopupMenuItem(value: '/about', child: Text('About')),
+            ],
           ),
         ],
       ),

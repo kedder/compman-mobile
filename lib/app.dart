@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/platform/saf_test_screen.dart';
 import 'features/competitions/presentation/screens/bookmarks_screen.dart';
 import 'features/competitions/presentation/screens/competition_detail_screen.dart';
 import 'features/competitions/presentation/screens/competition_list_screen.dart';
@@ -42,6 +43,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/about',
       builder: (context, state) => const _AboutScreen(),
+    ),
+    GoRoute(
+      path: '/saf-test',
+      builder: (context, state) => const SafTestScreen(),
     ),
   ],
 );
