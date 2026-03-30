@@ -44,6 +44,31 @@ class MainActivity : FlutterFragmentActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "tryWriteHelloFile" -> handleTryWriteHelloFile(result)
+                    "writeFile" -> {
+                        val bytes = call.argument<ByteArray>("bytes")!!
+                        val filename = call.argument<String>("filename")!!
+                        handleWriteFile(bytes, filename, result)
+                    }
+                    "getSafDirectoryUri" -> {
+                        val uri = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
+                            .getString("xcsoar_tree_uri", null)
+                        result.success(uri)
+                    }
+                    "clearSafPermission" -> {
+                        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
+                        val stored = prefs.getString("xcsoar_tree_uri", null)
+                        if (stored != null) {
+                            val treeUri = Uri.parse(stored)
+                            try {
+                                contentResolver.releasePersistableUriPermission(
+                                    treeUri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                                )
+                            } catch (_: SecurityException) { /* already released */ }
+                            prefs.edit().remove("xcsoar_tree_uri").apply()
+                        }
+                        result.success("ok")
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -68,6 +93,53 @@ class MainActivity : FlutterFragmentActivity() {
 
         pendingResult = result
         safLauncher.launch(Uri.parse("content://org.xcsoar.allfiles/document/root:"))
+    }
+
+    private fun handleWriteFile(bytes: ByteArray, filename: String, result: MethodChannel.Result) {
+        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
+        val storedUri = prefs.getString("xcsoar_tree_uri", null)
+        if (storedUri == null) {
+            result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
+            return
+        }
+        val treeUri = Uri.parse(storedUri)
+        val hasGrant = contentResolver.persistedUriPermissions.any { perm ->
+            perm.uri == treeUri && perm.isReadPermission && perm.isWritePermission
+        }
+        if (!hasGrant) {
+            result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
+            return
+        }
+        try {
+            val childDocUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+                treeUri,
+                DocumentsContract.getTreeDocumentId(treeUri),
+            )
+            val cursor = contentResolver.query(
+                childDocUri,
+                arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+                "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} = ?",
+                arrayOf(filename),
+                null,
+            )
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val docId = it.getString(0)
+                    val existingDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
+                    DocumentsContract.deleteDocument(contentResolver, existingDocUri)
+                }
+            }
+            val fileUri = DocumentsContract.createDocument(
+                contentResolver,
+                childDocUri,
+                "application/octet-stream",
+                filename,
+            )
+            contentResolver.openOutputStream(fileUri!!).use { it!!.write(bytes) }
+            result.success("ok")
+        } catch (e: Exception) {
+            result.error("SAF_ERROR", e.message, null)
+        }
     }
 
     private fun writeHelloFile(treeUri: Uri, result: MethodChannel.Result) {
