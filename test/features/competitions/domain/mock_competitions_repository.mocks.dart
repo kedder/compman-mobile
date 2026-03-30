@@ -4,12 +4,15 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
+import 'dart:typed_data' as _i10;
 
 import 'package:compman_mobile/core/error/failures.dart' as _i5;
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart'
     as _i8;
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart'
     as _i6;
+import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart'
+    as _i9;
 import 'package:compman_mobile/features/competitions/domain/repositories/competitions_repository.dart'
     as _i2;
 import 'package:fpdart/fpdart.dart' as _i4;
@@ -112,4 +115,41 @@ class MockCompetitionsRepository extends _i1.Mock
           ),
         )),
       ) as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>> fetchLatestTasks(
+          String? competitionId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #fetchLatestTasks,
+          [competitionId],
+        ),
+        returnValue:
+            _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>.value(
+                _i7.dummyValue<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>(
+          this,
+          Invocation.method(
+            #fetchLatestTasks,
+            [competitionId],
+          ),
+        )),
+      ) as _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>> downloadTask(
+          String? taskUrl) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #downloadTask,
+          [taskUrl],
+        ),
+        returnValue: _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>.value(
+            _i7.dummyValue<_i4.Either<_i5.Failure, _i10.Uint8List>>(
+          this,
+          Invocation.method(
+            #downloadTask,
+            [taskUrl],
+          ),
+        )),
+      ) as _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>);
 }

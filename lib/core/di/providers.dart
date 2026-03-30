@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../features/competitions/data/datasources/competitions_local_datasource.dart';
+import '../../features/competitions/data/datasources/soarscore_remote_datasource.dart';
 import '../../features/competitions/data/datasources/soaringspot_remote_datasource.dart';
 import '../../features/competitions/data/models/bookmarked_competition_model.dart';
 import '../../features/competitions/data/repositories/competitions_repository_impl.dart';
 import '../../features/competitions/domain/repositories/competitions_repository.dart';
+import '../../features/competitions/domain/usecases/download_task.dart';
+import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
 import '../network/http_client.dart';
 
 /// Provides the configured [Dio] instance.
@@ -45,5 +48,21 @@ final competitionsRepositoryProvider = Provider<CompetitionsRepository>((ref) {
   return CompetitionsRepositoryImpl(
     remote: ref.watch(soaringSpotRemoteDataSourceProvider),
     local: ref.watch(competitionsLocalDataSourceProvider),
+    soarScore: ref.watch(soarScoreRemoteDataSourceProvider),
   );
 });
+
+/// Provides the [SoarScoreRemoteDataSource] implementation.
+final soarScoreRemoteDataSourceProvider = Provider<SoarScoreRemoteDataSource>(
+  (ref) => DioSoarScoreRemoteDataSource(ref.watch(dioProvider)),
+);
+
+/// Provides a [FetchLatestTasks] use case instance.
+final fetchLatestTasksProvider = Provider<FetchLatestTasks>(
+  (ref) => FetchLatestTasks(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [DownloadTask] use case instance.
+final downloadTaskProvider = Provider<DownloadTask>(
+  (ref) => DownloadTask(ref.read(competitionsRepositoryProvider)),
+);

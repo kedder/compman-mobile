@@ -75,16 +75,15 @@
 
 ---
 
-## Phase 3: Generate XCSoar Task Files *(Planned)*
+## Phase 3: Generate XCSoar Task Files *(In Progress)*
 
 *Goal: Fetch today's task from soarscore.com and generate a `.tsk` file for XCSoar.*
 
 - ✅ `docs/adr/005-soarscore-html-scraping.md` — why HTML scraping is used for SoarScore task downloads
-- 📋 SoarScore API integration (`soarscore.com`)
-- 📋 `.tsk` XML file generator
+- ✅ **SoarScore data layer** — `TaskInfo` entity (freezed), `fetchLatestTasks` + `downloadTask` on `CompetitionsRepository`, `FetchLatestTasks` + `DownloadTask` use cases, `DioSoarScoreRemoteDataSource` (HTML scraping of `#Downloads` tab), repository impl + DI wired; `docs/api/soarscore.md` created; unit tests for datasource, use cases, and repository methods
+- 📋 `.tsk` XML file writer (write bytes to XCSoar data directory as `Default.tsk`)
 - 📋 Competition class selection
 - 📋 `docs/features/tasks.md`
-- 📋 `docs/api/soarscore.md`
 
 ---
 

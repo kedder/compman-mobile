@@ -15,13 +15,15 @@ import 'mock_datasources.dart';
 void main() {
   late MockSoaringSpotRemoteDataSource mockRemote;
   late MockCompetitionsLocalDataSource mockLocal;
+  late MockSoarScoreRemoteDataSource mockSoarScore;
   late CompetitionsRepositoryImpl repository;
 
   setUp(() {
     mockRemote = MockSoaringSpotRemoteDataSource();
     mockLocal = MockCompetitionsLocalDataSource();
-    repository =
-        CompetitionsRepositoryImpl(remote: mockRemote, local: mockLocal);
+    mockSoarScore = MockSoarScoreRemoteDataSource();
+    repository = CompetitionsRepositoryImpl(
+        remote: mockRemote, local: mockLocal, soarScore: mockSoarScore);
   });
 
   final tCompetitionModel = CompetitionModel(

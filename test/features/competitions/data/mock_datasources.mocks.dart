@@ -4,15 +4,20 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
+import 'dart:typed_data' as _i9;
 
 import 'package:compman_mobile/features/competitions/data/datasources/competitions_local_datasource.dart'
     as _i5;
 import 'package:compman_mobile/features/competitions/data/datasources/soaringspot_remote_datasource.dart'
     as _i2;
+import 'package:compman_mobile/features/competitions/data/datasources/soarscore_remote_datasource.dart'
+    as _i7;
 import 'package:compman_mobile/features/competitions/data/models/bookmarked_competition_model.dart'
     as _i6;
 import 'package:compman_mobile/features/competitions/data/models/competition_model.dart'
     as _i4;
+import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart'
+    as _i8;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -90,4 +95,34 @@ class MockCompetitionsLocalDataSource extends _i1.Mock
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+}
+
+/// A class which mocks [SoarScoreRemoteDataSource].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSoarScoreRemoteDataSource extends _i1.Mock
+    implements _i7.SoarScoreRemoteDataSource {
+  MockSoarScoreRemoteDataSource() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<List<_i8.TaskInfo>> fetchLatestTasks(String? competitionId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #fetchLatestTasks,
+          [competitionId],
+        ),
+        returnValue: _i3.Future<List<_i8.TaskInfo>>.value(<_i8.TaskInfo>[]),
+      ) as _i3.Future<List<_i8.TaskInfo>>);
+
+  @override
+  _i3.Future<_i9.Uint8List> downloadTask(String? taskUrl) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #downloadTask,
+          [taskUrl],
+        ),
+        returnValue: _i3.Future<_i9.Uint8List>.value(_i9.Uint8List(0)),
+      ) as _i3.Future<_i9.Uint8List>);
 }
