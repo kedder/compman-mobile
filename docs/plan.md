@@ -84,6 +84,7 @@
 - ✅ **SAF bridge extended** — `writeFile`, `getSafDirectoryUri`, `clearSafPermission` added to Kotlin `MainActivity.kt` and `XcsoarSafService` Dart wrapper
 - 📋 `.tsk` XML file writer (write bytes to XCSoar data directory as `Default.tsk`)
 - ✅ **Competition class selection persistence** — `selectedClass` field added to `BookmarkedCompetition` (freezed) and `BookmarkedCompetitionModel` (HiveField 4); `getById` on local datasource; `setCompetitionClass` on repository interface and impl; `SetCompetitionClass` use case; DI wired; unit tests for use case and repository; old records deserialise with `selectedClass == null`
+- ✅ **Competition classes from SoaringSpot (data + domain)** — `fetchClasses(String competitionUrl)` added to `SoaringSpotRemoteDataSource`; scrapes `table.result-overview thead th` from `{url}/results`; `fetchCompetitionClasses(String competitionId)` on repository interface and impl (looks up bookmark URL, delegates to remote, returns `Right([])` if not bookmarked); `FetchCompetitionClasses` use case; DI provider added; unit tests for datasource (3), use case (2), and repository (2)
 - 📋 `docs/features/tasks.md`
 
 ---

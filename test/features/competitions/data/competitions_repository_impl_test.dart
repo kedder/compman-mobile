@@ -222,4 +222,38 @@ void main() {
       );
     });
   });
+
+  group('fetchCompetitionClasses', () {
+    test('calls remote.fetchClasses with the correct URL', () async {
+      when(mockLocal.getAll())
+          .thenAnswer((_) async => [tBookmarkedModel]);
+      when(mockRemote.fetchClasses(any))
+          .thenAnswer((_) async => ['Standard', 'Club']);
+
+      final result =
+          await repository.fetchCompetitionClasses('barron-2024');
+
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('expected Right'),
+        (classes) => expect(classes, ['Standard', 'Club']),
+      );
+      verify(mockRemote.fetchClasses(
+          'https://www.soaringspot.com/en_gb/barron-2024/'));
+    });
+
+    test('returns Right([]) when competition ID is not bookmarked', () async {
+      when(mockLocal.getAll()).thenAnswer((_) async => []);
+
+      final result =
+          await repository.fetchCompetitionClasses('unknown-id');
+
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('expected Right'),
+        (classes) => expect(classes, isEmpty),
+      );
+      verifyNever(mockRemote.fetchClasses(any));
+    });
+  });
 }

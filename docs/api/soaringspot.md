@@ -103,7 +103,19 @@ Competition classes (e.g. "Standard", "Club", "Open") appear as column headers i
 </table>
 ```
 
-> **Note:** This feature is planned for Phase 4.
+### Selector and URL Pattern
+
+The Dart CSS selector is `table.result-overview thead th`. The results URL is formed by appending `/results` to the competition's SoaringSpot URL (with any trailing slash stripped first):
+
+```dart
+final url = '${competitionUrl.endsWith('/') ? competitionUrl.substring(0, competitionUrl.length - 1) : competitionUrl}/results';
+```
+
+Empty `<th>` elements are skipped. An empty result list is not an error — the table is absent before any competition day begins.
+
+### Implementation File
+
+`lib/features/competitions/data/datasources/soaringspot_remote_datasource.dart` — `fetchClasses(String competitionUrl)`
 
 ---
 

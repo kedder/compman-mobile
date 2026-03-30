@@ -9,6 +9,7 @@ import '../../features/competitions/data/models/bookmarked_competition_model.dar
 import '../../features/competitions/data/repositories/competitions_repository_impl.dart';
 import '../../features/competitions/domain/repositories/competitions_repository.dart';
 import '../../features/competitions/domain/usecases/download_task.dart';
+import '../../features/competitions/domain/usecases/fetch_competition_classes.dart';
 import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
 import '../../features/competitions/domain/usecases/set_competition_class.dart';
 import '../network/http_client.dart';
@@ -71,4 +72,9 @@ final downloadTaskProvider = Provider<DownloadTask>(
 /// Provides a [SetCompetitionClass] use case instance.
 final setCompetitionClassProvider = Provider<SetCompetitionClass>(
   (ref) => SetCompetitionClass(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [FetchCompetitionClasses] use case instance.
+final fetchCompetitionClassesProvider = Provider<FetchCompetitionClasses>(
+  (ref) => FetchCompetitionClasses(ref.read(competitionsRepositoryProvider)),
 );

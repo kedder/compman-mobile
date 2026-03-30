@@ -178,4 +178,22 @@ class MockCompetitionsRepository extends _i1.Mock
           ),
         )),
       ) as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, List<String>>> fetchCompetitionClasses(
+          String? competitionId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #fetchCompetitionClasses,
+          [competitionId],
+        ),
+        returnValue: _i3.Future<_i4.Either<_i5.Failure, List<String>>>.value(
+            _i7.dummyValue<_i4.Either<_i5.Failure, List<String>>>(
+          this,
+          Invocation.method(
+            #fetchCompetitionClasses,
+            [competitionId],
+          ),
+        )),
+      ) as _i3.Future<_i4.Either<_i5.Failure, List<String>>>);
 }

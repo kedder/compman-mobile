@@ -11,6 +11,13 @@ abstract class SoaringSpotRemoteDataSource {
   /// Returns an empty list if no competitions are found.
   /// Throws [ServerException] on network errors.
   Future<List<CompetitionModel>> fetchCompetitions();
+
+  /// Fetches the competition class names from the SoaringSpot results page.
+  ///
+  /// Scrapes `{competitionUrl}/results` for `table.result-overview thead th`
+  /// elements. Returns an empty list if no table is found.
+  /// Throws [ServerException] on network errors.
+  Future<List<String>> fetchClasses(String competitionUrl);
 }
 
 /// HTTP + HTML scraping implementation of [SoaringSpotRemoteDataSource].
@@ -33,6 +40,23 @@ class SoaringSpotRemoteDataSourceImpl implements SoaringSpotRemoteDataSource {
       return elements
           .map(CompetitionModel.fromElement)
           .whereType<CompetitionModel>()
+          .toList();
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Network error');
+    }
+  }
+
+  @override
+  Future<List<String>> fetchClasses(String competitionUrl) async {
+    final url =
+        '${competitionUrl.endsWith('/') ? competitionUrl.substring(0, competitionUrl.length - 1) : competitionUrl}/results';
+    try {
+      final response = await dio.get<String>(url);
+      final document = html_parser.parse(response.data ?? '');
+      return document
+          .querySelectorAll('table.result-overview thead th')
+          .map((e) => e.text.trim())
+          .where((t) => t.isNotEmpty)
           .toList();
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Network error');

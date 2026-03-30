@@ -39,4 +39,12 @@ abstract class CompetitionsRepository {
     String competitionId,
     String? selectedClass,
   );
+
+  /// Fetches the list of competition class names for a bookmarked competition.
+  ///
+  /// Looks up [competitionId] in local storage to get its SoaringSpot URL,
+  /// then scrapes the `/results` page for class names.
+  /// Returns an empty list (not a failure) if no classes are found.
+  Future<Either<Failure, List<String>>> fetchCompetitionClasses(
+      String competitionId);
 }

@@ -53,6 +53,16 @@ class MockSoaringSpotRemoteDataSource extends _i1.Mock
         returnValue: _i3.Future<List<_i4.CompetitionModel>>.value(
             <_i4.CompetitionModel>[]),
       ) as _i3.Future<List<_i4.CompetitionModel>>);
+
+  @override
+  _i3.Future<List<String>> fetchClasses(String? competitionUrl) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #fetchClasses,
+          [competitionUrl],
+        ),
+        returnValue: _i3.Future<List<String>>.value(<String>[]),
+      ) as _i3.Future<List<String>>);
 }
 
 /// A class which mocks [CompetitionsLocalDataSource].

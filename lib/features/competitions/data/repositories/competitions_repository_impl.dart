@@ -127,4 +127,22 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       return Left(StorageFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, List<String>>> fetchCompetitionClasses(
+      String competitionId) async {
+    try {
+      final models = await local.getAll();
+      final match = models.where((m) => m.id == competitionId).firstOrNull;
+      if (match == null || match.soaringspotUrl.isEmpty) {
+        return const Right([]);
+      }
+      final classes = await remote.fetchClasses(match.soaringspotUrl);
+      return Right(classes);
+    } on ServerException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on ParseException catch (e) {
+      return Left(ParseFailure(e.message));
+    }
+  }
 }
