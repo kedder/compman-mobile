@@ -1,100 +1,127 @@
-# XCSoar Directory Settings Screen
+# XCSoar Directory Settings Screen — Fix & Complete
 
 ## Feature
 
 Give users a way to view their configured XCSoar data directory, change it to a different folder, or reset it so they can re-grant access. This is surfaced as a Settings screen accessible from the home screen menu.
 
+## Current State
+
+All dependencies are resolved. The following is **already implemented** — do not recreate it:
+
+- `XcsoarSafService` with `getSafDirectoryUri()`, `clearSafPermission()`, and `tryWriteHelloFile()` at `lib/core/platform/xcsoar_saf_service.dart`
+- `xcsoarDirectoryUriProvider` (`FutureProvider.autoDispose<String?>`) in `lib/features/competitions/presentation/providers/competitions_providers.dart`
+- Route `/settings/xcsoar-directory` wired in `lib/app.dart`
+- `XcsoarDirectorySettingsScreen` (`ConsumerStatefulWidget`) at `lib/core/platform/xcsoar_directory_settings_screen.dart`
+
 ## Scope
 
-New screen `XcsoarDirectorySettingsScreen`, a new route `/settings/xcsoar-directory`, and a "Settings" entry in the home screen PopupMenuButton. No domain or data layer changes.
-
-## Dependencies
-
-- `20260330-02-saf-task-writer.md` must be done first (`XcsoarSafService.getSafDirectoryUri`, `clearSafPermission`, and `tryWriteHelloFile` for the picker flow).
-
-Issue `20260330-04-competition-detail-ui.md` depends on this screen existing (it links to it from the SAF_NOT_CONFIGURED error path), but the two issues can be developed in parallel by agreeing on the route path `/settings/xcsoar-directory` in advance.
-
----
-
-## Background
-
-After the SAF PoC, the stored tree URI is opaque (`content://...`). This screen makes it visible and manageable. Read `docs/architecture.md` — Platform Services section — to understand `XcsoarSafService`.
+Fix the existing screen and menu to match the spec. Two files only — no domain or data layer changes.
 
 ---
 
 ## Tasks
 
-### 1. Settings screen — `lib/core/platform/xcsoar_directory_settings_screen.dart`
+### 1. Fix the screen — `lib/core/platform/xcsoar_directory_settings_screen.dart`
 
-Create `XcsoarDirectorySettingsScreen` (`ConsumerStatefulWidget`).
+Read the file in full before editing. Apply these targeted changes:
 
-**AppBar:** title `"XCSoar Folder"`
+#### 1a. AppBar title
+Change `'XCSoar Directory'` → `'XCSoar Folder'`.
 
-**Body:** `ListView` with the following sections:
+#### 1b. Body layout — replace Column with ListView + ListTile
 
-#### Current directory
+Replace the current `Padding > Column` body with a `ListView`. The first item must be a `ListTile`:
 
-A `ListTile`:
-- Leading: `Icon(Icons.folder_outlined)`
-- Title: `"XCSoar folder"`
-- Subtitle: the URI string from `XcsoarSafService().getSafDirectoryUri()`, or `"Not configured"` if null
-- Load the URI in `initState` (call `getSafDirectoryUri()` and store in state); show `CircularProgressIndicator` in subtitle while loading
-
-#### Change directory button
-
-`ElevatedButton` labelled `"Change Directory"`:
-- Calls `XcsoarSafService().tryWriteHelloFile()` — this triggers the SAF folder picker (if needed) AND writes the hello file to verify the grant works
-- Wait state: show `CircularProgressIndicator` while the picker / write is in progress
-- On success (`"ok"` or `"cancelled"`):
-  - If `"ok"`: update the displayed URI by calling `getSafDirectoryUri()` again; invalidate `xcsoarDirectoryUriProvider` (from issue 04 providers); show green `SnackBar` — `"XCSoar folder configured"`
-  - If `"cancelled"`: show neutral `SnackBar` — `"Folder selection cancelled"`
-- On `PlatformException`: show red `SnackBar` with error message
-
-#### Reset permission button
-
-`OutlinedButton` labelled `"Reset Permission"` (destructive, uses `ButtonStyle` with red foreground):
-- Calls `XcsoarSafService().clearSafPermission()`
-- On success: update state to show `"Not configured"`; invalidate `xcsoarDirectoryUriProvider`; show `SnackBar` — `"Permission cleared"`
-- On error: show red `SnackBar`
-
-#### Info text
-
-Below the buttons, a descriptive paragraph:
-
-> "Compman needs access to XCSoar's data folder to install task files. Tap Change Directory to open the folder picker and grant access. If XCSoar is not installed or the folder picker shows an unexpected location, tap Reset Permission and try again."
-
-### 2. Route — `lib/app.dart`
-
-Add:
 ```dart
-GoRoute(
-  path: '/settings/xcsoar-directory',
-  builder: (context, state) => const XcsoarDirectorySettingsScreen(),
+ListTile(
+  leading: const Icon(Icons.folder_outlined),
+  title: const Text('XCSoar folder'),
+  subtitle: uriAsync.when(
+    loading: () => const LinearProgressIndicator(),
+    error: (_, __) => const Text('Could not read folder'),
+    data: (uri) => Text(uri != null && uri.isNotEmpty ? uri : 'Not configured'),
+  ),
 ),
 ```
 
-Import `lib/core/platform/xcsoar_directory_settings_screen.dart`.
+The `ElevatedButton`, `OutlinedButton` (see 1d), and info text (see 1f) follow as `ListView` children, each wrapped in a `Padding` with horizontal/vertical spacing as appropriate.
 
-### 3. Home screen menu — `lib/features/competitions/presentation/screens/bookmarks_screen.dart`
+#### 1c. Button label
+Change the `ElevatedButton` label from `'Choose XCSoar Folder'` → `'Change Directory'`.
 
-Add `"Settings"` item to the `PopupMenuButton` **before** the `"Try SAF"` item:
+#### 1d. Handle `'cancelled'` result in `_pickDirectory`
+
+The existing `if (result == 'ok')` branch already handles success. Add an `else if (result == 'cancelled')` branch:
 
 ```dart
-PopupMenuItem(value: '/settings/xcsoar-directory', child: Text('Settings')),
-PopupMenuItem(value: '/saf-test', child: Text('Try SAF')),
-PopupMenuItem(value: '/about', child: Text('About')),
+} else if (result == 'cancelled') {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Folder selection cancelled')),
+  );
+}
 ```
+
+#### 1e. Correct SnackBar text
+
+- Success SnackBar: `'XCSoar folder configured successfully'` → `'XCSoar folder configured'`
+- Reset SnackBar: `'XCSoar folder cleared'` → `'Permission cleared'`
+
+#### 1f. Reset button — change to OutlinedButton with red ButtonStyle
+
+Replace the `TextButton` used for reset with an `OutlinedButton`. The button must always be visible (not gated on the URI being non-null). Use a `ButtonStyle` for the red colour instead of styling the child text:
+
+```dart
+OutlinedButton(
+  onPressed: _clearDirectory,
+  style: OutlinedButton.styleFrom(foregroundColor: Colors.red.shade700),
+  child: const Text('Reset Permission'),
+),
+```
+
+Remove the `uriAsync.maybeWhen` guard that currently hides this button.
+
+#### 1g. Add info text paragraph
+
+At the bottom of the `ListView`, after both buttons, add:
+
+```dart
+Padding(
+  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+  child: Text(
+    'Compman needs access to XCSoar\'s data folder to install task files. '
+    'Tap Change Directory to open the folder picker and grant access. '
+    'If XCSoar is not installed or the folder picker shows an unexpected '
+    'location, tap Reset Permission and try again.',
+  ),
+),
+```
+
+---
+
+### 2. Add Settings menu entry — `lib/features/competitions/presentation/screens/bookmarks_screen.dart`
+
+The current `PopupMenuButton` itemBuilder has two items: `'Try SAF'` and `'About'`. Add `'Settings'` **before** `'Try SAF'`:
+
+```dart
+itemBuilder: (context) => const [
+  PopupMenuItem(value: '/settings/xcsoar-directory', child: Text('Settings')),
+  PopupMenuItem(value: '/saf-test', child: Text('Try SAF')),
+  PopupMenuItem(value: '/about', child: Text('About')),
+],
+```
+
+The existing `onSelected: (value) => context.push(value)` handler requires no change.
 
 ---
 
 ## Acceptance Criteria
 
-1. `flutter analyze` passes.
-2. `flutter test` passes — existing tests still green.
-3. A "Settings" item appears in the home screen three-dot menu.
-4. Tapping "Settings" navigates to the XCSoar Folder screen.
-5. The screen shows the current SAF URI (or "Not configured") loaded from `XcsoarSafService`.
-6. "Change Directory" opens the SAF folder picker; on success the displayed URI updates.
-7. "Reset Permission" clears the stored URI and the display shows "Not configured".
-8. All loading and error states are visible.
-9. `docs/plan.md` updated.
+1. `flutter analyze` passes with no issues.
+2. `flutter test` passes — existing tests stay green.
+3. A "Settings" item appears **first** in the home screen three-dot menu.
+4. Tapping "Settings" navigates to a screen titled **"XCSoar Folder"**.
+5. The screen body starts with a `ListTile` showing a folder icon, title "XCSoar folder", and a subtitle that is the SAF URI or "Not configured".
+6. Tapping "Change Directory" opens the SAF folder picker; on success SnackBar reads **"XCSoar folder configured"**; on cancel reads **"Folder selection cancelled"**.
+7. "Reset Permission" is always visible, uses `OutlinedButton` with a red foreground, and on tap shows SnackBar **"Permission cleared"** and resets the subtitle to "Not configured".
+8. Info text paragraph is visible below both buttons.
+9. `docs/plan.md` updated — mark the XCSoar Directory Settings task ✅ with a brief implementation note.
