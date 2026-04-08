@@ -47,7 +47,9 @@ lib/
 │   │   └── failures.dart            # Failure sealed class (freezed)
 │   ├── network/
 │   │   └── http_client.dart         # Dio instance configuration
-│   └── platform/                    # MethodChannel service classes (Android/iOS bridges)
+│   ├── platform/                    # MethodChannel service classes (Android/iOS bridges)
+│   └── theme/
+│       └── app_theme.dart           # AppTheme factory + AppColors ThemeExtension
 │
 └── features/
     └── competitions/                # One folder per feature
@@ -86,6 +88,21 @@ lib/
 ```
 
 New features follow the same pattern: create a new folder under `lib/features/<feature>/` with `domain/`, `data/`, and `presentation/` subfolders.
+
+---
+
+## Theme
+
+All visual tokens live in `lib/core/theme/app_theme.dart`.
+
+- `AppTheme.light()` returns the app's `ThemeData`, encoding all design tokens from `docs/ui-guidelines.md`.
+- `AppColors` is a `ThemeExtension<AppColors>` carrying tokens that live outside standard `ColorScheme` / `ThemeData` slots (status badge colours, success snackbar colour).
+
+**Rules:**
+- Widgets must consume colours via `Theme.of(context).colorScheme` or `AppColors`.
+- Hardcoded `Colors.*` values are not permitted in widget code except for transparent / black / white used as modifiers (e.g. shadow alpha).
+- Access `AppColors` via the `BuildContext` extension: `context.appColors`.
+- To add dark mode, add `AppTheme.dark()` in `app_theme.dart` — no widget code will need to change.
 
 ---
 

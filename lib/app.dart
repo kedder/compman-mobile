@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'core/platform/saf_test_screen.dart';
 import 'core/platform/xcsoar_directory_settings_screen.dart';
+import 'core/theme/app_theme.dart';
 import 'features/competitions/presentation/screens/bookmarks_screen.dart';
 import 'features/competitions/presentation/screens/competition_detail_screen.dart';
 import 'features/competitions/presentation/screens/competition_list_screen.dart';
@@ -16,10 +17,7 @@ class CompmanApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Compman Mobile',
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF0D7FC1),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       routerConfig: _router,
     );
   }

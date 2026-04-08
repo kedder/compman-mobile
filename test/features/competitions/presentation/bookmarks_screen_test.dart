@@ -1,3 +1,4 @@
+import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/bookmarks_screen.dart';
@@ -67,7 +68,7 @@ Widget _buildApp(Override bookmarksOverride) {
 
   return ProviderScope(
     overrides: [bookmarksOverride],
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(routerConfig: router, theme: AppTheme.light()),
   );
 }
 

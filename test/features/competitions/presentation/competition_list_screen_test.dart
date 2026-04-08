@@ -1,3 +1,4 @@
+import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
@@ -82,7 +83,7 @@ Widget _buildApp({
       ),
       ...extra,
     ],
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(routerConfig: router, theme: AppTheme.light()),
   );
 }
 

@@ -81,7 +81,7 @@ class BookmarksScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red.shade700,
+              foregroundColor: Theme.of(ctx).colorScheme.error,
             ),
             child: const Text('Remove'),
           ),
@@ -197,13 +197,16 @@ class _BookmarkCard extends StatelessWidget {
         subtitle: Text(
           _formatBookmarkedDate(bookmark.bookmarkedAt),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
         ),
         trailing: Semantics(
           label: 'Remove ${bookmark.title}',
           child: IconButton(
-            icon: Icon(Icons.delete_outline, color: Colors.red.shade700),
+            icon: Icon(
+              Icons.delete_outline,
+              color: Theme.of(context).colorScheme.error,
+            ),
             tooltip: 'Remove ${bookmark.title}',
             onPressed: onRemove,
           ),

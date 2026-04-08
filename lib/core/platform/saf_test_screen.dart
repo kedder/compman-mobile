@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../theme/app_theme.dart';
 import 'xcsoar_saf_service.dart';
 
 /// Screen for testing SAF-based file delivery to XCSoar's data folder.
@@ -28,7 +29,7 @@ class _SafTestScreenState extends ConsumerState<SafTestScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result),
-          backgroundColor: Colors.green,
+          backgroundColor: context.appColors.success,
         ),
       );
     } on PlatformException catch (e) {
@@ -36,7 +37,7 @@ class _SafTestScreenState extends ConsumerState<SafTestScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message ?? 'Unknown error'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {

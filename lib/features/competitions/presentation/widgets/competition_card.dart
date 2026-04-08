@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/competition.dart';
 
 /// Reusable card widget displaying a [Competition] in the Add Competition screen.
@@ -57,8 +58,9 @@ class CompetitionCard extends StatelessWidget {
               children: [
                 Icon(
                   isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color:
-                      isSelected ? colorScheme.primary : Colors.grey.shade400,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.outline,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
@@ -75,7 +77,7 @@ class CompetitionCard extends StatelessWidget {
                       Text(
                         competition.description,
                         style: textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -103,9 +105,10 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // "Upcoming" badge colors per ui-guidelines.md
-    const Color background = Color(0xFF1565C0);
-    const Color foreground = Colors.white;
+    final appColors = context.appColors;
+    // "Upcoming" badge colours per ui-guidelines.md / AppColors
+    final Color background = appColors.badgeUpcoming;
+    final Color foreground = appColors.badgeOnDark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

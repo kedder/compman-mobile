@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../features/competitions/presentation/providers/competitions_providers.dart';
 import 'xcsoar_saf_service.dart';
 
@@ -30,9 +31,9 @@ class _XcsoarDirectorySettingsScreenState
       if (result == 'ok') {
         ref.invalidate(xcsoarDirectoryUriProvider);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('XCSoar folder configured'),
-            backgroundColor: Color(0xFF2E7D32),
+          SnackBar(
+            content: const Text('XCSoar folder configured'),
+            backgroundColor: context.appColors.success,
           ),
         );
       } else if (result == 'cancelled') {
@@ -45,7 +46,7 @@ class _XcsoarDirectorySettingsScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message ?? 'Could not configure folder'),
-          backgroundColor: Colors.red.shade700,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -89,13 +90,7 @@ class _XcsoarDirectorySettingsScreenState
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: _pickDirectory,
-                      child: const Text(
-                        'Change Directory',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: const Text('Change Directory'),
                     ),
             ),
           ),
@@ -104,7 +99,7 @@ class _XcsoarDirectorySettingsScreenState
             child: OutlinedButton(
               onPressed: _clearDirectory,
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red.shade700,
+                foregroundColor: Theme.of(context).colorScheme.error,
               ),
               child: const Text('Reset Permission'),
             ),

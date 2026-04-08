@@ -1,4 +1,5 @@
 import 'package:compman_mobile/core/error/failures.dart';
+import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
@@ -43,7 +44,7 @@ Widget _buildApp(List<Override> overrides) {
 
   return ProviderScope(
     overrides: overrides,
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(routerConfig: router, theme: AppTheme.light()),
   );
 }
 

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/platform/xcsoar_saf_service.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/task_info.dart';
 import '../providers/competitions_providers.dart';
@@ -127,13 +128,13 @@ class _HeaderSection extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            Icon(Icons.link, size: 16, color: Colors.grey.shade600),
+            Icon(Icons.link, size: 16, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 competition.soaringspotUrl,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -310,9 +311,9 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
       await XcsoarSafService().writeFile(bytes, 'Default.tsk');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Default.tsk installed in XCSoar folder'),
-          backgroundColor: Color(0xFF2E7D32),
+        SnackBar(
+          content: const Text('Default.tsk installed in XCSoar folder'),
+          backgroundColor: context.appColors.success,
         ),
       );
       ref.invalidate(xcsoarDirectoryUriProvider);
@@ -334,7 +335,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.message ?? 'Install failed'),
-            backgroundColor: Colors.red.shade700,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -343,7 +344,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_failureMessage(f)),
-          backgroundColor: Colors.red.shade700,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -426,7 +427,7 @@ class _TaskCard extends StatelessWidget {
             Text(
               'Generated ${task.timestamp}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
             const SizedBox(height: 16),
@@ -438,10 +439,6 @@ class _TaskCard extends StatelessWidget {
                       onPressed: onInstall,
                       child: const Text(
                         'Install as XCSoar Default Task',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
                       ),
                     ),
             ),
@@ -468,13 +465,17 @@ class _XcsoarDirectoryRow extends ConsumerWidget {
         if (uri != null && uri.isNotEmpty) {
           return Row(
             children: [
-              Icon(Icons.folder_open, size: 16, color: Colors.grey.shade600),
+              Icon(
+                Icons.folder_open,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   'XCSoar folder: $uri',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -484,12 +485,16 @@ class _XcsoarDirectoryRow extends ConsumerWidget {
         }
         return Row(
           children: [
-            Icon(Icons.folder_off, size: 16, color: Colors.grey.shade600),
+            Icon(
+              Icons.folder_off,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 6),
             Text(
               'XCSoar folder: Not configured',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
             ),
             const SizedBox(width: 4),

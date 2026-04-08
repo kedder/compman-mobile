@@ -15,13 +15,14 @@ This app is used by glider pilots in competition settings — on the flight line
 
 ## Visual Theme
 
-- **Primary color:** Sky blue `#0D7FC1`. Conveys aviation and sky.
+- **Primary color:** Sky blue `#0D7FC1` (`colorScheme.primary`). Conveys aviation and sky.
 - **Background:** White or very light gray `#F5F7FA` for maximum contrast.
 - **Card / surface background:** White `#FFFFFF` with subtle shadow (`elevation: 2`).
-- **Destructive action color:** Red `Colors.red.shade700`.
-- **Success / confirmation color:** Green `#2E7D32`.
+- **Destructive action color:** Red (`colorScheme.error`; approximately `Colors.red.shade700`).
+- **Success / confirmation color:** Green (`appColors.success`; `#2E7D32`).
 - Do not use decorative gradients or textures. Flat, clean surfaces only.
 - Always derive colors from `Theme.of(context)` — never hard-code white or black text values. This keeps future theme changes (e.g. dark mode) non-breaking.
+- **Always use theme tokens — never hardcode colour literals in widget code.** All tokens are defined in `lib/core/theme/app_theme.dart`.
 
 ---
 
@@ -29,7 +30,7 @@ This app is used by glider pilots in competition settings — on the flight line
 
 - Use Flutter's default `TextTheme`. Scale up from defaults: body text must be **at least 16 sp** — never smaller.
 - Titles and item names: `titleLarge` (22 sp or larger).
-- Secondary info (dates, location): `bodyMedium` in `Colors.grey.shade600` — visually subordinate but still legible in sunlight.
+- Secondary info (dates, location): `bodyMedium` in `colorScheme.onSurfaceVariant` (`#9E9E9E` approx) — visually subordinate but still legible in sunlight.
 - Button labels: **bold**, minimum 16 sp.
 - Do not use more than 3 type sizes on any single screen.
 - No prose descriptions. Information must be scannable in under 2 seconds.
@@ -66,10 +67,10 @@ Badges convey status at a glance and must be consistent across all screens and f
 
 | Status | Label | Background | Text |
 |---|---|---|---|
-| Live | `Live` | `#2E7D32` (green) | White |
-| Upcoming | `Upcoming` | `#1565C0` (blue) | White |
-| Past | `Past` | `#757575` (gray) | White |
-| New / Updated | `New` | `#F9A825` (yellow) | Black |
+| Live | `Live` | `appColors.badgeLive` (`#2E7D32`, green) | `appColors.badgeOnDark` (white) |
+| Upcoming | `Upcoming` | `appColors.badgeUpcoming` (`#1565C0`, blue) | `appColors.badgeOnDark` (white) |
+| Past | `Past` | `appColors.badgePast` (`#757575`, gray) | `appColors.badgeOnDark` (white) |
+| New / Updated | `New` | `appColors.badgeNew` (`#F9A825`, yellow) | `Colors.black` (always black — yellow provides insufficient contrast against white) |
 
 Rendering rules:
 - `Container` with `BorderRadius.circular(4)`, horizontal padding 8 dp, vertical padding 3 dp.

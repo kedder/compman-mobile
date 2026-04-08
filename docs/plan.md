@@ -58,6 +58,8 @@
 - ✅ **Routing** — `GoRouter` with named routes `/`, `/add`, `/competitions/:id`, `/about`; no bottom nav per ui-guidelines
 - ✅ **XCSoar Directory Settings Screen** — screen reworked to `ListView`+`ListTile` layout, AppBar title "XCSoar Folder", "Change Directory" button, always-visible `OutlinedButton` "Reset Permission" (red), cancelled-selection SnackBar, info text paragraph; "Settings" entry added first in home screen three-dot menu
 
+- ✅ **Centralise app theme** — `lib/core/theme/app_theme.dart` created with `AppTheme.light()` factory and `AppColors` ThemeExtension; all hardcoded colour literals replaced with `colorScheme.*` or `appColors.*` lookups across all presentation files; `CardTheme` elevation 2, `ElevatedButton` bold 16 sp, and `OutlinedButton`/`TextButton` base styles set centrally; `docs/architecture.md` and `docs/ui-guidelines.md` updated
+
 ### Tests
 - ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository
 - ✅ **Repository impl tests** — unit tests with mocked datasources
