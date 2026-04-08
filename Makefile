@@ -5,7 +5,7 @@
 #
 # Quick reference:
 #   make deps          Install/update Dart dependencies
-#   make codegen       Run code generation (freezed, json_serializable)
+#   make codegen       Run code generation (freezed, json_serializable, launcher icons)
 #   make test          Run all tests
 #   make analyze       Static analysis
 #   make format        Format source files
@@ -39,7 +39,8 @@ deps: ## Install / update Dart dependencies  (flutter pub get)
 
 # ── Code generation ───────────────────────────────────────────────────────────
 
-codegen: ## Run code generation once  (freezed, json_serializable, etc.)
+codegen: ## Run code generation once  (freezed, json_serializable, launcher icons, etc.)
+	$(RUN) dart run flutter_launcher_icons
 	$(RUN) dart run build_runner build --delete-conflicting-outputs
 
 codegen-watch: ## Run code generation in watch mode  (keeps running; Ctrl-C to stop)
