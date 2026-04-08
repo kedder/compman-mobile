@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -111,35 +112,44 @@ class MainActivity : FlutterFragmentActivity() {
             return
         }
         try {
-            val childDocUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                treeUri,
-                DocumentsContract.getTreeDocumentId(treeUri),
-            )
+            val treeDocId = DocumentsContract.getTreeDocumentId(treeUri)
+            val parentDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, treeDocId)
+            val childDocUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocId)
+            Log.d("CompmanSAF", "writeFile: treeUri=$treeUri bytes=${bytes.size}")
+            // ExternalStorageProvider ignores selection args, so we fetch all children
+            // and filter by display name in-process.
             val cursor = contentResolver.query(
                 childDocUri,
-                arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
-                "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} = ?",
-                arrayOf(filename),
-                null,
+                arrayOf(
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                ),
+                null, null, null,
             )
             val fileUri: Uri? = cursor?.use {
-                if (it.moveToFirst()) {
-                    val docId = it.getString(0)
-                    DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
-                } else {
-                    null
+                val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                var found: Uri? = null
+                while (it.moveToNext()) {
+                    if (it.getString(nameCol) == filename) {
+                        found = DocumentsContract.buildDocumentUriUsingTree(treeUri, it.getString(idCol))
+                        break
+                    }
                 }
+                found
             }
             if (fileUri != null) {
                 // File exists — truncate and overwrite in place to avoid duplicate names.
+                Log.d("CompmanSAF", "writeFile: overwriting existing $fileUri")
                 contentResolver.openOutputStream(fileUri, "rwt").use { it!!.write(bytes) }
             } else {
                 val newUri = DocumentsContract.createDocument(
                     contentResolver,
-                    childDocUri,
+                    parentDocUri,
                     "application/octet-stream",
                     filename,
                 )
+                Log.d("CompmanSAF", "writeFile: created $newUri")
                 contentResolver.openOutputStream(newUri!!).use { it!!.write(bytes) }
             }
             result.success("ok")
@@ -150,30 +160,35 @@ class MainActivity : FlutterFragmentActivity() {
 
     private fun writeHelloFile(treeUri: Uri, result: MethodChannel.Result) {
         try {
-            val childDocUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                treeUri,
-                DocumentsContract.getTreeDocumentId(treeUri),
-            )
+            val treeDocId = DocumentsContract.getTreeDocumentId(treeUri)
+            val parentDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, treeDocId)
+            val childDocUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocId)
 
-            // Delete existing file to avoid duplicates
+            // Delete existing file to avoid duplicates.
+            // ExternalStorageProvider ignores selection args, so filter in-process.
             val cursor = contentResolver.query(
                 childDocUri,
-                arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
-                "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} = ?",
-                arrayOf("hello-from-compman.txt"),
-                null,
+                arrayOf(
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                ),
+                null, null, null,
             )
             cursor?.use {
-                if (it.moveToFirst()) {
-                    val docId = it.getString(0)
-                    val existingDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
-                    DocumentsContract.deleteDocument(contentResolver, existingDocUri)
+                val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                while (it.moveToNext()) {
+                    if (it.getString(nameCol) == "hello-from-compman.txt") {
+                        val existingDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, it.getString(idCol))
+                        DocumentsContract.deleteDocument(contentResolver, existingDocUri)
+                        break
+                    }
                 }
             }
 
             val fileUri = DocumentsContract.createDocument(
                 contentResolver,
-                childDocUri,
+                parentDocUri,
                 "text/plain",
                 "hello-from-compman.txt",
             )
