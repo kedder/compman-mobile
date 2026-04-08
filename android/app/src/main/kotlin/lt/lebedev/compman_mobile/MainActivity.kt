@@ -122,20 +122,26 @@ class MainActivity : FlutterFragmentActivity() {
                 arrayOf(filename),
                 null,
             )
-            cursor?.use {
+            val fileUri: Uri? = cursor?.use {
                 if (it.moveToFirst()) {
                     val docId = it.getString(0)
-                    val existingDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
-                    DocumentsContract.deleteDocument(contentResolver, existingDocUri)
+                    DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
+                } else {
+                    null
                 }
             }
-            val fileUri = DocumentsContract.createDocument(
-                contentResolver,
-                childDocUri,
-                "application/octet-stream",
-                filename,
-            )
-            contentResolver.openOutputStream(fileUri!!).use { it!!.write(bytes) }
+            if (fileUri != null) {
+                // File exists — truncate and overwrite in place to avoid duplicate names.
+                contentResolver.openOutputStream(fileUri, "rwt").use { it!!.write(bytes) }
+            } else {
+                val newUri = DocumentsContract.createDocument(
+                    contentResolver,
+                    childDocUri,
+                    "application/octet-stream",
+                    filename,
+                )
+                contentResolver.openOutputStream(newUri!!).use { it!!.write(bytes) }
+            }
             result.success("ok")
         } catch (e: Exception) {
             result.error("SAF_ERROR", e.message, null)
