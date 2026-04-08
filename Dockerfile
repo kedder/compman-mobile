@@ -92,8 +92,8 @@ RUN if getent group "${HOST_GID}" > /dev/null 2>&1; then \
     && chown -R dev:dev "$PUB_CACHE" \
                         "$FLUTTER_HOME/bin/cache" \
                         "$FLUTTER_HOME/packages/flutter_tools/.dart_tool" \
-    && mkdir -p /home/dev/.gradle \
-    && chown dev:dev /home/dev/.gradle
+    && mkdir -p /home/dev/.gradle /home/dev/.android \
+    && chown dev:dev /home/dev/.gradle /home/dev/.android
 USER dev
 
 # Configure Flutter for the dev user so every container starts pre-initialised

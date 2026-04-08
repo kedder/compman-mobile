@@ -6,6 +6,8 @@
 #   .:/app              — live source code (changes are reflected immediately)
 #   pub_cache           — Dart pub cache  (survives container restarts)
 #   gradle_cache        — Gradle cache    (survives container restarts)
+#   android_debug_keystore — Android debug keystore (survives container rebuilds,
+#                            prevents signature mismatch on `make install`)
 
 services:
   dev:
@@ -21,6 +23,7 @@ services:
       - .:/app
       - pub_cache:/opt/pub-cache
       - gradle_cache:/home/dev/.gradle
+      - android_debug_keystore:/home/dev/.android
     environment:
       - PUB_CACHE=/opt/pub-cache
 
@@ -35,3 +38,4 @@ services:
 volumes:
   pub_cache:
   gradle_cache:
+  android_debug_keystore:
