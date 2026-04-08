@@ -10,6 +10,7 @@
 #   make analyze       Static analysis
 #   make format        Format source files
 #   make build         Build debug APK
+#   make install       Install debug APK on connected device/emulator  (host adb)
 #   make shell         Open interactive shell in container
 #
 # Run `make help` for the full list.
@@ -20,7 +21,7 @@ RUN     := $(COMPOSE) run --rm dev
 .PHONY: help build-image deps codegen codegen-watch \
         test test-coverage \
         analyze format format-check \
-        build build-release \
+        build build-release install \
         flutter-run \
         clean doctor shell
 
@@ -70,6 +71,9 @@ build: ## Build a debug APK  (output: build/app/outputs/flutter-apk/)
 
 build-release: ## Build a release APK
 	$(RUN) flutter build apk --release
+
+install: ## Install the debug APK on a connected device/emulator  (runs adb on the host, not in Docker)
+	adb install -r build/app/outputs/flutter-apk/app-debug.apk
 
 flutter-run: ## Run app on a host emulator/device with hot reload  (Linux only — requires emulator running on host)
 	$(COMPOSE) run --rm -it flutter-run flutter run

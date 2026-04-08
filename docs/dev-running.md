@@ -126,11 +126,12 @@ emulator -avd compman
 
 # Terminal 2 — edit sources, then build and install
 make build
-adb install -r build/app/outputs/flutter-apk/app-debug.apk
+make install
+# make install runs: adb install -r build/app/outputs/flutter-apk/app-debug.apk
 # -r replaces an existing installation without uninstalling (preserves app data)
 ```
 
-Repeat `make build` + `adb install -r` for each change. The Gradle build cache (in the `gradle_cache` Docker volume) makes incremental builds fast after the first one.
+Repeat `make build` + `make install` for each change. The Gradle build cache (in the `gradle_cache` Docker volume) makes incremental builds fast after the first one.
 
 **Linux shortcut — `flutter run` with hot reload:**
 
@@ -178,7 +179,7 @@ If the device shows as `unauthorized`, check your phone for a prompt asking to t
 
 ```bash
 make build
-adb install -r build/app/outputs/flutter-apk/app-debug.apk
+make install
 ```
 
 Repeat for each change. Use `adb devices` to confirm the device is still connected if installation fails.
