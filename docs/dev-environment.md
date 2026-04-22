@@ -42,9 +42,12 @@ There are **two ways** to use the container, depending on your workflow:
 git clone <repo-url> compman-mobile
 cd compman-mobile
 
-# 2. Configure your host user identity
+# 2. Configure your host user identity and (optionally) signing credentials
 cp sample.env .env
-# Edit .env: set HOST_UID=$(id -u) and HOST_GID=$(id -g)
+# Edit .env:
+#   - Set HOST_UID=$(id -u) and HOST_GID=$(id -g)
+#   - Fill in UPLOAD_STORE_PASSWORD, UPLOAD_KEY_ALIAS, UPLOAD_KEY_PASSWORD
+#     to enable `make build-release` / `make build-aab` with the upload key
 
 # 3. Build the Docker image (one-time, takes a few minutes)
 make build-image
@@ -68,7 +71,8 @@ make test-coverage   # flutter test --coverage → coverage/lcov.info
 make analyze         # flutter analyze
 make format          # dart format lib test
 make build           # flutter build apk --debug
-make build-release   # flutter build apk --release
+make build-release   # flutter build apk --release  (signed with upload key)
+make build-aab       # flutter build appbundle --release  (Play Store AAB, signed with upload key)
 make clean           # flutter clean
 make doctor          # flutter doctor -v
 make shell           # interactive bash shell inside the container

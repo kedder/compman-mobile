@@ -31,11 +31,32 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        release {
+            // Credentials are injected via environment variables.
+            // Locally:   set UPLOAD_STORE_PASSWORD, UPLOAD_KEY_ALIAS, UPLOAD_KEY_PASSWORD in .env
+            //            (the keystore file is already mounted at secret/upload-key.jks)
+            // CI/CD:     decode keystore to a temp path, set UPLOAD_STORE_FILE to that path,
+            //            and set the three password variables as repository secrets.
+            storeFile file(System.getenv("UPLOAD_STORE_FILE") ?: "../../secret/upload-key.jks")
+            storePassword System.getenv("UPLOAD_STORE_PASSWORD") ?: ""
+            keyAlias System.getenv("UPLOAD_KEY_ALIAS") ?: ""
+            keyPassword System.getenv("UPLOAD_KEY_PASSWORD") ?: ""
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Use the upload key when credentials are present; fall back to debug key otherwise.
+            def hasUploadKey = System.getenv("UPLOAD_STORE_PASSWORD") != null
+            signingConfig = hasUploadKey ? signingConfigs.release : signingConfigs.debug
+            // Embed native symbol tables in the AAB so Google Play can decode crash
+            // stack traces from the Flutter engine and native plugins automatically.
+            // SYMBOL_TABLE gives function names (~1-2 MB overhead); use FULL only
+            // if you need line-level info in custom C/C++ code.
+            ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
+            }
         }
     }
 }

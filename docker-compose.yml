@@ -26,6 +26,11 @@ services:
       - android_debug_keystore:/home/dev/.android
     environment:
       - PUB_CACHE=/opt/pub-cache
+      # Android release signing — set these in .env (see sample.env)
+      - UPLOAD_STORE_FILE
+      - UPLOAD_STORE_PASSWORD
+      - UPLOAD_KEY_ALIAS
+      - UPLOAD_KEY_PASSWORD
 
   # Used by `make flutter-run` on Linux to connect to a host emulator/device
   # via ADB. network_mode: host gives the container access to the host's ADB

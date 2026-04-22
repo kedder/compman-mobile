@@ -10,6 +10,7 @@
 #   make analyze       Static analysis
 #   make format        Format source files
 #   make build         Build debug APK
+#   make build-aab     Build release AAB signed with upload key  (needs signing vars in .env)
 #   make install       Install debug APK on connected device/emulator  (host adb)
 #   make shell         Open interactive shell in container
 #
@@ -21,7 +22,7 @@ RUN     := $(COMPOSE) run --rm dev
 .PHONY: help build-image deps codegen codegen-watch \
         test test-coverage \
         analyze format format-check \
-        build build-release install \
+        build build-release build-aab install \
         flutter-run \
         clean doctor shell
 
@@ -70,8 +71,11 @@ format-check: ## Check formatting without applying changes  (CI-friendly, exits 
 build: ## Build a debug APK  (output: build/app/outputs/flutter-apk/)
 	$(RUN) flutter build apk --debug
 
-build-release: ## Build a release APK
+build-release: ## Build a release APK signed with the upload key
 	$(RUN) flutter build apk --release
+
+build-aab: ## Build a release AAB for Play Store upload  (requires UPLOAD_STORE_PASSWORD etc. in .env)
+	$(RUN) flutter build appbundle --release
 
 install: ## Install the debug APK on a connected device/emulator  (runs adb on the host, not in Docker)
 	adb install -r build/app/outputs/flutter-apk/app-debug.apk
