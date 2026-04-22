@@ -29,7 +29,7 @@ YYYYMMDD[-NN]-kebab-description.md
 When you are assigned an issue:
 
 1. **Read the issue file** as your primary task specification.
-2. **Follow all rules in [CLAUDE.md](../CLAUDE.md)** — code quality, architecture, documentation, and tests.
+2. **Follow all rules in [AGENTS.md](../AGENTS.md)** — code quality, architecture, documentation, and tests.
 3. **Reference the issue filename (no path) in every commit message** you make while working the issue. Add it as a trailer line after a blank line.
 
    ```

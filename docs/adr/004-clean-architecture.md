@@ -29,4 +29,4 @@ Use **Clean Architecture** (domain / data / presentation layers) with a **featur
 
 **Negative:**
 - More files and folders than a simple flat structure.
-- Requires discipline to maintain the dependency rule — enforced via `CLAUDE.md` instructions and code review.
+- Requires discipline to maintain the dependency rule — enforced via `AGENTS.md` instructions and code review.

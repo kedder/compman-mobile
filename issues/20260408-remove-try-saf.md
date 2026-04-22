@@ -54,7 +54,7 @@ Remove all "Try SAF" PoC code in a single atomic commit. Do **not** remove the r
 
 ## Context
 
-- Read `CLAUDE.md` for project rules (architecture, doc maintenance, commit format).
+- Read `AGENTS.md` for project rules (architecture, doc maintenance, commit format).
 - Real SAF files to keep: `lib/core/platform/xcsoar_saf_service.dart`, `lib/core/platform/xcsoar_directory_settings_screen.dart`, and the corresponding Kotlin handlers.
 - The `safLauncher` + `pendingResult` pattern is documented in `docs/architecture.md` (~line 157) — keep it, just repurpose it for `pickDirectory` only.
 - Reference the issue filename in every commit message as a trailer (see `issues/AGENTS.md`).

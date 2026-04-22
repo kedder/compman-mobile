@@ -71,7 +71,7 @@ section of Phase 1. Add a brief implementation note.
 - `pubspec.yaml` — version and dependency list
 - `docs/architecture.md` — layer rules
 - `docs/ui-guidelines.md` — typography, loading/error state patterns
-- `CLAUDE.md` — general project rules
+- `AGENTS.md` — general project rules
 
 ## Acceptance criteria
 

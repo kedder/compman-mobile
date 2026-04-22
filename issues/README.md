@@ -1,6 +1,7 @@
 # Issues
 
 This directory contains task specifications for AI agents working on this project.
+General project rules live in the repo-root `AGENTS.md`; issue-specific workflow rules live in `issues/AGENTS.md`.
 
 ## How it works
 

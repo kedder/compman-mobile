@@ -15,7 +15,7 @@
 *Goal: Establish documentation and project structure before writing any Flutter code.*
 
 - ✅ `README.md` — concise project description, quick start, docs index
-- ✅ `CLAUDE.md` — AI model rules: context loading, documentation maintenance, dependency rule, test commands
+- ✅ `AGENTS.md` — canonical agent rules: context loading, documentation maintenance, dependency rule, test commands
 - ✅ `docs/architecture.md` — layer overview, folder structure, state management, navigation, error handling
 - ✅ `docs/adr/001-flutter-dart.md` — why Flutter
 - ✅ `docs/adr/002-riverpod.md` — why Riverpod

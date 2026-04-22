@@ -79,7 +79,7 @@ Then show a `SizedBox(width: 20, height: 20, child: CircularProgressIndicator(st
 - `lib/features/competitions/presentation/screens/competition_detail_screen.dart` — the screen and all private widgets
 - `lib/features/competitions/presentation/providers/competitions_providers.dart` — provider definitions
 - `docs/features/competitions.md` — domain model and provider table
-- `CLAUDE.md` — project rules (doc maintenance, commit format, tests)
+- `AGENTS.md` — project rules (doc maintenance, commit format, tests)
 
 ## Documentation
 
