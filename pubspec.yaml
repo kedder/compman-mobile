@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.0.1+3
 
 environment:
-  sdk: ^3.6.2
+  sdk: ^3.8.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,8 +34,8 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # State management
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.3.1
+  riverpod_annotation: ^4.0.2
 
   # Networking
   dio: ^5.7.0
@@ -44,13 +44,13 @@ dependencies:
   html: ^0.15.4
 
   # Local persistence
-  hive_flutter: ^1.1.0
+  hive_ce_flutter: ^2.3.4
 
   # Navigation
   go_router: ^14.6.2
 
   # Immutable models
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
 
   # Functional programming utilities
@@ -64,10 +64,10 @@ dev_dependencies:
 
   # Code generation
   build_runner: ^2.4.13
-  freezed: ^2.5.7
+  freezed: ^3.2.5
   json_serializable: ^6.8.0
-  riverpod_generator: ^2.6.2
-  hive_generator: ^2.0.1
+  riverpod_generator: ^4.0.3
+  hive_ce_generator: ^1.10.1
 
   # Testing
   mockito: ^5.4.4

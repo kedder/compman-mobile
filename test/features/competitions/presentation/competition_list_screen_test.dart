@@ -5,6 +5,7 @@ import 'package:compman_mobile/features/competitions/presentation/providers/comp
 import 'package:compman_mobile/features/competitions/presentation/screens/competition_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -66,10 +67,7 @@ Widget _buildApp({
         path: '/',
         builder: (_, __) => const Scaffold(body: Text('Home')),
       ),
-      GoRoute(
-        path: '/add',
-        builder: (_, __) => const CompetitionListScreen(),
-      ),
+      GoRoute(path: '/add', builder: (_, __) => const CompetitionListScreen()),
     ],
   );
 
@@ -101,8 +99,9 @@ void main() {
     expect(find.text('Gamma Cup'), findsOneWidget);
   });
 
-  testWidgets('filters competitions when search text is entered',
-      (tester) async {
+  testWidgets('filters competitions when search text is entered', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(competitions: _tCompetitions));
     await tester.pump();
 
@@ -114,8 +113,9 @@ void main() {
     expect(find.text('Gamma Cup'), findsNothing);
   });
 
-  testWidgets('shows "No competitions found." when search matches nothing',
-      (tester) async {
+  testWidgets('shows "No competitions found." when search matches nothing', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(competitions: _tCompetitions));
     await tester.pump();
 
@@ -125,8 +125,9 @@ void main() {
     expect(find.text('No competitions found.'), findsOneWidget);
   });
 
-  testWidgets('tapping a competition row selects it (checkmark visible)',
-      (tester) async {
+  testWidgets('tapping a competition row selects it (checkmark visible)', (
+    tester,
+  ) async {
     await tester.pumpWidget(_buildApp(competitions: _tCompetitions));
     await tester.pump();
 

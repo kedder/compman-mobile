@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import '../../domain/entities/bookmarked_competition.dart';
 
@@ -40,12 +40,12 @@ class BookmarkedCompetitionModel {
 
   /// Converts this model to the domain [BookmarkedCompetition] entity.
   BookmarkedCompetition toEntity() => BookmarkedCompetition(
-        id: id,
-        title: title,
-        soaringspotUrl: soaringspotUrl,
-        bookmarkedAt: bookmarkedAt,
-        selectedClass: selectedClass,
-      );
+    id: id,
+    title: title,
+    soaringspotUrl: soaringspotUrl,
+    bookmarkedAt: bookmarkedAt,
+    selectedClass: selectedClass,
+  );
 
   /// Creates a [BookmarkedCompetitionModel] from a domain [BookmarkedCompetition].
   factory BookmarkedCompetitionModel.fromEntity(BookmarkedCompetition entity) =>

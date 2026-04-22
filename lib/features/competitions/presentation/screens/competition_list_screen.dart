@@ -67,22 +67,21 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
       ),
       body: competitionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => _ErrorView(
-          onRetry: () => ref.invalidate(competitionListProvider),
-        ),
+        error: (err, stack) =>
+            _ErrorView(onRetry: () => ref.invalidate(competitionListProvider)),
         data: (competitions) {
           final filtered = _searchQuery.isEmpty
               ? competitions
               : competitions
-                  .where((c) => c.title
-                      .toLowerCase()
-                      .contains(_searchQuery.toLowerCase()))
-                  .toList();
+                    .where(
+                      (c) => c.title.toLowerCase().contains(
+                        _searchQuery.toLowerCase(),
+                      ),
+                    )
+                    .toList();
 
           if (filtered.isEmpty) {
-            return const Center(
-              child: Text('No competitions found.'),
-            );
+            return const Center(child: Text('No competitions found.'));
           }
 
           return ListView.builder(
@@ -132,15 +131,16 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
   }
 
   Future<void> _onDone(BuildContext context) async {
-    final competitions = ref.read(competitionListProvider).valueOrNull ?? [];
+    final competitions = ref.read(competitionListProvider).value ?? [];
     final alreadyBookmarked =
-        ref.read(bookmarkedCompetitionsProvider).valueOrNull ??
-            <BookmarkedCompetition>[];
+        ref.read(bookmarkedCompetitionsProvider).value ??
+        <BookmarkedCompetition>[];
     final alreadyBookmarkedIds = alreadyBookmarked.map((b) => b.id).toSet();
 
     final notifier = ref.read(bookmarkedCompetitionsProvider.notifier);
-    for (final competition
-        in competitions.where((c) => _selectedIds.contains(c.id))) {
+    for (final competition in competitions.where(
+      (c) => _selectedIds.contains(c.id),
+    )) {
       if (!alreadyBookmarkedIds.contains(competition.id)) {
         await notifier.bookmark(competition);
       }

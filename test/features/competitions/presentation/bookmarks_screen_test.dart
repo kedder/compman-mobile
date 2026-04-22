@@ -4,6 +4,7 @@ import 'package:compman_mobile/features/competitions/presentation/providers/comp
 import 'package:compman_mobile/features/competitions/presentation/screens/bookmarks_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -19,19 +20,19 @@ class _EmptyBookmarksNotifier extends BookmarkedCompetitionsNotifier {
 class _DataBookmarksNotifier extends BookmarkedCompetitionsNotifier {
   @override
   Future<List<BookmarkedCompetition>> build() async => [
-        BookmarkedCompetition(
-          id: 'comp-1',
-          title: 'Competition One',
-          soaringspotUrl: 'https://example.com/1',
-          bookmarkedAt: DateTime(2026, 3, 1),
-        ),
-        BookmarkedCompetition(
-          id: 'comp-2',
-          title: 'Competition Two',
-          soaringspotUrl: 'https://example.com/2',
-          bookmarkedAt: DateTime(2026, 3, 2),
-        ),
-      ];
+    BookmarkedCompetition(
+      id: 'comp-1',
+      title: 'Competition One',
+      soaringspotUrl: 'https://example.com/1',
+      bookmarkedAt: DateTime(2026, 3, 1),
+    ),
+    BookmarkedCompetition(
+      id: 'comp-2',
+      title: 'Competition Two',
+      soaringspotUrl: 'https://example.com/2',
+      bookmarkedAt: DateTime(2026, 3, 2),
+    ),
+  ];
 }
 
 class _ErrorBookmarksNotifier extends BookmarkedCompetitionsNotifier {
@@ -47,10 +48,7 @@ class _ErrorBookmarksNotifier extends BookmarkedCompetitionsNotifier {
 Widget _buildApp(Override bookmarksOverride) {
   final router = GoRouter(
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (_, __) => const BookmarksScreen(),
-      ),
+      GoRoute(path: '/', builder: (_, __) => const BookmarksScreen()),
       GoRoute(
         path: '/add',
         builder: (_, __) => const Scaffold(body: Text('Add screen')),
@@ -91,8 +89,9 @@ void main() {
     expect(find.text('No competitions added yet.'), findsOneWidget);
   });
 
-  testWidgets('shows competition titles when bookmarks are loaded',
-      (tester) async {
+  testWidgets('shows competition titles when bookmarks are loaded', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
         bookmarkedCompetitionsProvider.overrideWith(
@@ -106,8 +105,9 @@ void main() {
     expect(find.text('Competition Two'), findsOneWidget);
   });
 
-  testWidgets('shows error message and Retry button on failure',
-      (tester) async {
+  testWidgets('shows error message and Retry button on failure', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
         bookmarkedCompetitionsProvider.overrideWith(
@@ -121,8 +121,9 @@ void main() {
     expect(find.text('An unexpected error occurred.'), findsOneWidget);
   });
 
-  testWidgets('shows confirmation dialog when trash icon is tapped',
-      (tester) async {
+  testWidgets('shows confirmation dialog when trash icon is tapped', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp(
         bookmarkedCompetitionsProvider.overrideWith(

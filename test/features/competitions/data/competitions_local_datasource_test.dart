@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import 'package:compman_mobile/features/competitions/data/datasources/competitions_local_datasource.dart';
 import 'package:compman_mobile/features/competitions/data/models/bookmarked_competition_model.dart';

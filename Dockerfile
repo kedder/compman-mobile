@@ -11,13 +11,18 @@
 # Version references:
 #   Flutter releases:      https://docs.flutter.dev/release/archive
 #   Android cmdline-tools: https://developer.android.com/studio#command-line-tools-only
+
 #   Android platforms:     https://developer.android.com/tools/releases/platforms
 
-ARG FLUTTER_VERSION=3.27.4
-ARG ANDROID_PLATFORM=35
+
+ARG FLUTTER_VERSION=3.41.7
+ARG ANDROID_PLATFORM=36
+ARG ANDROID_PLATFORM_COMPAT=35
 ARG ANDROID_BUILD_TOOLS=35.0.0
 # Numeric ID from the cmdline-tools download URL on developer.android.com
-ARG ANDROID_CMDLINE_TOOLS=11076708
+ARG ANDROID_CMDLINE_TOOLS=14742923
+ARG ANDROID_NDK_VERSION=28.2.13676358
+ARG ANDROID_CMAKE_VERSION=3.22.1
 # Host user/group IDs — set in .env (copy from sample.env) so container files
 # are owned by the host developer rather than root.
 ARG HOST_UID=1000
@@ -25,10 +30,6 @@ ARG HOST_GID=1000
 
 FROM ubuntu:24.04
 
-ARG FLUTTER_VERSION
-ARG ANDROID_PLATFORM
-ARG ANDROID_BUILD_TOOLS
-ARG ANDROID_CMDLINE_TOOLS
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -46,6 +47,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # --- Android SDK --------------------------------------------------------------
+ARG FLUTTER_VERSION
+ARG ANDROID_PLATFORM
+ARG ANDROID_PLATFORM_COMPAT
+ARG ANDROID_BUILD_TOOLS
+ARG ANDROID_CMDLINE_TOOLS
+ARG ANDROID_NDK_VERSION
+ARG ANDROID_CMAKE_VERSION
 RUN mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools" \
     && wget -q \
        "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS}_latest.zip" \
@@ -57,8 +65,11 @@ RUN mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools" \
     && yes | sdkmanager --licenses > /dev/null \
     && sdkmanager \
          "platforms;android-${ANDROID_PLATFORM}" \
+         "platforms;android-${ANDROID_PLATFORM_COMPAT}" \
          "build-tools;${ANDROID_BUILD_TOOLS}" \
-         "platform-tools"
+         "platform-tools" \
+         "ndk;${ANDROID_NDK_VERSION}" \
+         "cmake;${ANDROID_CMAKE_VERSION}"
 
 # --- Flutter SDK --------------------------------------------------------------
 RUN wget -q \
@@ -89,10 +100,12 @@ RUN if getent group "${HOST_GID}" > /dev/null 2>&1; then \
     else \
         useradd --uid "${HOST_UID}" --gid "${HOST_GID}" --create-home dev; \
     fi \
+    && mkdir -p "$FLUTTER_HOME/packages/flutter_tools/.dart_tool" \
+                /home/dev/.gradle \
+                /home/dev/.android \
     && chown -R dev:dev "$PUB_CACHE" \
                         "$FLUTTER_HOME/bin/cache" \
                         "$FLUTTER_HOME/packages/flutter_tools/.dart_tool" \
-    && mkdir -p /home/dev/.gradle /home/dev/.android \
     && chown dev:dev /home/dev/.gradle /home/dev/.android
 USER dev
 

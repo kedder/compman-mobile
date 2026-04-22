@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import '../../features/competitions/data/datasources/competitions_local_datasource.dart';
 import '../../features/competitions/data/datasources/soarscore_remote_datasource.dart';
@@ -21,8 +21,9 @@ final dioProvider = Provider<Dio>((ref) => createDioClient());
 ///
 /// Registers [BookmarkedCompetitionModelAdapter] (typeId 0) before opening the
 /// box so that Hive can serialise and deserialise the stored objects.
-final bookmarksBoxProvider =
-    FutureProvider<Box<BookmarkedCompetitionModel>>((ref) async {
+final bookmarksBoxProvider = FutureProvider<Box<BookmarkedCompetitionModel>>((
+  ref,
+) async {
   await Hive.initFlutter();
   if (!Hive.isAdapterRegistered(0)) {
     Hive.registerAdapter(BookmarkedCompetitionModelAdapter());
@@ -33,17 +34,17 @@ final bookmarksBoxProvider =
 /// Provides the [SoaringSpotRemoteDataSource] implementation.
 final soaringSpotRemoteDataSourceProvider =
     Provider<SoaringSpotRemoteDataSource>(
-  (ref) => SoaringSpotRemoteDataSourceImpl(ref.watch(dioProvider)),
-);
+      (ref) => SoaringSpotRemoteDataSourceImpl(ref.watch(dioProvider)),
+    );
 
 /// Provides the [CompetitionsLocalDataSource] implementation.
 ///
 /// Depends on [bookmarksBoxProvider]; resolves only when the Hive box is open.
 final competitionsLocalDataSourceProvider =
     Provider<CompetitionsLocalDataSource>((ref) {
-  final box = ref.watch(bookmarksBoxProvider).requireValue;
-  return HiveCompetitionsLocalDataSource(box);
-});
+      final box = ref.watch(bookmarksBoxProvider).requireValue;
+      return HiveCompetitionsLocalDataSource(box);
+    });
 
 /// Provides the [CompetitionsRepository] implementation.
 final competitionsRepositoryProvider = Provider<CompetitionsRepository>((ref) {
