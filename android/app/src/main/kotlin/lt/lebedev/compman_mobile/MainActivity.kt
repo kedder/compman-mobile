@@ -38,13 +38,13 @@ class MainActivity : FlutterFragmentActivity() {
                 .putString("xcsoar_tree_uri", uri.toString())
                 .apply()
 
-            writeHelloFile(uri, result)
+            result.success("ok")
         }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "xcsoar.saf")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "tryWriteHelloFile" -> handleTryWriteHelloFile(result)
+                    "pickDirectory" -> handlePickDirectory(result)
                     "writeFile" -> {
                         val bytes = call.argument<ByteArray>("bytes")!!
                         val filename = call.argument<String>("filename")!!
@@ -75,23 +75,7 @@ class MainActivity : FlutterFragmentActivity() {
             }
     }
 
-    private fun handleTryWriteHelloFile(result: MethodChannel.Result) {
-        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
-        val storedUri = prefs.getString("xcsoar_tree_uri", null)
-
-        if (storedUri != null) {
-            val treeUri = Uri.parse(storedUri)
-            val hasGrant = contentResolver.persistedUriPermissions.any { perm ->
-                perm.uri == treeUri &&
-                    perm.isReadPermission &&
-                    perm.isWritePermission
-            }
-            if (hasGrant) {
-                writeHelloFile(treeUri, result)
-                return
-            }
-        }
-
+    private fun handlePickDirectory(result: MethodChannel.Result) {
         pendingResult = result
         safLauncher.launch(Uri.parse("content://org.xcsoar.allfiles/document/root:"))
     }
@@ -152,51 +136,6 @@ class MainActivity : FlutterFragmentActivity() {
                 Log.d("CompmanSAF", "writeFile: created $newUri")
                 contentResolver.openOutputStream(newUri!!).use { it!!.write(bytes) }
             }
-            result.success("ok")
-        } catch (e: Exception) {
-            result.error("SAF_ERROR", e.message, null)
-        }
-    }
-
-    private fun writeHelloFile(treeUri: Uri, result: MethodChannel.Result) {
-        try {
-            val treeDocId = DocumentsContract.getTreeDocumentId(treeUri)
-            val parentDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, treeDocId)
-            val childDocUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocId)
-
-            // Delete existing file to avoid duplicates.
-            // ExternalStorageProvider ignores selection args, so filter in-process.
-            val cursor = contentResolver.query(
-                childDocUri,
-                arrayOf(
-                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                ),
-                null, null, null,
-            )
-            cursor?.use {
-                val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-                val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-                while (it.moveToNext()) {
-                    if (it.getString(nameCol) == "hello-from-compman.txt") {
-                        val existingDocUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, it.getString(idCol))
-                        DocumentsContract.deleteDocument(contentResolver, existingDocUri)
-                        break
-                    }
-                }
-            }
-
-            val fileUri = DocumentsContract.createDocument(
-                contentResolver,
-                parentDocUri,
-                "text/plain",
-                "hello-from-compman.txt",
-            )
-
-            contentResolver.openOutputStream(fileUri!!).use {
-                it!!.write("Hello from Compman Mobile!".toByteArray())
-            }
-
             result.success("ok")
         } catch (e: Exception) {
             result.error("SAF_ERROR", e.message, null)

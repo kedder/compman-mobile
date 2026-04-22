@@ -160,10 +160,10 @@ Providers translate failures into `AsyncError` states, which screens display as 
 override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
     safLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        // resolve pendingResult here
+        // persist the selected tree URI and resolve pendingResult here
     }
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "xcsoar.saf")
-        .setMethodCallHandler { call, result -> /* store result as pendingResult, launch */ }
+        .setMethodCallHandler { call, result -> /* for pickDirectory, store result as pendingResult and launch */ }
 }
 ```
 

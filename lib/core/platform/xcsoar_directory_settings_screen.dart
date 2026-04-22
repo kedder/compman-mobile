@@ -26,7 +26,7 @@ class _XcsoarDirectorySettingsScreenState
   Future<void> _pickDirectory() async {
     setState(() => _loading = true);
     try {
-      final result = await XcsoarSafService().tryWriteHelloFile();
+      final result = await XcsoarSafService().pickDirectory();
       if (!mounted) return;
       if (result == 'ok') {
         ref.invalidate(xcsoarDirectoryUriProvider);

@@ -134,7 +134,7 @@ Operations: `getAll()`, `save(model)`, `delete(id)`.
 ### XCSoar Directory Settings Screen (`/settings/xcsoar-directory`)
 
 - Displays the current SAF directory URI or "Not configured".
-- "Choose XCSoar Folder" button triggers `XcsoarSafService.tryWriteHelloFile()` which opens the Android folder picker on first use.
+- "Choose XCSoar Folder" button triggers `XcsoarSafService.pickDirectory()` which opens the Android folder picker and stores the selected URI permission.
 - "Clear configured folder" button calls `XcsoarSafService.clearSafPermission()`.
 
 ---

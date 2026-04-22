@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'core/platform/saf_test_screen.dart';
 import 'core/platform/xcsoar_directory_settings_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'features/competitions/presentation/screens/bookmarks_screen.dart';
@@ -42,10 +41,6 @@ final _router = GoRouter(
     GoRoute(
       path: '/about',
       builder: (context, state) => const _AboutScreen(),
-    ),
-    GoRoute(
-      path: '/saf-test',
-      builder: (context, state) => const SafTestScreen(),
     ),
     GoRoute(
       path: '/settings/xcsoar-directory',
