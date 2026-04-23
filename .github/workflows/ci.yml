@@ -1,0 +1,121 @@
+# Compman Mobile — Continuous Integration
+#
+# Triggered on every push.  Builds a debug APK and publishes it as a
+# workflow artifact.
+#
+# Image-layer caching strategy (keeps regular builds fast despite the ~7 GB image):
+#   • docker/build-push-action with BuildKit registry cache stores every layer in
+#     GHCR under `ghcr.io/<owner>/<repo>/builder-cache:latest`.
+#   • On subsequent runs BuildKit fetches only the layers whose content has
+#     changed; an unchanged Dockerfile is a 100 % cache hit (~1-2 min vs
+#     ~15 min from scratch).
+#   • Dart pub packages and Gradle caches are stored separately via
+#     actions/cache so they survive across pushes independently of the image.
+
+name: CI
+
+on:
+  push:
+
+permissions:
+  contents: read
+  packages: write   # required to push BuildKit layer cache to GHCR
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # GHCR login — GITHUB_TOKEN is automatically available; no extra secret needed.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # BuildKit is required for type=registry cache.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Cache Dart pub packages between pushes.
+      # Key changes only when pubspec.yaml or pubspec.lock change.
+      - name: Cache Dart pub packages
+        uses: actions/cache@v4
+        with:
+          path: /tmp/pub-cache
+          key: pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          restore-keys: |
+            pub-
+
+      # Cache Gradle build artefacts between pushes.
+      # Key changes when any Gradle build file or the wrapper properties change.
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: /tmp/gradle-cache
+          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-
+
+      # Build the builder image from the project Dockerfile.
+      # `load: true`  — materialise the built image in the local Docker daemon
+      #                 so the subsequent `docker run` can use it.
+      # `push: false` — we never push the image itself, only its layer cache.
+      # `cache-from/cache-to` — read and write BuildKit layer cache in GHCR.
+      # `mode=max`    — cache all layers (intermediate + final), maximising hits.
+      - name: Build builder image (with registry layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: compman-mobile-dev:ci
+          build-args: |
+            HOST_UID=1000
+            HOST_GID=1000
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/builder-cache:latest
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/builder-cache:latest,mode=max
+
+      # Ensure the container's `dev` user (uid 1000) can read/write the workspace
+      # and the two host-side cache directories.
+      - name: Prepare cache dirs and workspace permissions
+        run: |
+          mkdir -p /tmp/pub-cache /tmp/gradle-cache
+          sudo chown -R 1000:1000 /tmp/pub-cache /tmp/gradle-cache "$GITHUB_WORKSPACE"
+
+      # Run `flutter pub get` then `flutter build apk --debug` inside the builder
+      # container, mirroring `make deps && make build`.
+      # Volume mounts:
+      #   $GITHUB_WORKSPACE → /app        (project source + build output)
+      #   /tmp/pub-cache    → /opt/pub-cache   (Dart package cache)
+      #   /tmp/gradle-cache → /home/dev/.gradle (Gradle cache)
+      - name: Build debug APK
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/app" \
+            -v /tmp/pub-cache:/opt/pub-cache \
+            -v /tmp/gradle-cache:/home/dev/.gradle \
+            -e PUB_CACHE=/opt/pub-cache \
+            compman-mobile-dev:ci \
+            bash -c "flutter pub get && flutter build apk --debug"
+
+      # Hand ownership of the cache dirs back to the runner user so that the
+      # actions/cache post-step can archive them without permission errors.
+      # (The container's `dev` user, uid 1000, writes files as a different
+      # owner than the GitHub Actions runner user.)
+      - name: Fix cache dir permissions
+        if: always()
+        run: sudo chown -R "$USER" /tmp/pub-cache /tmp/gradle-cache
+
+      # Publish the APK so it can be downloaded from the workflow run summary.
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
