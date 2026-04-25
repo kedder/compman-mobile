@@ -17,18 +17,16 @@ import '../providers/competitions_providers.dart';
 /// latest XCSoar task, and see the current XCSoar data directory.
 class CompetitionDetailScreen extends ConsumerWidget {
   /// Creates the [CompetitionDetailScreen].
-  const CompetitionDetailScreen({
-    super.key,
-    required this.competitionId,
-  });
+  const CompetitionDetailScreen({super.key, required this.competitionId});
 
   /// The SoaringSpot slug / SoarScore competition ID.
   final String competitionId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final competitionAsync =
-        ref.watch(competitionDetailProvider(competitionId));
+    final competitionAsync = ref.watch(
+      competitionDetailProvider(competitionId),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -92,10 +90,7 @@ class _CompetitionDetailBody extends ConsumerWidget {
         children: [
           _HeaderSection(competition: competition),
           const SizedBox(height: 24),
-          _ClassSection(
-            competition: competition,
-            competitionId: competitionId,
-          ),
+          _ClassSection(competition: competition, competitionId: competitionId),
           const SizedBox(height: 24),
           _XcsoarDirectoryRow(),
         ],
@@ -128,7 +123,11 @@ class _HeaderSection extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            Icon(Icons.link, size: 16, color: theme.colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.link,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
@@ -151,10 +150,7 @@ class _HeaderSection extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ClassSection extends ConsumerWidget {
-  const _ClassSection({
-    required this.competition,
-    required this.competitionId,
-  });
+  const _ClassSection({required this.competition, required this.competitionId});
 
   final BookmarkedCompetition competition;
   final String competitionId;
@@ -214,6 +210,7 @@ class _ClassPicker extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         classesAsync.when(
+          skipLoadingOnReload: true,
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => _ErrorRetry(
             message:
@@ -427,8 +424,8 @@ class _TaskCard extends StatelessWidget {
             Text(
               'Generated ${task.timestamp}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -437,9 +434,7 @@ class _TaskCard extends StatelessWidget {
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: onInstall,
-                      child: const Text(
-                        'Install as XCSoar Default Task',
-                      ),
+                      child: const Text('Install as XCSoar Default Task'),
                     ),
             ),
           ],
@@ -475,8 +470,8 @@ class _XcsoarDirectoryRow extends ConsumerWidget {
                 child: Text(
                   'XCSoar folder: $uri',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -494,8 +489,8 @@ class _XcsoarDirectoryRow extends ConsumerWidget {
             Text(
               'XCSoar folder: Not configured',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(width: 4),
             TextButton(

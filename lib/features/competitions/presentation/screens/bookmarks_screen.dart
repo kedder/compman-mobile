@@ -28,13 +28,17 @@ class BookmarksScreen extends ConsumerWidget {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) => context.push(value),
             itemBuilder: (context) => const [
-              PopupMenuItem(value: '/settings/xcsoar-directory', child: Text('Settings')),
+              PopupMenuItem(
+                value: '/settings/xcsoar-directory',
+                child: Text('Settings'),
+              ),
               PopupMenuItem(value: '/about', child: Text('About')),
             ],
           ),
         ],
       ),
       body: bookmarksAsync.when(
+        skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => _ErrorView(
           message: _errorMessage(err),
@@ -196,8 +200,8 @@ class _BookmarkCard extends StatelessWidget {
         subtitle: Text(
           _formatBookmarkedDate(bookmark.bookmarkedAt),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         trailing: Semantics(
           label: 'Remove ${bookmark.title}',
