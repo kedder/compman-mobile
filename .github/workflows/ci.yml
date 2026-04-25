@@ -1,7 +1,12 @@
 # Compman Mobile — Continuous Integration
 #
-# Triggered on every push.  Builds a debug APK and publishes it as a
+# Triggered on every push.  Builds a signed release AAB and publishes it as a
 # workflow artifact.
+#
+# Required repository secrets:
+#   UPLOAD_KEYSTORE_BASE64 — base64-encoded upload-key.jks  (base64 -w 0 upload-key.jks)
+#   UPLOAD_KEY_ALIAS       — key alias inside the keystore
+#   UPLOAD_KEY_PASSWORD    — key password (also used as the store password)
 #
 # Image-layer caching strategy (keeps regular builds fast despite the ~7 GB image):
 #   • docker/build-push-action with BuildKit registry cache stores every layer in
@@ -23,7 +28,7 @@ permissions:
 
 jobs:
   build:
-    name: Build debug APK
+    name: Build release AAB
     runs-on: ubuntu-latest
 
     steps:
@@ -88,21 +93,36 @@ jobs:
           mkdir -p /tmp/pub-cache /tmp/gradle-cache
           sudo chown -R 1000:1000 /tmp/pub-cache /tmp/gradle-cache "$GITHUB_WORKSPACE"
 
-      # Run `flutter pub get` then `flutter build apk --debug` inside the builder
-      # container, mirroring `make deps && make build`.
+      # Decode the base64-encoded keystore secret to a temp file on the runner.
+      # The file is bind-mounted into the Docker container in the build step below.
+      - name: Decode upload keystore
+        run: |
+          echo "${{ secrets.UPLOAD_KEYSTORE_BASE64 }}" | base64 -d > /tmp/upload-key.jks
+          chmod 600 /tmp/upload-key.jks
+          sudo chown 1000:1000 /tmp/upload-key.jks
+
+      # Run `flutter pub get` then `flutter build appbundle --release` inside the
+      # builder container, mirroring `make deps && make build`.
       # Volume mounts:
-      #   $GITHUB_WORKSPACE → /app        (project source + build output)
-      #   /tmp/pub-cache    → /opt/pub-cache   (Dart package cache)
-      #   /tmp/gradle-cache → /home/dev/.gradle (Gradle cache)
-      - name: Build debug APK
+      #   $GITHUB_WORKSPACE    → /app              (project source + build output)
+      #   /tmp/pub-cache       → /opt/pub-cache    (Dart package cache)
+      #   /tmp/gradle-cache    → /home/dev/.gradle (Gradle cache)
+      #   /tmp/upload-key.jks  → /tmp/upload-key.jks (signing keystore)
+      # Signing env vars are injected from repository secrets.
+      - name: Build release AAB
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE:/app" \
             -v /tmp/pub-cache:/opt/pub-cache \
             -v /tmp/gradle-cache:/home/dev/.gradle \
+            -v /tmp/upload-key.jks:/tmp/upload-key.jks:ro \
             -e PUB_CACHE=/opt/pub-cache \
+            -e UPLOAD_STORE_FILE=/tmp/upload-key.jks \
+            -e UPLOAD_STORE_PASSWORD="${{ secrets.UPLOAD_KEY_PASSWORD }}" \
+            -e UPLOAD_KEY_ALIAS="${{ secrets.UPLOAD_KEY_ALIAS }}" \
+            -e UPLOAD_KEY_PASSWORD="${{ secrets.UPLOAD_KEY_PASSWORD }}" \
             compman-mobile-dev:ci \
-            bash -c "flutter pub get && flutter build apk --debug"
+            bash -c "flutter pub get && flutter build appbundle --release"
 
       # Hand ownership of the cache dirs back to the runner user so that the
       # actions/cache post-step can archive them without permission errors.
@@ -112,10 +132,10 @@ jobs:
         if: always()
         run: sudo chown -R "$USER" /tmp/pub-cache /tmp/gradle-cache
 
-      # Publish the APK so it can be downloaded from the workflow run summary.
-      - name: Upload debug APK artifact
+      # Publish the AAB so it can be downloaded from the workflow run summary.
+      - name: Upload release AAB artifact
         uses: actions/upload-artifact@v7
         with:
-          name: app-debug-${{ github.sha }}
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: app-release-${{ github.sha }}
+          path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
