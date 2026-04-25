@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#5c5f61",
+                        "surface-container": "#e7eeff",
+                        "on-error-container": "#93000a",
+                        "on-background": "#111c2d",
+                        "surface-variant": "#d8e3fb",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "secondary-container": "#d0e1fb",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#cfdaf2",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "outline-variant": "#bec8d2",
+                        "on-primary-fixed-variant": "#004c6e",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "primary-container": "#0ea5e9",
+                        "surface-container-low": "#f0f3ff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-primary-container": "#003751",
+                        "on-secondary-container": "#54647a",
+                        "inverse-surface": "#263143",
+                        "tertiary-fixed": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#999c9e",
+                        "inverse-on-surface": "#ecf1ff",
+                        "primary-fixed-dim": "#89ceff",
+                        "on-tertiary-container": "#303436",
+                        "surface-tint": "#006591",
+                        "primary": "#006591",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#c9e6ff",
+                        "surface-container-high": "#dee8ff",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-surface": "#111c2d",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "on-primary-fixed": "#001e2f",
+                        "secondary": "#505f76",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-container-highest": "#d8e3fb",
+                        "on-surface-variant": "#3e4850",
+                        "background": "#f9f9ff",
+                        "secondary-fixed": "#d3e4fe",
+                        "outline": "#6e7881",
+                        "inverse-primary": "#89ceff",
+                        "on-tertiary-fixed-variant": "#444749"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "12px",
+                        "stack-sm": "8px",
+                        "base-unit": "4px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "status-badge": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "status-badge": ["11px", {"lineHeight": "12px", "fontWeight": "800"}],
+                        "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9ff; color: #111c2d; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 left-0 w-full z-50 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center px-4 h-16">
+<div class="flex items-center gap-2">
+<button class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold text-slate-900 dark:text-white font-sans antialiased tracking-tight">Add Competition</h1>
+</div>
+<button class="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:opacity-90 active:scale-95 transition-all">
+            Done
+        </button>
+</header>
+<main class="pt-20 px-margin-mobile">
+<!-- Sleek Search Bar -->
+<div class="mb-stack-lg">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-12 pl-12 pr-4 bg-white border border-outline-variant rounded-full text-body-lg focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Search competitions..." type="text"/>
+</div>
+</div>
+<!-- Competition List styled like SCREEN_10 -->
+<div class="flex flex-col gap-0">
+<!-- Item 1: Alps Gliding Cup (Upcoming) -->
+<label class="py-stack-md flex items-start gap-4 cursor-pointer active:bg-surface-container transition-colors group border-b border-surface-container-low">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background leading-tight">Alps Gliding Cup</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-[10px] uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Saint-Auban, France • June 12-24, 2024</p>
+</div>
+</label>
+<!-- Item 2: Rocky Mountain Soar (Upcoming) -->
+<label class="py-stack-md flex items-start gap-4 cursor-pointer active:bg-surface-container transition-colors group border-b border-surface-container-low">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background leading-tight">Rocky Mountain Soar</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-[10px] uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Boulder, CO, USA • July 01-10, 2024</p>
+</div>
+</label>
+<!-- Item 3: Nordic Glide Masters (Live) -->
+<label class="py-stack-md flex items-start gap-4 cursor-pointer active:bg-surface-container transition-colors group border-b border-surface-container-low">
+<input checked="" class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-primary leading-tight">Nordic Glide Masters</h3>
+<span class="bg-primary px-2 py-0.5 rounded text-white font-status-badge text-[10px] uppercase">Live</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Vågå, Norway • August 20-30, 2024</p>
+</div>
+</label>
+<!-- Item 4: Pyrenees Open 2024 (Past) -->
+<label class="py-stack-md flex items-start gap-4 cursor-pointer active:bg-surface-container transition-colors group border-b border-surface-container-low">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background leading-tight">Pyrenees Open 2024</h3>
+<span class="bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded font-status-badge text-[10px] uppercase">Past</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Cerdanya, Spain • May 05-15, 2024</p>
+</div>
+</label>
+<!-- Item 5: Andes Cross (Upcoming) -->
+<label class="py-stack-md flex items-start gap-4 cursor-pointer active:bg-surface-container transition-colors group border-b border-surface-container-low">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background leading-tight">Andes Cross</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-[10px] uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Santiago, Chile • September 10-22, 2024</p>
+</div>
+</label>
+<!-- Item 6: South African Nationals (Upcoming) -->
+<label class="py-stack-md flex items-start gap-4 cursor-pointer active:bg-surface-container transition-colors group border-b border-surface-container-low">
+<input class="mt-1 w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background leading-tight">South African Nationals</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-[10px] uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Worcester, SA • October 04-14, 2024</p>
+</div>
+</label>
+</div>
+<!-- Bottom Spacer -->
+<div class="h-10"></div>
+</main>
+</body></html>

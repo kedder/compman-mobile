@@ -1,5 +1,8 @@
 # Gliding Compman — UI Guidelines
 
+> **Source of truth for visual design:** [`docs/design/design.md`](design/design.md) and [`docs/design/tokens.md`](design/tokens.md).
+> This document covers implementation rules, Flutter-specific patterns, and UX constraints that are not expressed in the design files.
+
 ## Usage Context
 
 This app is used by glider pilots in competition settings — on the flight line, in the briefing room, and **in the cockpit during flight**. Design for these constraints:
@@ -15,22 +18,21 @@ This app is used by glider pilots in competition settings — on the flight line
 
 ## Visual Theme
 
-- **Primary color:** Sky blue `#0D7FC1` (`colorScheme.primary`). Conveys aviation and sky.
-- **Background:** White or very light gray `#F5F7FA` for maximum contrast.
-- **Card / surface background:** White `#FFFFFF` with subtle shadow (`elevation: 2`).
-- **Destructive action color:** Red (`colorScheme.error`; approximately `Colors.red.shade700`).
-- **Success / confirmation color:** Green (`appColors.success`; `#2E7D32`).
+Specific color values, surface tiers, elevation/shadow rules, shape radii, and spacing tokens are defined in [`docs/design/design.md`](design/design.md) and [`docs/design/tokens.md`](design/tokens.md). Implementation rules:
+
 - Do not use decorative gradients or textures. Flat, clean surfaces only.
-- Always derive colors from `Theme.of(context)` — never hard-code white or black text values. This keeps future theme changes (e.g. dark mode) non-breaking.
-- **Always use theme tokens — never hardcode colour literals in widget code.** All tokens are defined in `lib/core/theme/app_theme.dart`.
+- Always derive colors from `Theme.of(context)` — never hard-code color literals in widget code.
+- **All tokens are defined in `lib/core/theme/app_theme.dart`.** If a token is missing, add it there rather than using a literal.
+- Cards use the `surface-container-lowest` background color with a 1 dp border (`outline-variant`) and `shadow-sm` — do not use `elevation: 2` alone.
 
 ---
 
 ## Typography
 
-- Use Flutter's default `TextTheme`. Scale up from defaults: body text must be **at least 16 sp** — never smaller.
-- Titles and item names: `titleLarge` (22 sp or larger).
-- Secondary info (dates, location): `bodyMedium` in `colorScheme.onSurfaceVariant` (`#9E9E9E` approx) — visually subordinate but still legible in sunlight.
+The app uses **Inter** as its primary typeface. Type scale and weights are defined in [`docs/design/design.md`](design/design.md). Implementation rules:
+
+- Body text (`body-lg`): 16 sp, regular weight. This is the minimum size for primary content.
+- Secondary metadata (dates, locations, file sizes): `body-sm` (14 sp) or `label-caps` (11 sp, bold, uppercase) as defined in the type scale — use the smallest size only for subordinate labels such as section headers and badge text.
 - Button labels: **bold**, minimum 16 sp.
 - Do not use more than 3 type sizes on any single screen.
 - No prose descriptions. Information must be scannable in under 2 seconds.
@@ -63,18 +65,18 @@ Show only what the pilot needs right now. Everything else is noise.
 
 ## Status Badges
 
-Badges convey status at a glance and must be consistent across all screens and features.
+Badges convey status at a glance and must be consistent across all screens and features. Colors come from [`docs/design/tokens.md`](design/tokens.md).
 
-| Status | Label | Background | Text |
-|---|---|---|---|
-| Live | `Live` | `appColors.badgeLive` (`#2E7D32`, green) | `appColors.badgeOnDark` (white) |
-| Upcoming | `Upcoming` | `appColors.badgeUpcoming` (`#1565C0`, blue) | `appColors.badgeOnDark` (white) |
-| Past | `Past` | `appColors.badgePast` (`#757575`, gray) | `appColors.badgeOnDark` (white) |
-| New / Updated | `New` | `appColors.badgeNew` (`#F9A825`, yellow) | `Colors.black` (always black — yellow provides insufficient contrast against white) |
+| Status | Label | Token | Design token name | Text |
+|---|---|---|---|---|
+| Live | `Live` | `appColors.badgeLive` | `status-live` | white |
+| Upcoming | `Upcoming` | `appColors.badgeUpcoming` | `status-upcoming` | white |
+| Past | `Past` | `appColors.badgePast` | `status-past` | white |
+| New / Updated | `New` | `appColors.badgeNew` | `status-new` | black (yellow provides insufficient contrast against white) |
 
 Rendering rules:
 - `Container` with `BorderRadius.circular(4)`, horizontal padding 8 dp, vertical padding 3 dp.
-- Font: `labelSmall`, bold.
+- Font: `labelSmall`, bold (maps to `status-badge` token: 10 sp, weight 800).
 - Placement: to the right of a title on list rows; below the title on detail screens.
 
 These are the only permitted badge styles. Do not introduce ad hoc colored labels.
@@ -112,7 +114,9 @@ Every screen backed by async data must handle all three states explicitly. No st
 
 ## Buttons
 
-- **Primary action:** `ElevatedButton` in theme primary color. Full-width on detail/action screens; standard width in dialogs.
+Button shape and sizing tokens are defined in [`docs/design/design.md`](design/design.md) (8 dp radius, 48 dp height for primary). Implementation rules:
+
+- **Primary action:** `ElevatedButton` in `colorScheme.primary` (see `tokens.md`). Full-width on detail/action screens; standard width in dialogs.
 - **Secondary / cancel action:** `TextButton` or `OutlinedButton`. Always visually lighter than the primary.
 - **Destructive action:** Red `TextButton` inside a confirmation dialog. Never a standalone primary button.
 - **Disabled state:** Reduce opacity to 38%. Update the label to describe why the button is inactive (e.g. "Downloading…"). Never silently disable without visual and textual feedback.
@@ -151,8 +155,7 @@ Despite the cockpit use case, the app must meet baseline accessibility requireme
 
 ## Do Not
 
-- Do not shrink font sizes below 14 sp anywhere.
 - Do not place critical interactive elements in the bottom 20% of the screen — hard to see in cockpit mounts.
 - Do not add splash screens, onboarding flows, or decorative loading screens.
 - Do not use more than two typeface weights on a single screen.
-- Do not introduce a new color without adding it to this document.
+- Do not introduce a new color without adding it to [`docs/design/tokens.md`](design/tokens.md) and `lib/core/theme/app_theme.dart`.

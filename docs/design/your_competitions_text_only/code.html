@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#5c5f61",
+                    "surface-container": "#e7eeff",
+                    "on-error-container": "#93000a",
+                    "on-background": "#111c2d",
+                    "surface-variant": "#d8e3fb",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "secondary-container": "#d0e1fb",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#cfdaf2",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "outline-variant": "#bec8d2",
+                    "on-primary-fixed-variant": "#004c6e",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f9f9ff",
+                    "primary-container": "#0ea5e9",
+                    "surface-container-low": "#f0f3ff",
+                    "on-tertiary-fixed": "#191c1e",
+                    "on-primary-container": "#003751",
+                    "on-secondary-container": "#54647a",
+                    "inverse-surface": "#263143",
+                    "tertiary-fixed": "#e0e3e5",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#999c9e",
+                    "inverse-on-surface": "#ecf1ff",
+                    "primary-fixed-dim": "#89ceff",
+                    "on-tertiary-container": "#303436",
+                    "surface-tint": "#006591",
+                    "primary": "#006591",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#c9e6ff",
+                    "surface-container-high": "#dee8ff",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "on-surface": "#111c2d",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f9f9ff",
+                    "on-primary-fixed": "#001e2f",
+                    "secondary": "#505f76",
+                    "on-secondary-fixed": "#0b1c30",
+                    "surface-container-highest": "#d8e3fb",
+                    "on-surface-variant": "#3e4850",
+                    "background": "#f9f9ff",
+                    "secondary-fixed": "#d3e4fe",
+                    "outline": "#6e7881",
+                    "inverse-primary": "#89ceff",
+                    "on-tertiary-fixed-variant": "#444749"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "gutter": "12px",
+                    "stack-sm": "8px",
+                    "base-unit": "4px",
+                    "stack-md": "16px",
+                    "stack-lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "status-badge": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "label-caps": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "status-badge": ["11px", {"lineHeight": "12px", "fontWeight": "800"}],
+                    "headline-lg": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9ff;
+            color: #111c2d;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center w-full px-4 h-16 fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300" data-icon="menu">menu</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sky-600 dark:text-sky-400" data-icon="flight_takeoff">flight_takeoff</span>
+<h1 class="text-xl font-bold text-slate-900 dark:text-white font-sans antialiased tracking-tight">SkyGlider</h1>
+</div>
+</div>
+</header>
+<main class="pt-24 px-margin-mobile">
+<!-- Screen Title -->
+<header class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Your Competitions</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-base-unit">View and manage your gliding events.</p>
+</header>
+<!-- Competition List -->
+<div class="flex flex-col gap-0">
+<!-- List Item 1: Live -->
+<a class="py-stack-md group active:bg-surface-container transition-colors" href="#">
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background">National Gliding Championship</h3>
+<span class="bg-primary px-2 py-0.5 rounded text-white font-status-badge text-status-badge uppercase">Live</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Alps, France • Aug 12-20, 2023</p>
+</div>
+<span class="material-symbols-outlined text-outline self-center transition-opacity group-hover:translate-x-1" data-icon="chevron_right">chevron_right</span>
+</div>
+</a>
+<!-- List Item 2: Upcoming -->
+<a class="py-stack-md group active:bg-surface-container transition-colors" href="#">
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background">Regionals South Region</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-status-badge uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Veynes, Haute-Alpes, Sep 05-12, 2023</p>
+</div>
+<span class="material-symbols-outlined text-outline self-center group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</a>
+<!-- List Item 3: Upcoming -->
+<a class="py-stack-md group active:bg-surface-container transition-colors" href="#">
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background">Mediterranean Open Cup</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-status-badge uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Castellón, Spain • Oct 01-10, 2023</p>
+</div>
+<span class="material-symbols-outlined text-outline self-center group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</a>
+<!-- List Item 4: Upcoming -->
+<a class="py-stack-md group active:bg-surface-container transition-colors" href="#">
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-stack-sm mb-base-unit">
+<h3 class="font-headline-md text-body-lg font-bold text-on-background">Autumn Ridge Challenge</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-status-badge text-status-badge uppercase">Upcoming</span>
+</div>
+<p class="font-body-sm text-body-sm text-tertiary">Sugarbush, Vermont, USA • Oct 22-29, 2023</p>
+</div>
+<span class="material-symbols-outlined text-outline self-center group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</a>
+</div>
+<!-- Add Competition Floating Action Button -->
+<button class="fixed bottom-8 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform z-50">
+<span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
+</button>
+<!-- Utility Spacer -->
+<div class="h-24"></div>
+</main>
+</body></html>
