@@ -69,10 +69,10 @@ Badges convey status at a glance and must be consistent across all screens and f
 
 | Status | Label | Token | Design token name | Text |
 |---|---|---|---|---|
-| Live | `Live` | `appColors.badgeLive` | `status-live` | white |
-| Upcoming | `Upcoming` | `appColors.badgeUpcoming` | `status-upcoming` | white |
-| Past | `Past` | `appColors.badgePast` | `status-past` | white |
-| New / Updated | `New` | `appColors.badgeNew` | `status-new` | black (yellow provides insufficient contrast against white) |
+| Live | `Live` | `appColors.badgeLive` | `status-live` | `appColors.badgeLiveText` (white) |
+| Upcoming | `Upcoming` | `appColors.badgeUpcoming` | `status-upcoming` | `appColors.badgeUpcomingText` (dark) |
+| Past | `Past` | `appColors.badgePast` | `status-past` | `appColors.badgePastText` (dark) |
+| New / Updated | `New Update` | `appColors.badgeNew` | `status-new` | `appColors.badgeNewText` (white) |
 
 Rendering rules:
 - `Container` with `BorderRadius.circular(4)`, horizontal padding 8 dp, vertical padding 3 dp.

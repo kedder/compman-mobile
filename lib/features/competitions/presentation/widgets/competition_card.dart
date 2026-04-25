@@ -108,7 +108,7 @@ class _StatusBadge extends StatelessWidget {
     final appColors = context.appColors;
     // "Upcoming" badge colours per ui-guidelines.md / AppColors
     final Color background = appColors.badgeUpcoming;
-    final Color foreground = appColors.badgeOnDark;
+    final Color foreground = appColors.badgeUpcomingText;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

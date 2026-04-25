@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // ---------------------------------------------------------------------------
 // AppColors — ThemeExtension for tokens that live outside standard
@@ -20,7 +21,10 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.badgeUpcoming,
     required this.badgePast,
     required this.badgeNew,
-    required this.badgeOnDark,
+    required this.badgeLiveText,
+    required this.badgeUpcomingText,
+    required this.badgePastText,
+    required this.badgeNewText,
   });
 
   /// Colour used for success SnackBars and positive confirmations.
@@ -36,17 +40,19 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color badgePast;
 
   /// Background colour for "New / Updated" status badges.
-  ///
-  /// Note: the foreground text for [badgeNew] badges must be `Colors.black`
-  /// (not [badgeOnDark]) because the yellow background does not provide
-  /// sufficient contrast against white text (WCAG AA).
   final Color badgeNew;
 
-  /// Foreground text colour for Live, Upcoming, and Past status badges.
-  ///
-  /// Always white — these dark badge backgrounds provide sufficient contrast
-  /// against white text. For the New badge, use `Colors.black` directly.
-  final Color badgeOnDark;
+  /// Foreground text colour for "Live" status badges.
+  final Color badgeLiveText;
+
+  /// Foreground text colour for "Upcoming" status badges.
+  final Color badgeUpcomingText;
+
+  /// Foreground text colour for "Past" status badges.
+  final Color badgePastText;
+
+  /// Foreground text colour for "New / Updated" status badges.
+  final Color badgeNewText;
 
   @override
   AppColors copyWith({
@@ -55,7 +61,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? badgeUpcoming,
     Color? badgePast,
     Color? badgeNew,
-    Color? badgeOnDark,
+    Color? badgeLiveText,
+    Color? badgeUpcomingText,
+    Color? badgePastText,
+    Color? badgeNewText,
   }) {
     return AppColors(
       success: success ?? this.success,
@@ -63,7 +72,10 @@ class AppColors extends ThemeExtension<AppColors> {
       badgeUpcoming: badgeUpcoming ?? this.badgeUpcoming,
       badgePast: badgePast ?? this.badgePast,
       badgeNew: badgeNew ?? this.badgeNew,
-      badgeOnDark: badgeOnDark ?? this.badgeOnDark,
+      badgeLiveText: badgeLiveText ?? this.badgeLiveText,
+      badgeUpcomingText: badgeUpcomingText ?? this.badgeUpcomingText,
+      badgePastText: badgePastText ?? this.badgePastText,
+      badgeNewText: badgeNewText ?? this.badgeNewText,
     );
   }
 
@@ -76,7 +88,29 @@ class AppColors extends ThemeExtension<AppColors> {
       badgeUpcoming: Color.lerp(badgeUpcoming, other.badgeUpcoming, t)!,
       badgePast: Color.lerp(badgePast, other.badgePast, t)!,
       badgeNew: Color.lerp(badgeNew, other.badgeNew, t)!,
-      badgeOnDark: Color.lerp(badgeOnDark, other.badgeOnDark, t)!,
+      badgeLiveText: Color.lerp(badgeLiveText, other.badgeLiveText, t)!,
+      badgeUpcomingText:
+          Color.lerp(badgeUpcomingText, other.badgeUpcomingText, t)!,
+      badgePastText: Color.lerp(badgePastText, other.badgePastText, t)!,
+      badgeNewText: Color.lerp(badgeNewText, other.badgeNewText, t)!,
+    );
+  }
+}
+
+/// Named button style helpers for non-standard button variants.
+abstract final class AppButtonStyles {
+  /// Ghost/utility button for secondary file-operation actions.
+  static ButtonStyle ghost(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return OutlinedButton.styleFrom(
+      foregroundColor: primary,
+      backgroundColor: Colors.white,
+      side: BorderSide(color: primary.withValues(alpha: 0.3)),
+      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      minimumSize: Size.zero,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 }
@@ -97,48 +131,105 @@ class AppColors extends ThemeExtension<AppColors> {
 abstract final class AppTheme {
   /// Light theme. Used as the app's default theme in [MaterialApp].
   static ThemeData light() {
-    // Material 3 generates a full ColorScheme from the seed; primary will be
-    // derived from the seed colour but may differ slightly. The seed is the
-    // canonical aviation-sky-blue brand colour.
-    const seedColor = Color(0xFF0D7FC1);
+    const seedColor = Color(0xFF006591);
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: seedColor,
+      onPrimary: Colors.white,
+      primaryContainer: const Color(0xFF0EA5E9),
+      onPrimaryContainer: const Color(0xFF003751),
+      secondary: const Color(0xFF505F76),
+      onSecondary: Colors.white,
+      secondaryContainer: const Color(0xFFD0E1FB),
+      onSecondaryContainer: const Color(0xFF54647A),
+      tertiary: const Color(0xFF5C5F61),
+      onTertiary: Colors.white,
+      tertiaryContainer: const Color(0xFF999C9E),
+      onTertiaryContainer: const Color(0xFF303436),
+      error: const Color(0xFFBA1A1A),
+      onError: Colors.white,
+      errorContainer: const Color(0xFFFFDAD6),
+      onErrorContainer: const Color(0xFF93000A),
+      surface: const Color(0xFFF9F9FF),
+      onSurface: const Color(0xFF111C2D),
+      onSurfaceVariant: const Color(0xFF3E4850),
+      outline: const Color(0xFF6E7881),
+      outlineVariant: const Color(0xFFBEC8D2),
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: const Color(0xFFF0F3FF),
+      surfaceContainer: const Color(0xFFE7EEFF),
+      surfaceContainerHigh: const Color(0xFFDEE8FF),
+      surfaceContainerHighest: const Color(0xFFD8E3FB),
+    );
 
-    // Material 3 default text styles enforce a minimum body size of ~14 sp.
-    // With useMaterial3: true the default bodyMedium is 14 sp and bodyLarge
-    // is 16 sp. The ui-guidelines require body text at least 16 sp — screens
-    // must use bodyLarge (or larger) for primary body content and labelLarge
-    // for button labels (already 14 sp bold in M3, overridden below to 16 sp).
     return ThemeData(
-      colorSchemeSeed: seedColor,
       useMaterial3: true,
+      colorScheme: colorScheme,
+      textTheme: GoogleFonts.interTextTheme(),
+      scaffoldBackgroundColor: colorScheme.surface,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.white,
+        foregroundColor: Color(0xFF111C2D),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        shape: Border(
+          bottom: BorderSide(color: Color(0xFFBEC8D2)),
+        ),
+      ),
       cardTheme: const CardThemeData(
-        elevation: 2,
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          side: BorderSide(color: Color(0xFFBEC8D2)),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFBEC8D2),
+        thickness: 1,
+        space: 1,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           textStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           textStyle: const TextStyle(fontSize: 16),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           textStyle: const TextStyle(fontSize: 16),
         ),
       ),
       extensions: const [
         AppColors(
-          success: Color(0xFF2E7D32),
-          badgeLive: Color(0xFF2E7D32),
-          badgeUpcoming: Color(0xFF1565C0),
-          badgePast: Color(0xFF757575),
-          badgeNew: Color(0xFFF9A825),
-          badgeOnDark: Colors.white,
+          success: Color(0xFF059669),
+          badgeLive: Color(0xFF006591),
+          badgeUpcoming: Color(0xFFD0E1FB),
+          badgePast: Color(0xFF999C9E),
+          badgeNew: Color(0xFFBA1A1A),
+          badgeLiveText: Colors.white,
+          badgeUpcomingText: Color(0xFF54647A),
+          badgePastText: Color(0xFF303436),
+          badgeNewText: Colors.white,
         ),
       ],
     );
