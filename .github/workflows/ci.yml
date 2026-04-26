@@ -1,7 +1,10 @@
 # Compman Mobile — Continuous Integration
 #
-# Triggered on every push.  Builds a signed release AAB and publishes it as a
-# workflow artifact.
+# Triggered when a version tag of the form X.Y.Z is pushed (e.g. 2.5.12).
+# Builds a signed release AAB and publishes it as a workflow artifact.
+#
+# --build-name is set to the tag name (e.g. 2.5.12).
+# --build-number is set to github.run_number (monotonically increasing integer).
 #
 # Required repository secrets:
 #   UPLOAD_KEYSTORE_BASE64 — base64-encoded upload-key.jks  (base64 -w 0 upload-key.jks)
@@ -21,6 +24,8 @@ name: CI
 
 on:
   push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: read
@@ -122,7 +127,9 @@ jobs:
             -e UPLOAD_KEY_ALIAS="${{ secrets.UPLOAD_KEY_ALIAS }}" \
             -e UPLOAD_KEY_PASSWORD="${{ secrets.UPLOAD_KEY_PASSWORD }}" \
             compman-mobile-dev:ci \
-            bash -c "flutter pub get && flutter build appbundle --release"
+            bash -c "flutter pub get && flutter build appbundle --release \
+              --build-name '${{ github.ref_name }}' \
+              --build-number '${{ github.run_number }}'"
 
       # Hand ownership of the cache dirs back to the runner user so that the
       # actions/cache post-step can archive them without permission errors.
@@ -136,6 +143,6 @@ jobs:
       - name: Upload release AAB artifact
         uses: actions/upload-artifact@v7
         with:
-          name: app-release-${{ github.sha }}
+          name: app-release-${{ github.ref_name }}
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
