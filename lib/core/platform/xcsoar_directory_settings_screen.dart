@@ -58,9 +58,9 @@ class _XcsoarDirectorySettingsScreenState
     await XcsoarSafService().clearSafPermission();
     if (!mounted) return;
     ref.invalidate(xcsoarDirectoryUriProvider);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Permission cleared')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Permission cleared')));
   }
 
   @override
@@ -77,9 +77,8 @@ class _XcsoarDirectorySettingsScreenState
             subtitle: uriAsync.when(
               loading: () => const LinearProgressIndicator(),
               error: (_, __) => const Text('Could not read folder'),
-              data: (uri) => Text(
-                uri != null && uri.isNotEmpty ? uri : 'Not configured',
-              ),
+              data: (uri) =>
+                  Text(uri != null && uri.isNotEmpty ? uri : 'Not configured'),
             ),
           ),
           Padding(

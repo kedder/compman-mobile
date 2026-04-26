@@ -15,8 +15,7 @@ const _classesFixtureHtml = '''
 </body></html>
 ''';
 
-const _noTableHtml =
-    '<html><body><p>No results yet</p></body></html>';
+const _noTableHtml = '<html><body><p>No results yet</p></body></html>';
 
 void main() {
   late MockDio mockDio;
@@ -29,70 +28,82 @@ void main() {
 
   group('fetchClasses', () {
     test('parses two class names from valid fixture HTML', () async {
-      when(mockDio.get<String>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-      )).thenAnswer(
+      when(
+        mockDio.get<String>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+        ),
+      ).thenAnswer(
         (_) async => Response<String>(
           data: _classesFixtureHtml,
           statusCode: 200,
           requestOptions: RequestOptions(
-              path: 'https://www.soaringspot.com/en_gb/barron-2024/results'),
+            path: 'https://www.soaringspot.com/en_gb/barron-2024/results',
+          ),
         ),
       );
 
-      final result = await dataSource
-          .fetchClasses('https://www.soaringspot.com/en_gb/barron-2024/');
+      final result = await dataSource.fetchClasses(
+        'https://www.soaringspot.com/en_gb/barron-2024/',
+      );
 
       expect(result, ['Standard', 'Club']);
     });
 
     test('returns empty list when result-overview table is absent', () async {
-      when(mockDio.get<String>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-      )).thenAnswer(
+      when(
+        mockDio.get<String>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+        ),
+      ).thenAnswer(
         (_) async => Response<String>(
           data: _noTableHtml,
           statusCode: 200,
           requestOptions: RequestOptions(
-              path: 'https://www.soaringspot.com/en_gb/barron-2024/results'),
+            path: 'https://www.soaringspot.com/en_gb/barron-2024/results',
+          ),
         ),
       );
 
-      final result = await dataSource
-          .fetchClasses('https://www.soaringspot.com/en_gb/barron-2024/');
+      final result = await dataSource.fetchClasses(
+        'https://www.soaringspot.com/en_gb/barron-2024/',
+      );
 
       expect(result, isEmpty);
     });
 
     test('throws ServerException on DioException', () async {
-      when(mockDio.get<String>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-      )).thenThrow(
+      when(
+        mockDio.get<String>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+        ),
+      ).thenThrow(
         DioException(
           requestOptions: RequestOptions(
-              path: 'https://www.soaringspot.com/en_gb/barron-2024/results'),
+            path: 'https://www.soaringspot.com/en_gb/barron-2024/results',
+          ),
           message: 'Connection refused',
         ),
       );
 
       expect(
-        () => dataSource
-            .fetchClasses('https://www.soaringspot.com/en_gb/barron-2024/'),
+        () => dataSource.fetchClasses(
+          'https://www.soaringspot.com/en_gb/barron-2024/',
+        ),
         throwsA(isA<ServerException>()),
       );
     });

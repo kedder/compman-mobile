@@ -12,7 +12,8 @@ part of 'task_info.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$TaskInfo {
@@ -35,13 +36,14 @@ abstract class $TaskInfoCopyWith<$Res> {
   factory $TaskInfoCopyWith(TaskInfo value, $Res Function(TaskInfo) then) =
       _$TaskInfoCopyWithImpl<$Res, TaskInfo>;
   @useResult
-  $Res call(
-      {String compClass,
-      String title,
-      int dayNo,
-      int taskNo,
-      String timestamp,
-      String taskUrl});
+  $Res call({
+    String compClass,
+    String title,
+    int dayNo,
+    int taskNo,
+    String timestamp,
+    String taskUrl,
+  });
 }
 
 /// @nodoc
@@ -66,32 +68,35 @@ class _$TaskInfoCopyWithImpl<$Res, $Val extends TaskInfo>
     Object? timestamp = null,
     Object? taskUrl = null,
   }) {
-    return _then(_value.copyWith(
-      compClass: null == compClass
-          ? _value.compClass
-          : compClass // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      dayNo: null == dayNo
-          ? _value.dayNo
-          : dayNo // ignore: cast_nullable_to_non_nullable
-              as int,
-      taskNo: null == taskNo
-          ? _value.taskNo
-          : taskNo // ignore: cast_nullable_to_non_nullable
-              as int,
-      timestamp: null == timestamp
-          ? _value.timestamp
-          : timestamp // ignore: cast_nullable_to_non_nullable
-              as String,
-      taskUrl: null == taskUrl
-          ? _value.taskUrl
-          : taskUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            compClass: null == compClass
+                ? _value.compClass
+                : compClass // ignore: cast_nullable_to_non_nullable
+                      as String,
+            title: null == title
+                ? _value.title
+                : title // ignore: cast_nullable_to_non_nullable
+                      as String,
+            dayNo: null == dayNo
+                ? _value.dayNo
+                : dayNo // ignore: cast_nullable_to_non_nullable
+                      as int,
+            taskNo: null == taskNo
+                ? _value.taskNo
+                : taskNo // ignore: cast_nullable_to_non_nullable
+                      as int,
+            timestamp: null == timestamp
+                ? _value.timestamp
+                : timestamp // ignore: cast_nullable_to_non_nullable
+                      as String,
+            taskUrl: null == taskUrl
+                ? _value.taskUrl
+                : taskUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -99,17 +104,19 @@ class _$TaskInfoCopyWithImpl<$Res, $Val extends TaskInfo>
 abstract class _$$TaskInfoImplCopyWith<$Res>
     implements $TaskInfoCopyWith<$Res> {
   factory _$$TaskInfoImplCopyWith(
-          _$TaskInfoImpl value, $Res Function(_$TaskInfoImpl) then) =
-      __$$TaskInfoImplCopyWithImpl<$Res>;
+    _$TaskInfoImpl value,
+    $Res Function(_$TaskInfoImpl) then,
+  ) = __$$TaskInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String compClass,
-      String title,
-      int dayNo,
-      int taskNo,
-      String timestamp,
-      String taskUrl});
+  $Res call({
+    String compClass,
+    String title,
+    int dayNo,
+    int taskNo,
+    String timestamp,
+    String taskUrl,
+  });
 }
 
 /// @nodoc
@@ -117,8 +124,9 @@ class __$$TaskInfoImplCopyWithImpl<$Res>
     extends _$TaskInfoCopyWithImpl<$Res, _$TaskInfoImpl>
     implements _$$TaskInfoImplCopyWith<$Res> {
   __$$TaskInfoImplCopyWithImpl(
-      _$TaskInfoImpl _value, $Res Function(_$TaskInfoImpl) _then)
-      : super(_value, _then);
+    _$TaskInfoImpl _value,
+    $Res Function(_$TaskInfoImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of TaskInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -132,45 +140,48 @@ class __$$TaskInfoImplCopyWithImpl<$Res>
     Object? timestamp = null,
     Object? taskUrl = null,
   }) {
-    return _then(_$TaskInfoImpl(
-      compClass: null == compClass
-          ? _value.compClass
-          : compClass // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      dayNo: null == dayNo
-          ? _value.dayNo
-          : dayNo // ignore: cast_nullable_to_non_nullable
-              as int,
-      taskNo: null == taskNo
-          ? _value.taskNo
-          : taskNo // ignore: cast_nullable_to_non_nullable
-              as int,
-      timestamp: null == timestamp
-          ? _value.timestamp
-          : timestamp // ignore: cast_nullable_to_non_nullable
-              as String,
-      taskUrl: null == taskUrl
-          ? _value.taskUrl
-          : taskUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      _$TaskInfoImpl(
+        compClass: null == compClass
+            ? _value.compClass
+            : compClass // ignore: cast_nullable_to_non_nullable
+                  as String,
+        title: null == title
+            ? _value.title
+            : title // ignore: cast_nullable_to_non_nullable
+                  as String,
+        dayNo: null == dayNo
+            ? _value.dayNo
+            : dayNo // ignore: cast_nullable_to_non_nullable
+                  as int,
+        taskNo: null == taskNo
+            ? _value.taskNo
+            : taskNo // ignore: cast_nullable_to_non_nullable
+                  as int,
+        timestamp: null == timestamp
+            ? _value.timestamp
+            : timestamp // ignore: cast_nullable_to_non_nullable
+                  as String,
+        taskUrl: null == taskUrl
+            ? _value.taskUrl
+            : taskUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$TaskInfoImpl implements _TaskInfo {
-  const _$TaskInfoImpl(
-      {required this.compClass,
-      required this.title,
-      required this.dayNo,
-      required this.taskNo,
-      required this.timestamp,
-      required this.taskUrl});
+  const _$TaskInfoImpl({
+    required this.compClass,
+    required this.title,
+    required this.dayNo,
+    required this.taskNo,
+    required this.timestamp,
+    required this.taskUrl,
+  });
 
   @override
   final String compClass;
@@ -207,7 +218,14 @@ class _$TaskInfoImpl implements _TaskInfo {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, compClass, title, dayNo, taskNo, timestamp, taskUrl);
+    runtimeType,
+    compClass,
+    title,
+    dayNo,
+    taskNo,
+    timestamp,
+    taskUrl,
+  );
 
   /// Create a copy of TaskInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -219,13 +237,14 @@ class _$TaskInfoImpl implements _TaskInfo {
 }
 
 abstract class _TaskInfo implements TaskInfo {
-  const factory _TaskInfo(
-      {required final String compClass,
-      required final String title,
-      required final int dayNo,
-      required final int taskNo,
-      required final String timestamp,
-      required final String taskUrl}) = _$TaskInfoImpl;
+  const factory _TaskInfo({
+    required final String compClass,
+    required final String title,
+    required final int dayNo,
+    required final int taskNo,
+    required final String timestamp,
+    required final String taskUrl,
+  }) = _$TaskInfoImpl;
 
   @override
   String get compClass;

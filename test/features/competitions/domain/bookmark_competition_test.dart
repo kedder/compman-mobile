@@ -25,8 +25,9 @@ void main() {
   );
 
   test('delegates to repository and returns unit on success', () async {
-    when(mockRepository.bookmarkCompetition(tCompetition))
-        .thenAnswer((_) async => const Right(unit));
+    when(
+      mockRepository.bookmarkCompetition(tCompetition),
+    ).thenAnswer((_) async => const Right(unit));
 
     final result = await useCase(tCompetition);
 
@@ -37,8 +38,9 @@ void main() {
 
   test('delegates to repository and returns its failure unchanged', () async {
     const failure = Failure.storage('write error');
-    when(mockRepository.bookmarkCompetition(tCompetition))
-        .thenAnswer((_) async => const Left(failure));
+    when(
+      mockRepository.bookmarkCompetition(tCompetition),
+    ).thenAnswer((_) async => const Left(failure));
 
     final result = await useCase(tCompetition);
 

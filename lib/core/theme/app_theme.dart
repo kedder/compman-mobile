@@ -89,8 +89,11 @@ class AppColors extends ThemeExtension<AppColors> {
       badgePast: Color.lerp(badgePast, other.badgePast, t)!,
       badgeNew: Color.lerp(badgeNew, other.badgeNew, t)!,
       badgeLiveText: Color.lerp(badgeLiveText, other.badgeLiveText, t)!,
-      badgeUpcomingText:
-          Color.lerp(badgeUpcomingText, other.badgeUpcomingText, t)!,
+      badgeUpcomingText: Color.lerp(
+        badgeUpcomingText,
+        other.badgeUpcomingText,
+        t,
+      )!,
       badgePastText: Color.lerp(badgePastText, other.badgePastText, t)!,
       badgeNewText: Color.lerp(badgeNewText, other.badgeNewText, t)!,
     );
@@ -132,37 +135,38 @@ abstract final class AppTheme {
   /// Light theme. Used as the app's default theme in [MaterialApp].
   static ThemeData light() {
     const seedColor = Color(0xFF006591);
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: seedColor,
-      onPrimary: Colors.white,
-      primaryContainer: const Color(0xFF0EA5E9),
-      onPrimaryContainer: const Color(0xFF003751),
-      secondary: const Color(0xFF505F76),
-      onSecondary: Colors.white,
-      secondaryContainer: const Color(0xFFD0E1FB),
-      onSecondaryContainer: const Color(0xFF54647A),
-      tertiary: const Color(0xFF5C5F61),
-      onTertiary: Colors.white,
-      tertiaryContainer: const Color(0xFF999C9E),
-      onTertiaryContainer: const Color(0xFF303436),
-      error: const Color(0xFFBA1A1A),
-      onError: Colors.white,
-      errorContainer: const Color(0xFFFFDAD6),
-      onErrorContainer: const Color(0xFF93000A),
-      surface: const Color(0xFFF9F9FF),
-      onSurface: const Color(0xFF111C2D),
-      onSurfaceVariant: const Color(0xFF3E4850),
-      outline: const Color(0xFF6E7881),
-      outlineVariant: const Color(0xFFBEC8D2),
-      surfaceContainerLowest: Colors.white,
-      surfaceContainerLow: const Color(0xFFF0F3FF),
-      surfaceContainer: const Color(0xFFE7EEFF),
-      surfaceContainerHigh: const Color(0xFFDEE8FF),
-      surfaceContainerHighest: const Color(0xFFD8E3FB),
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: seedColor,
+          onPrimary: Colors.white,
+          primaryContainer: const Color(0xFF0EA5E9),
+          onPrimaryContainer: const Color(0xFF003751),
+          secondary: const Color(0xFF505F76),
+          onSecondary: Colors.white,
+          secondaryContainer: const Color(0xFFD0E1FB),
+          onSecondaryContainer: const Color(0xFF54647A),
+          tertiary: const Color(0xFF5C5F61),
+          onTertiary: Colors.white,
+          tertiaryContainer: const Color(0xFF999C9E),
+          onTertiaryContainer: const Color(0xFF303436),
+          error: const Color(0xFFBA1A1A),
+          onError: Colors.white,
+          errorContainer: const Color(0xFFFFDAD6),
+          onErrorContainer: const Color(0xFF93000A),
+          surface: const Color(0xFFF9F9FF),
+          onSurface: const Color(0xFF111C2D),
+          onSurfaceVariant: const Color(0xFF3E4850),
+          outline: const Color(0xFF6E7881),
+          outlineVariant: const Color(0xFFBEC8D2),
+          surfaceContainerLowest: Colors.white,
+          surfaceContainerLow: const Color(0xFFF0F3FF),
+          surfaceContainer: const Color(0xFFE7EEFF),
+          surfaceContainerHigh: const Color(0xFFDEE8FF),
+          surfaceContainerHighest: const Color(0xFFD8E3FB),
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -174,9 +178,7 @@ abstract final class AppTheme {
         foregroundColor: Color(0xFF111C2D),
         elevation: 0,
         scrolledUnderElevation: 0,
-        shape: Border(
-          bottom: BorderSide(color: Color(0xFFBEC8D2)),
-        ),
+        shape: Border(bottom: BorderSide(color: Color(0xFFBEC8D2))),
       ),
       cardTheme: const CardThemeData(
         elevation: 0,
@@ -194,28 +196,19 @@ abstract final class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          textStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(fontSize: 16),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           textStyle: const TextStyle(fontSize: 16),
         ),
       ),

@@ -18,22 +18,26 @@ void main() {
 
   const tCompetitionId = 'barron-2024';
 
-  test('returns Right(["Standard", "Club"]) when repository succeeds',
-      () async {
-    when(mockRepository.fetchCompetitionClasses(tCompetitionId))
-        .thenAnswer((_) async => const Right(['Standard', 'Club']));
+  test(
+    'returns Right(["Standard", "Club"]) when repository succeeds',
+    () async {
+      when(
+        mockRepository.fetchCompetitionClasses(tCompetitionId),
+      ).thenAnswer((_) async => const Right(['Standard', 'Club']));
 
-    final result = await useCase(tCompetitionId);
+      final result = await useCase(tCompetitionId);
 
-    expect(result, const Right(['Standard', 'Club']));
-    verify(mockRepository.fetchCompetitionClasses(tCompetitionId));
-    verifyNoMoreInteractions(mockRepository);
-  });
+      expect(result, const Right(['Standard', 'Club']));
+      verify(mockRepository.fetchCompetitionClasses(tCompetitionId));
+      verifyNoMoreInteractions(mockRepository);
+    },
+  );
 
   test('returns Left(NetworkFailure) when repository fails', () async {
     const failure = Failure.network('connection refused');
-    when(mockRepository.fetchCompetitionClasses(tCompetitionId))
-        .thenAnswer((_) async => const Left(failure));
+    when(
+      mockRepository.fetchCompetitionClasses(tCompetitionId),
+    ).thenAnswer((_) async => const Left(failure));
 
     final result = await useCase(tCompetitionId);
 

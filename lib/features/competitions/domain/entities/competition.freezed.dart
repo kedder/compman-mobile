@@ -12,7 +12,8 @@ part of 'competition.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$Competition {
@@ -31,8 +32,9 @@ mixin _$Competition {
 /// @nodoc
 abstract class $CompetitionCopyWith<$Res> {
   factory $CompetitionCopyWith(
-          Competition value, $Res Function(Competition) then) =
-      _$CompetitionCopyWithImpl<$Res, Competition>;
+    Competition value,
+    $Res Function(Competition) then,
+  ) = _$CompetitionCopyWithImpl<$Res, Competition>;
   @useResult
   $Res call({String id, String title, String url, String description});
 }
@@ -57,24 +59,27 @@ class _$CompetitionCopyWithImpl<$Res, $Val extends Competition>
     Object? url = null,
     Object? description = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      url: null == url
-          ? _value.url
-          : url // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            title: null == title
+                ? _value.title
+                : title // ignore: cast_nullable_to_non_nullable
+                      as String,
+            url: null == url
+                ? _value.url
+                : url // ignore: cast_nullable_to_non_nullable
+                      as String,
+            description: null == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -82,8 +87,9 @@ class _$CompetitionCopyWithImpl<$Res, $Val extends Competition>
 abstract class _$$CompetitionImplCopyWith<$Res>
     implements $CompetitionCopyWith<$Res> {
   factory _$$CompetitionImplCopyWith(
-          _$CompetitionImpl value, $Res Function(_$CompetitionImpl) then) =
-      __$$CompetitionImplCopyWithImpl<$Res>;
+    _$CompetitionImpl value,
+    $Res Function(_$CompetitionImpl) then,
+  ) = __$$CompetitionImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String id, String title, String url, String description});
@@ -94,8 +100,9 @@ class __$$CompetitionImplCopyWithImpl<$Res>
     extends _$CompetitionCopyWithImpl<$Res, _$CompetitionImpl>
     implements _$$CompetitionImplCopyWith<$Res> {
   __$$CompetitionImplCopyWithImpl(
-      _$CompetitionImpl _value, $Res Function(_$CompetitionImpl) _then)
-      : super(_value, _then);
+    _$CompetitionImpl _value,
+    $Res Function(_$CompetitionImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Competition
   /// with the given fields replaced by the non-null parameter values.
@@ -107,35 +114,38 @@ class __$$CompetitionImplCopyWithImpl<$Res>
     Object? url = null,
     Object? description = null,
   }) {
-    return _then(_$CompetitionImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      url: null == url
-          ? _value.url
-          : url // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: null == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+    return _then(
+      _$CompetitionImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        title: null == title
+            ? _value.title
+            : title // ignore: cast_nullable_to_non_nullable
+                  as String,
+        url: null == url
+            ? _value.url
+            : url // ignore: cast_nullable_to_non_nullable
+                  as String,
+        description: null == description
+            ? _value.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$CompetitionImpl implements _Competition {
-  const _$CompetitionImpl(
-      {required this.id,
-      required this.title,
-      required this.url,
-      required this.description});
+  const _$CompetitionImpl({
+    required this.id,
+    required this.title,
+    required this.url,
+    required this.description,
+  });
 
   @override
   final String id;
@@ -176,11 +186,12 @@ class _$CompetitionImpl implements _Competition {
 }
 
 abstract class _Competition implements Competition {
-  const factory _Competition(
-      {required final String id,
-      required final String title,
-      required final String url,
-      required final String description}) = _$CompetitionImpl;
+  const factory _Competition({
+    required final String id,
+    required final String title,
+    required final String url,
+    required final String description,
+  }) = _$CompetitionImpl;
 
   @override
   String get id;

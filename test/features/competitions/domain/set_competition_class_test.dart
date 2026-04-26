@@ -17,21 +17,25 @@ void main() {
   });
 
   group('SetCompetitionClass', () {
-    test('sets class: delegates to repository and returns unit on success',
-        () async {
-      when(mockRepository.setCompetitionClass('comp-id', 'Club'))
-          .thenAnswer((_) async => const Right(unit));
+    test(
+      'sets class: delegates to repository and returns unit on success',
+      () async {
+        when(
+          mockRepository.setCompetitionClass('comp-id', 'Club'),
+        ).thenAnswer((_) async => const Right(unit));
 
-      final result = await useCase('comp-id', 'Club');
+        final result = await useCase('comp-id', 'Club');
 
-      expect(result, const Right(unit));
-      verify(mockRepository.setCompetitionClass('comp-id', 'Club'));
-      verifyNoMoreInteractions(mockRepository);
-    });
+        expect(result, const Right(unit));
+        verify(mockRepository.setCompetitionClass('comp-id', 'Club'));
+        verifyNoMoreInteractions(mockRepository);
+      },
+    );
 
     test('clears class: delegates with null selectedClass', () async {
-      when(mockRepository.setCompetitionClass('comp-id', null))
-          .thenAnswer((_) async => const Right(unit));
+      when(
+        mockRepository.setCompetitionClass('comp-id', null),
+      ).thenAnswer((_) async => const Right(unit));
 
       final result = await useCase('comp-id', null);
 
@@ -42,8 +46,9 @@ void main() {
 
     test('propagates Left(StorageFailure) from repository', () async {
       const failure = Failure.storage('Competition not found');
-      when(mockRepository.setCompetitionClass('comp-id', 'Club'))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        mockRepository.setCompetitionClass('comp-id', 'Club'),
+      ).thenAnswer((_) async => const Left(failure));
 
       final result = await useCase('comp-id', 'Club');
 

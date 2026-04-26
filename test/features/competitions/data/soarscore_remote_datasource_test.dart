@@ -17,10 +17,12 @@ void main() {
   late String noTasksHtml;
 
   setUpAll(() {
-    twoClassesHtml =
-        File('test/fixtures/soarscore_competition.html').readAsStringSync();
-    noTasksHtml =
-        File('test/fixtures/soarscore_no_tasks.html').readAsStringSync();
+    twoClassesHtml = File(
+      'test/fixtures/soarscore_competition.html',
+    ).readAsStringSync();
+    noTasksHtml = File(
+      'test/fixtures/soarscore_no_tasks.html',
+    ).readAsStringSync();
   });
 
   setUp(() {
@@ -33,14 +35,16 @@ void main() {
   const tUrl = 'https://soarscore.com/competitions/$tCompetitionId/';
 
   void mockGet(String html, {int statusCode = 200}) {
-    when(mockDio.get<String>(
-      any,
-      data: anyNamed('data'),
-      queryParameters: anyNamed('queryParameters'),
-      options: anyNamed('options'),
-      cancelToken: anyNamed('cancelToken'),
-      onReceiveProgress: anyNamed('onReceiveProgress'),
-    )).thenAnswer(
+    when(
+      mockDio.get<String>(
+        any,
+        data: anyNamed('data'),
+        queryParameters: anyNamed('queryParameters'),
+        options: anyNamed('options'),
+        cancelToken: anyNamed('cancelToken'),
+        onReceiveProgress: anyNamed('onReceiveProgress'),
+      ),
+    ).thenAnswer(
       (_) async => Response<String>(
         data: html,
         statusCode: statusCode,
@@ -77,14 +81,16 @@ void main() {
     });
 
     test('throws ServerException on DioException', () async {
-      when(mockDio.get<String>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-      )).thenThrow(
+      when(
+        mockDio.get<String>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+        ),
+      ).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: tUrl),
           message: 'Connection refused',
@@ -113,14 +119,16 @@ void main() {
     final tBytes = Uint8List.fromList([0x3C, 0x3F, 0x78, 0x6D, 0x6C]);
 
     test('returns bytes on success', () async {
-      when(mockDio.get<List<int>>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-      )).thenAnswer(
+      when(
+        mockDio.get<List<int>>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+        ),
+      ).thenAnswer(
         (_) async => Response<List<int>>(
           data: tBytes,
           statusCode: 200,
@@ -134,14 +142,16 @@ void main() {
     });
 
     test('throws ServerException on DioException', () async {
-      when(mockDio.get<List<int>>(
-        any,
-        data: anyNamed('data'),
-        queryParameters: anyNamed('queryParameters'),
-        options: anyNamed('options'),
-        cancelToken: anyNamed('cancelToken'),
-        onReceiveProgress: anyNamed('onReceiveProgress'),
-      )).thenThrow(
+      when(
+        mockDio.get<List<int>>(
+          any,
+          data: anyNamed('data'),
+          queryParameters: anyNamed('queryParameters'),
+          options: anyNamed('options'),
+          cancelToken: anyNamed('cancelToken'),
+          onReceiveProgress: anyNamed('onReceiveProgress'),
+        ),
+      ).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: tTaskUrl),
           message: 'timeout',

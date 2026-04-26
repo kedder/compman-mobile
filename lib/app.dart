@@ -24,24 +24,17 @@ class CompmanApp extends StatelessWidget {
 
 final _router = GoRouter(
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const BookmarksScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const BookmarksScreen()),
     GoRoute(
       path: '/add',
       builder: (context, state) => const CompetitionListScreen(),
     ),
     GoRoute(
       path: '/competitions/:id',
-      builder: (context, state) => CompetitionDetailScreen(
-        competitionId: state.pathParameters['id']!,
-      ),
+      builder: (context, state) =>
+          CompetitionDetailScreen(competitionId: state.pathParameters['id']!),
     ),
-    GoRoute(
-      path: '/about',
-      builder: (context, state) => const _AboutScreen(),
-    ),
+    GoRoute(path: '/about', builder: (context, state) => const _AboutScreen()),
     GoRoute(
       path: '/settings/xcsoar-directory',
       builder: (context, state) => const XcsoarDirectorySettingsScreen(),

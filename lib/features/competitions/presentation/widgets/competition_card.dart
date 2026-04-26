@@ -58,9 +58,7 @@ class CompetitionCard extends StatelessWidget {
               children: [
                 Icon(
                   isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.outline,
+                  color: isSelected ? colorScheme.primary : colorScheme.outline,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
@@ -119,9 +117,9 @@ class _StatusBadge extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.bold,
-            ),
+          color: foreground,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

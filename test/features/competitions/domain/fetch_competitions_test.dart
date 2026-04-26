@@ -27,8 +27,9 @@ void main() {
   ];
 
   test('delegates to repository and returns its result on success', () async {
-    when(mockRepository.fetchCompetitions())
-        .thenAnswer((_) async => Right(tCompetitions));
+    when(
+      mockRepository.fetchCompetitions(),
+    ).thenAnswer((_) async => Right(tCompetitions));
 
     final result = await useCase();
 
@@ -39,8 +40,9 @@ void main() {
 
   test('delegates to repository and returns its failure unchanged', () async {
     const failure = Failure.network('no connection');
-    when(mockRepository.fetchCompetitions())
-        .thenAnswer((_) async => const Left(failure));
+    when(
+      mockRepository.fetchCompetitions(),
+    ).thenAnswer((_) async => const Left(failure));
 
     final result = await useCase();
 

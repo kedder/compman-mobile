@@ -46,23 +46,20 @@ class MockSoaringSpotRemoteDataSource extends _i1.Mock
   @override
   _i3.Future<List<_i4.CompetitionModel>> fetchCompetitions() =>
       (super.noSuchMethod(
-        Invocation.method(
-          #fetchCompetitions,
-          [],
-        ),
-        returnValue: _i3.Future<List<_i4.CompetitionModel>>.value(
-            <_i4.CompetitionModel>[]),
-      ) as _i3.Future<List<_i4.CompetitionModel>>);
+            Invocation.method(#fetchCompetitions, []),
+            returnValue: _i3.Future<List<_i4.CompetitionModel>>.value(
+              <_i4.CompetitionModel>[],
+            ),
+          )
+          as _i3.Future<List<_i4.CompetitionModel>>);
 
   @override
   _i3.Future<List<String>> fetchClasses(String? competitionUrl) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #fetchClasses,
-          [competitionUrl],
-        ),
-        returnValue: _i3.Future<List<String>>.value(<String>[]),
-      ) as _i3.Future<List<String>>);
+            Invocation.method(#fetchClasses, [competitionUrl]),
+            returnValue: _i3.Future<List<String>>.value(<String>[]),
+          )
+          as _i3.Future<List<String>>);
 }
 
 /// A class which mocks [CompetitionsLocalDataSource].
@@ -77,44 +74,38 @@ class MockCompetitionsLocalDataSource extends _i1.Mock
   @override
   _i3.Future<List<_i6.BookmarkedCompetitionModel>> getAll() =>
       (super.noSuchMethod(
-        Invocation.method(
-          #getAll,
-          [],
-        ),
-        returnValue: _i3.Future<List<_i6.BookmarkedCompetitionModel>>.value(
-            <_i6.BookmarkedCompetitionModel>[]),
-      ) as _i3.Future<List<_i6.BookmarkedCompetitionModel>>);
+            Invocation.method(#getAll, []),
+            returnValue: _i3.Future<List<_i6.BookmarkedCompetitionModel>>.value(
+              <_i6.BookmarkedCompetitionModel>[],
+            ),
+          )
+          as _i3.Future<List<_i6.BookmarkedCompetitionModel>>);
 
   @override
   _i3.Future<_i6.BookmarkedCompetitionModel?> getById(String? id) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #getById,
-          [id],
-        ),
-        returnValue: _i3.Future<_i6.BookmarkedCompetitionModel?>.value(),
-      ) as _i3.Future<_i6.BookmarkedCompetitionModel?>);
+            Invocation.method(#getById, [id]),
+            returnValue: _i3.Future<_i6.BookmarkedCompetitionModel?>.value(),
+          )
+          as _i3.Future<_i6.BookmarkedCompetitionModel?>);
 
   @override
   _i3.Future<void> save(_i6.BookmarkedCompetitionModel? model) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #save,
-          [model],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+            Invocation.method(#save, [model]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 
   @override
-  _i3.Future<void> delete(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #delete,
-          [id],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+  _i3.Future<void> delete(String? id) =>
+      (super.noSuchMethod(
+            Invocation.method(#delete, [id]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }
 
 /// A class which mocks [SoarScoreRemoteDataSource].
@@ -129,20 +120,16 @@ class MockSoarScoreRemoteDataSource extends _i1.Mock
   @override
   _i3.Future<List<_i8.TaskInfo>> fetchLatestTasks(String? competitionId) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #fetchLatestTasks,
-          [competitionId],
-        ),
-        returnValue: _i3.Future<List<_i8.TaskInfo>>.value(<_i8.TaskInfo>[]),
-      ) as _i3.Future<List<_i8.TaskInfo>>);
+            Invocation.method(#fetchLatestTasks, [competitionId]),
+            returnValue: _i3.Future<List<_i8.TaskInfo>>.value(<_i8.TaskInfo>[]),
+          )
+          as _i3.Future<List<_i8.TaskInfo>>);
 
   @override
   _i3.Future<_i9.Uint8List> downloadTask(String? taskUrl) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #downloadTask,
-          [taskUrl],
-        ),
-        returnValue: _i3.Future<_i9.Uint8List>.value(_i9.Uint8List(0)),
-      ) as _i3.Future<_i9.Uint8List>);
+            Invocation.method(#downloadTask, [taskUrl]),
+            returnValue: _i3.Future<_i9.Uint8List>.value(_i9.Uint8List(0)),
+          )
+          as _i3.Future<_i9.Uint8List>);
 }

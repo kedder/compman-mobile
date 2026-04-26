@@ -12,8 +12,9 @@ void main() {
   late Document document;
 
   setUpAll(() {
-    fixtureHtml =
-        File('test/fixtures/soaringspot_home.html').readAsStringSync();
+    fixtureHtml = File(
+      'test/fixtures/soaringspot_home.html',
+    ).readAsStringSync();
     document = html_parser.parse(fixtureHtml);
   });
 
@@ -44,17 +45,20 @@ void main() {
       expect(model.url, startsWith('https://www.soaringspot.com'));
     });
 
-    test('description has no leading/trailing whitespace or consecutive spaces',
-        () {
-      final element = document.querySelector('.contest')!;
-      final model = CompetitionModel.fromElement(element)!;
-      expect(model.description, equals(model.description.trim()));
-      expect(model.description, isNot(contains('  ')));
-    });
+    test(
+      'description has no leading/trailing whitespace or consecutive spaces',
+      () {
+        final element = document.querySelector('.contest')!;
+        final model = CompetitionModel.fromElement(element)!;
+        expect(model.description, equals(model.description.trim()));
+        expect(model.description, isNot(contains('  ')));
+      },
+    );
 
     test('returns null for malformed element with no <h3><a>', () {
-      final malformed =
-          Element.html('<div class="contest"><p>No anchor</p></div>');
+      final malformed = Element.html(
+        '<div class="contest"><p>No anchor</p></div>',
+      );
       final result = CompetitionModel.fromElement(malformed);
       expect(result, isNull);
     });

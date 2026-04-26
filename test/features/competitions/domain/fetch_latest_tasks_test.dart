@@ -30,28 +30,34 @@ void main() {
     ),
   ];
 
-  test('delegates to repository and returns Right(List<TaskInfo>) on success',
-      () async {
-    when(mockRepository.fetchLatestTasks(tCompetitionId))
-        .thenAnswer((_) async => const Right(tTasks));
+  test(
+    'delegates to repository and returns Right(List<TaskInfo>) on success',
+    () async {
+      when(
+        mockRepository.fetchLatestTasks(tCompetitionId),
+      ).thenAnswer((_) async => const Right(tTasks));
 
-    final result = await useCase(tCompetitionId);
+      final result = await useCase(tCompetitionId);
 
-    expect(result, const Right(tTasks));
-    verify(mockRepository.fetchLatestTasks(tCompetitionId));
-    verifyNoMoreInteractions(mockRepository);
-  });
+      expect(result, const Right(tTasks));
+      verify(mockRepository.fetchLatestTasks(tCompetitionId));
+      verifyNoMoreInteractions(mockRepository);
+    },
+  );
 
-  test('delegates to repository and returns Left(NetworkFailure) on failure',
-      () async {
-    const failure = Failure.network('connection refused');
-    when(mockRepository.fetchLatestTasks(tCompetitionId))
-        .thenAnswer((_) async => const Left(failure));
+  test(
+    'delegates to repository and returns Left(NetworkFailure) on failure',
+    () async {
+      const failure = Failure.network('connection refused');
+      when(
+        mockRepository.fetchLatestTasks(tCompetitionId),
+      ).thenAnswer((_) async => const Left(failure));
 
-    final result = await useCase(tCompetitionId);
+      final result = await useCase(tCompetitionId);
 
-    expect(result, const Left(failure));
-    verify(mockRepository.fetchLatestTasks(tCompetitionId));
-    verifyNoMoreInteractions(mockRepository);
-  });
+      expect(result, const Left(failure));
+      verify(mockRepository.fetchLatestTasks(tCompetitionId));
+      verifyNoMoreInteractions(mockRepository);
+    },
+  );
 }

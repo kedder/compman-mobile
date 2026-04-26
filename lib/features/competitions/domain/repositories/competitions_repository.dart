@@ -17,7 +17,7 @@ abstract class CompetitionsRepository {
 
   /// Return all bookmarked competitions from local storage.
   Future<Either<Failure, List<BookmarkedCompetition>>>
-      getBookmarkedCompetitions();
+  getBookmarkedCompetitions();
 
   /// Add [competition] to the user's bookmarks.
   Future<Either<Failure, Unit>> bookmarkCompetition(Competition competition);
@@ -27,7 +27,8 @@ abstract class CompetitionsRepository {
 
   /// Fetch available tasks for a competition from SoarScore.
   Future<Either<Failure, List<TaskInfo>>> fetchLatestTasks(
-      String competitionId);
+    String competitionId,
+  );
 
   /// Download the raw bytes of a `.tsk` file from [taskUrl].
   Future<Either<Failure, Uint8List>> downloadTask(String taskUrl);
@@ -46,5 +47,6 @@ abstract class CompetitionsRepository {
   /// then scrapes the `/results` page for class names.
   /// Returns an empty list (not a failure) if no classes are found.
   Future<Either<Failure, List<String>>> fetchCompetitionClasses(
-      String competitionId);
+    String competitionId,
+  );
 }

@@ -22,28 +22,34 @@ void main() {
       'http://soarscore.com/competitions/celje-cup-2020/club-task5.tsk';
   final tBytes = Uint8List.fromList([0x3C, 0x3F, 0x78, 0x6D, 0x6C]);
 
-  test('delegates to repository and returns Right(Uint8List) on success',
-      () async {
-    when(mockRepository.downloadTask(tTaskUrl))
-        .thenAnswer((_) async => Right(tBytes));
+  test(
+    'delegates to repository and returns Right(Uint8List) on success',
+    () async {
+      when(
+        mockRepository.downloadTask(tTaskUrl),
+      ).thenAnswer((_) async => Right(tBytes));
 
-    final result = await useCase(tTaskUrl);
+      final result = await useCase(tTaskUrl);
 
-    expect(result, Right(tBytes));
-    verify(mockRepository.downloadTask(tTaskUrl));
-    verifyNoMoreInteractions(mockRepository);
-  });
+      expect(result, Right(tBytes));
+      verify(mockRepository.downloadTask(tTaskUrl));
+      verifyNoMoreInteractions(mockRepository);
+    },
+  );
 
-  test('delegates to repository and returns Left(NetworkFailure) on failure',
-      () async {
-    const failure = Failure.network('download failed');
-    when(mockRepository.downloadTask(tTaskUrl))
-        .thenAnswer((_) async => const Left(failure));
+  test(
+    'delegates to repository and returns Left(NetworkFailure) on failure',
+    () async {
+      const failure = Failure.network('download failed');
+      when(
+        mockRepository.downloadTask(tTaskUrl),
+      ).thenAnswer((_) async => const Left(failure));
 
-    final result = await useCase(tTaskUrl);
+      final result = await useCase(tTaskUrl);
 
-    expect(result, const Left(failure));
-    verify(mockRepository.downloadTask(tTaskUrl));
-    verifyNoMoreInteractions(mockRepository);
-  });
+      expect(result, const Left(failure));
+      verify(mockRepository.downloadTask(tTaskUrl));
+      verifyNoMoreInteractions(mockRepository);
+    },
+  );
 }

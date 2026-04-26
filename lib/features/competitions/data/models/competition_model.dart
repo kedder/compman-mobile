@@ -37,9 +37,9 @@ class CompetitionModel {
     final title = anchor.text.trim();
     final href = anchor.attributes['href'] ?? '';
     final url = 'https://www.soaringspot.com$href';
-    final id = Uri.parse(href)
-        .pathSegments
-        .lastWhere((s) => s.isNotEmpty, orElse: () => '');
+    final id = Uri.parse(
+      href,
+    ).pathSegments.lastWhere((s) => s.isNotEmpty, orElse: () => '');
 
     final rawDescription = element.querySelector('.info')?.text ?? '';
     final description = rawDescription.replaceAll(RegExp(r'\s+'), ' ').trim();
@@ -53,10 +53,6 @@ class CompetitionModel {
   }
 
   /// Converts this model to the domain [Competition] entity.
-  Competition toEntity() => Competition(
-        id: id,
-        title: title,
-        url: url,
-        description: description,
-      );
+  Competition toEntity() =>
+      Competition(id: id, title: title, url: url, description: description);
 }

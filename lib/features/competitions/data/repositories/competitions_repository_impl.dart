@@ -49,7 +49,7 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
 
   @override
   Future<Either<Failure, List<BookmarkedCompetition>>>
-      getBookmarkedCompetitions() async {
+  getBookmarkedCompetitions() async {
     try {
       final models = await local.getAll();
       return Right(models.map((m) => m.toEntity()).toList());
@@ -60,7 +60,8 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
 
   @override
   Future<Either<Failure, Unit>> bookmarkCompetition(
-      Competition competition) async {
+    Competition competition,
+  ) async {
     try {
       final model = BookmarkedCompetitionModel(
         id: competition.id,
@@ -87,7 +88,8 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
 
   @override
   Future<Either<Failure, List<TaskInfo>>> fetchLatestTasks(
-      String competitionId) async {
+    String competitionId,
+  ) async {
     try {
       return Right(await soarScore.fetchLatestTasks(competitionId));
     } on ServerException catch (e) {
@@ -130,7 +132,8 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
 
   @override
   Future<Either<Failure, List<String>>> fetchCompetitionClasses(
-      String competitionId) async {
+    String competitionId,
+  ) async {
     try {
       final models = await local.getAll();
       final match = models.where((m) => m.id == competitionId).firstOrNull;

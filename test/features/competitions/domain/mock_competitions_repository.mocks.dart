@@ -44,114 +44,99 @@ class MockCompetitionsRepository extends _i1.Mock
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, List<_i6.Competition>>>
-      fetchCompetitions() => (super.noSuchMethod(
-            Invocation.method(
-              #fetchCompetitions,
-              [],
-            ),
-            returnValue: _i3
-                .Future<_i4.Either<_i5.Failure, List<_i6.Competition>>>.value(
-                _i7.dummyValue<_i4.Either<_i5.Failure, List<_i6.Competition>>>(
-              this,
-              Invocation.method(
-                #fetchCompetitions,
-                [],
-              ),
-            )),
-          ) as _i3.Future<_i4.Either<_i5.Failure, List<_i6.Competition>>>);
+  fetchCompetitions() =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchCompetitions, []),
+            returnValue:
+                _i3.Future<
+                  _i4.Either<_i5.Failure, List<_i6.Competition>>
+                >.value(
+                  _i7.dummyValue<
+                    _i4.Either<_i5.Failure, List<_i6.Competition>>
+                  >(this, Invocation.method(#fetchCompetitions, [])),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, List<_i6.Competition>>>);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, List<_i8.BookmarkedCompetition>>>
-      getBookmarkedCompetitions() => (super.noSuchMethod(
-            Invocation.method(
-              #getBookmarkedCompetitions,
-              [],
-            ),
-            returnValue: _i3.Future<
-                _i4.Either<_i5.Failure,
-                    List<_i8.BookmarkedCompetition>>>.value(_i7.dummyValue<
-                _i4.Either<_i5.Failure, List<_i8.BookmarkedCompetition>>>(
-              this,
-              Invocation.method(
-                #getBookmarkedCompetitions,
-                [],
-              ),
-            )),
-          ) as _i3.Future<
-              _i4.Either<_i5.Failure, List<_i8.BookmarkedCompetition>>>);
+  getBookmarkedCompetitions() =>
+      (super.noSuchMethod(
+            Invocation.method(#getBookmarkedCompetitions, []),
+            returnValue:
+                _i3.Future<
+                  _i4.Either<_i5.Failure, List<_i8.BookmarkedCompetition>>
+                >.value(
+                  _i7.dummyValue<
+                    _i4.Either<_i5.Failure, List<_i8.BookmarkedCompetition>>
+                  >(this, Invocation.method(#getBookmarkedCompetitions, [])),
+                ),
+          )
+          as _i3.Future<
+            _i4.Either<_i5.Failure, List<_i8.BookmarkedCompetition>>
+          >);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>> bookmarkCompetition(
-          _i6.Competition? competition) =>
+    _i6.Competition? competition,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #bookmarkCompetition,
-          [competition],
-        ),
-        returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
-            _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
-          this,
-          Invocation.method(
-            #bookmarkCompetition,
-            [competition],
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
+            Invocation.method(#bookmarkCompetition, [competition]),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
+                this,
+                Invocation.method(#bookmarkCompetition, [competition]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>> removeBookmark(
-          String? competitionId) =>
+    String? competitionId,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #removeBookmark,
-          [competitionId],
-        ),
-        returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
-            _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
-          this,
-          Invocation.method(
-            #removeBookmark,
-            [competitionId],
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
+            Invocation.method(#removeBookmark, [competitionId]),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
+                this,
+                Invocation.method(#removeBookmark, [competitionId]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>> fetchLatestTasks(
-          String? competitionId) =>
+    String? competitionId,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #fetchLatestTasks,
-          [competitionId],
-        ),
-        returnValue:
-            _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>.value(
-                _i7.dummyValue<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>(
-          this,
-          Invocation.method(
-            #fetchLatestTasks,
-            [competitionId],
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>);
+            Invocation.method(#fetchLatestTasks, [competitionId]),
+            returnValue:
+                _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>.value(
+                  _i7.dummyValue<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>(
+                    this,
+                    Invocation.method(#fetchLatestTasks, [competitionId]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, List<_i9.TaskInfo>>>);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>> downloadTask(
-          String? taskUrl) =>
+    String? taskUrl,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #downloadTask,
-          [taskUrl],
-        ),
-        returnValue: _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>.value(
-            _i7.dummyValue<_i4.Either<_i5.Failure, _i10.Uint8List>>(
-          this,
-          Invocation.method(
-            #downloadTask,
-            [taskUrl],
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>);
+            Invocation.method(#downloadTask, [taskUrl]),
+            returnValue:
+                _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>.value(
+                  _i7.dummyValue<_i4.Either<_i5.Failure, _i10.Uint8List>>(
+                    this,
+                    Invocation.method(#downloadTask, [taskUrl]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>> setCompetitionClass(
@@ -159,41 +144,37 @@ class MockCompetitionsRepository extends _i1.Mock
     String? selectedClass,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setCompetitionClass,
-          [
-            competitionId,
-            selectedClass,
-          ],
-        ),
-        returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
-            _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
-          this,
-          Invocation.method(
-            #setCompetitionClass,
-            [
+            Invocation.method(#setCompetitionClass, [
               competitionId,
               selectedClass,
-            ],
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
+            ]),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
+                this,
+                Invocation.method(#setCompetitionClass, [
+                  competitionId,
+                  selectedClass,
+                ]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
 
   @override
   _i3.Future<_i4.Either<_i5.Failure, List<String>>> fetchCompetitionClasses(
-          String? competitionId) =>
+    String? competitionId,
+  ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #fetchCompetitionClasses,
-          [competitionId],
-        ),
-        returnValue: _i3.Future<_i4.Either<_i5.Failure, List<String>>>.value(
-            _i7.dummyValue<_i4.Either<_i5.Failure, List<String>>>(
-          this,
-          Invocation.method(
-            #fetchCompetitionClasses,
-            [competitionId],
-          ),
-        )),
-      ) as _i3.Future<_i4.Either<_i5.Failure, List<String>>>);
+            Invocation.method(#fetchCompetitionClasses, [competitionId]),
+            returnValue:
+                _i3.Future<_i4.Either<_i5.Failure, List<String>>>.value(
+                  _i7.dummyValue<_i4.Either<_i5.Failure, List<String>>>(
+                    this,
+                    Invocation.method(#fetchCompetitionClasses, [
+                      competitionId,
+                    ]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, List<String>>>);
 }

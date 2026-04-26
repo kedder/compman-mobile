@@ -17,6 +17,7 @@ class SetCompetitionClass {
   ///
   /// Pass null for [selectedClass] to clear the selection.
   Future<Either<Failure, Unit>> call(
-          String competitionId, String? selectedClass) =>
-      _repo.setCompetitionClass(competitionId, selectedClass);
+    String competitionId,
+    String? selectedClass,
+  ) => _repo.setCompetitionClass(competitionId, selectedClass);
 }

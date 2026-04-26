@@ -12,7 +12,8 @@ part of 'failures.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$Failure {
@@ -22,45 +23,39 @@ mixin _$Failure {
     required TResult Function(String message) network,
     required TResult Function(String message) parse,
     required TResult Function(String message) storage,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function(String message)? network,
     TResult? Function(String message)? parse,
     TResult? Function(String message)? storage,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function(String message)? network,
     TResult Function(String message)? parse,
     TResult Function(String message)? storage,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(NetworkFailure value) network,
     required TResult Function(ParseFailure value) parse,
     required TResult Function(StorageFailure value) storage,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(NetworkFailure value)? network,
     TResult? Function(ParseFailure value)? parse,
     TResult? Function(StorageFailure value)? storage,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(NetworkFailure value)? network,
     TResult Function(ParseFailure value)? parse,
     TResult Function(StorageFailure value)? storage,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
 
   /// Create a copy of Failure
   /// with the given fields replaced by the non-null parameter values.
@@ -90,24 +85,26 @@ class _$FailureCopyWithImpl<$Res, $Val extends Failure>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_value.copyWith(
-      message: null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+  $Res call({Object? message = null}) {
+    return _then(
+      _value.copyWith(
+            message: null == message
+                ? _value.message
+                : message // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$NetworkFailureImplCopyWith<$Res>
     implements $FailureCopyWith<$Res> {
-  factory _$$NetworkFailureImplCopyWith(_$NetworkFailureImpl value,
-          $Res Function(_$NetworkFailureImpl) then) =
-      __$$NetworkFailureImplCopyWithImpl<$Res>;
+  factory _$$NetworkFailureImplCopyWith(
+    _$NetworkFailureImpl value,
+    $Res Function(_$NetworkFailureImpl) then,
+  ) = __$$NetworkFailureImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String message});
@@ -118,22 +115,23 @@ class __$$NetworkFailureImplCopyWithImpl<$Res>
     extends _$FailureCopyWithImpl<$Res, _$NetworkFailureImpl>
     implements _$$NetworkFailureImplCopyWith<$Res> {
   __$$NetworkFailureImplCopyWithImpl(
-      _$NetworkFailureImpl _value, $Res Function(_$NetworkFailureImpl) _then)
-      : super(_value, _then);
+    _$NetworkFailureImpl _value,
+    $Res Function(_$NetworkFailureImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Failure
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$NetworkFailureImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? message = null}) {
+    return _then(
+      _$NetworkFailureImpl(
+        null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -168,7 +166,9 @@ class _$NetworkFailureImpl implements NetworkFailure {
   @pragma('vm:prefer-inline')
   _$$NetworkFailureImplCopyWith<_$NetworkFailureImpl> get copyWith =>
       __$$NetworkFailureImplCopyWithImpl<_$NetworkFailureImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   @optionalTypeArgs
@@ -257,8 +257,9 @@ abstract class NetworkFailure implements Failure {
 abstract class _$$ParseFailureImplCopyWith<$Res>
     implements $FailureCopyWith<$Res> {
   factory _$$ParseFailureImplCopyWith(
-          _$ParseFailureImpl value, $Res Function(_$ParseFailureImpl) then) =
-      __$$ParseFailureImplCopyWithImpl<$Res>;
+    _$ParseFailureImpl value,
+    $Res Function(_$ParseFailureImpl) then,
+  ) = __$$ParseFailureImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String message});
@@ -269,22 +270,23 @@ class __$$ParseFailureImplCopyWithImpl<$Res>
     extends _$FailureCopyWithImpl<$Res, _$ParseFailureImpl>
     implements _$$ParseFailureImplCopyWith<$Res> {
   __$$ParseFailureImplCopyWithImpl(
-      _$ParseFailureImpl _value, $Res Function(_$ParseFailureImpl) _then)
-      : super(_value, _then);
+    _$ParseFailureImpl _value,
+    $Res Function(_$ParseFailureImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Failure
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$ParseFailureImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? message = null}) {
+    return _then(
+      _$ParseFailureImpl(
+        null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -406,9 +408,10 @@ abstract class ParseFailure implements Failure {
 /// @nodoc
 abstract class _$$StorageFailureImplCopyWith<$Res>
     implements $FailureCopyWith<$Res> {
-  factory _$$StorageFailureImplCopyWith(_$StorageFailureImpl value,
-          $Res Function(_$StorageFailureImpl) then) =
-      __$$StorageFailureImplCopyWithImpl<$Res>;
+  factory _$$StorageFailureImplCopyWith(
+    _$StorageFailureImpl value,
+    $Res Function(_$StorageFailureImpl) then,
+  ) = __$$StorageFailureImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String message});
@@ -419,22 +422,23 @@ class __$$StorageFailureImplCopyWithImpl<$Res>
     extends _$FailureCopyWithImpl<$Res, _$StorageFailureImpl>
     implements _$$StorageFailureImplCopyWith<$Res> {
   __$$StorageFailureImplCopyWithImpl(
-      _$StorageFailureImpl _value, $Res Function(_$StorageFailureImpl) _then)
-      : super(_value, _then);
+    _$StorageFailureImpl _value,
+    $Res Function(_$StorageFailureImpl) _then,
+  ) : super(_value, _then);
 
   /// Create a copy of Failure
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$StorageFailureImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? message = null}) {
+    return _then(
+      _$StorageFailureImpl(
+        null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -469,7 +473,9 @@ class _$StorageFailureImpl implements StorageFailure {
   @pragma('vm:prefer-inline')
   _$$StorageFailureImplCopyWith<_$StorageFailureImpl> get copyWith =>
       __$$StorageFailureImplCopyWithImpl<_$StorageFailureImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   @optionalTypeArgs

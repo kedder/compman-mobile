@@ -27,8 +27,9 @@ void main() {
   ];
 
   test('delegates to repository and returns its result on success', () async {
-    when(mockRepository.getBookmarkedCompetitions())
-        .thenAnswer((_) async => Right(tBookmarks));
+    when(
+      mockRepository.getBookmarkedCompetitions(),
+    ).thenAnswer((_) async => Right(tBookmarks));
 
     final result = await useCase();
 
@@ -39,8 +40,9 @@ void main() {
 
   test('delegates to repository and returns its failure unchanged', () async {
     const failure = Failure.storage('read error');
-    when(mockRepository.getBookmarkedCompetitions())
-        .thenAnswer((_) async => const Left(failure));
+    when(
+      mockRepository.getBookmarkedCompetitions(),
+    ).thenAnswer((_) async => const Left(failure));
 
     final result = await useCase();
 

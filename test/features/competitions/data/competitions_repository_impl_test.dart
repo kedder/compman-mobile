@@ -23,7 +23,10 @@ void main() {
     mockLocal = MockCompetitionsLocalDataSource();
     mockSoarScore = MockSoarScoreRemoteDataSource();
     repository = CompetitionsRepositoryImpl(
-        remote: mockRemote, local: mockLocal, soarScore: mockSoarScore);
+      remote: mockRemote,
+      local: mockLocal,
+      soarScore: mockSoarScore,
+    );
   });
 
   final tCompetitionModel = CompetitionModel(
@@ -56,43 +59,51 @@ void main() {
 
   group('fetchCompetitions', () {
     test('returns Right(List<Competition>) on success', () async {
-      when(mockRemote.fetchCompetitions())
-          .thenAnswer((_) async => [tCompetitionModel]);
+      when(
+        mockRemote.fetchCompetitions(),
+      ).thenAnswer((_) async => [tCompetitionModel]);
 
       final result = await repository.fetchCompetitions();
 
       expect(result.isRight(), isTrue);
-      result.fold(
-        (_) => fail('expected Right'),
-        (competitions) {
-          expect(competitions, hasLength(1));
-          expect(competitions.first, equals(tCompetition));
-        },
-      );
+      result.fold((_) => fail('expected Right'), (competitions) {
+        expect(competitions, hasLength(1));
+        expect(competitions.first, equals(tCompetition));
+      });
     });
 
     test('returns Left(NetworkFailure) on ServerException', () async {
-      when(mockRemote.fetchCompetitions())
-          .thenThrow(const ServerException('connection refused'));
+      when(
+        mockRemote.fetchCompetitions(),
+      ).thenThrow(const ServerException('connection refused'));
 
       final result = await repository.fetchCompetitions();
 
       expect(
-          result,
-          equals(const Left<Failure, List<Competition>>(
-              NetworkFailure('connection refused'))));
+        result,
+        equals(
+          const Left<Failure, List<Competition>>(
+            NetworkFailure('connection refused'),
+          ),
+        ),
+      );
     });
 
     test('returns Left(ParseFailure) on ParseException', () async {
-      when(mockRemote.fetchCompetitions())
-          .thenThrow(const ParseException('unexpected HTML'));
+      when(
+        mockRemote.fetchCompetitions(),
+      ).thenThrow(const ParseException('unexpected HTML'));
 
       final result = await repository.fetchCompetitions();
 
       expect(
-          result,
-          equals(const Left<Failure, List<Competition>>(
-              ParseFailure('unexpected HTML'))));
+        result,
+        equals(
+          const Left<Failure, List<Competition>>(
+            ParseFailure('unexpected HTML'),
+          ),
+        ),
+      );
     });
   });
 
@@ -103,13 +114,10 @@ void main() {
       final result = await repository.getBookmarkedCompetitions();
 
       expect(result.isRight(), isTrue);
-      result.fold(
-        (_) => fail('expected Right'),
-        (bookmarks) {
-          expect(bookmarks, hasLength(1));
-          expect(bookmarks.first, equals(tBookmarkedCompetition));
-        },
-      );
+      result.fold((_) => fail('expected Right'), (bookmarks) {
+        expect(bookmarks, hasLength(1));
+        expect(bookmarks.first, equals(tBookmarkedCompetition));
+      });
     });
 
     test('returns Left(StorageFailure) on exception', () async {
@@ -149,15 +157,17 @@ void main() {
   });
 
   group('removeBookmark', () {
-    test('calls local.delete with correct id and returns Right(unit)',
-        () async {
-      when(mockLocal.delete(any)).thenAnswer((_) async {});
+    test(
+      'calls local.delete with correct id and returns Right(unit)',
+      () async {
+        when(mockLocal.delete(any)).thenAnswer((_) async {});
 
-      final result = await repository.removeBookmark('barron-2024');
+        final result = await repository.removeBookmark('barron-2024');
 
-      expect(result, equals(const Right<Failure, Unit>(unit)));
-      verify(mockLocal.delete('barron-2024')).called(1);
-    });
+        expect(result, equals(const Right<Failure, Unit>(unit)));
+        verify(mockLocal.delete('barron-2024')).called(1);
+      },
+    );
 
     test('returns Left(StorageFailure) on exception', () async {
       when(mockLocal.delete(any)).thenThrow(Exception('delete error'));
@@ -174,12 +184,15 @@ void main() {
 
   group('setCompetitionClass', () {
     test('updates model with new class and returns Right(unit)', () async {
-      when(mockLocal.getById('barron-2024'))
-          .thenAnswer((_) async => tBookmarkedModel);
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
       when(mockLocal.save(any)).thenAnswer((_) async {});
 
-      final result =
-          await repository.setCompetitionClass('barron-2024', 'Club');
+      final result = await repository.setCompetitionClass(
+        'barron-2024',
+        'Club',
+      );
 
       expect(result, equals(const Right<Failure, Unit>(unit)));
       verify(mockLocal.getById('barron-2024')).called(1);
@@ -187,8 +200,9 @@ void main() {
     });
 
     test('clears class when null is passed', () async {
-      when(mockLocal.getById('barron-2024'))
-          .thenAnswer((_) async => tBookmarkedModel);
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
       when(mockLocal.save(any)).thenAnswer((_) async {});
 
       final result = await repository.setCompetitionClass('barron-2024', null);
@@ -202,18 +216,23 @@ void main() {
       final result = await repository.setCompetitionClass('missing', 'Club');
 
       expect(
-          result,
-          equals(const Left<Failure, Unit>(
-              StorageFailure('Competition not found'))));
+        result,
+        equals(
+          const Left<Failure, Unit>(StorageFailure('Competition not found')),
+        ),
+      );
     });
 
     test('returns Left(StorageFailure) on save exception', () async {
-      when(mockLocal.getById('barron-2024'))
-          .thenAnswer((_) async => tBookmarkedModel);
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
       when(mockLocal.save(any)).thenThrow(Exception('disk full'));
 
-      final result =
-          await repository.setCompetitionClass('barron-2024', 'Club');
+      final result = await repository.setCompetitionClass(
+        'barron-2024',
+        'Club',
+      );
 
       expect(result.isLeft(), isTrue);
       result.fold(
@@ -225,28 +244,29 @@ void main() {
 
   group('fetchCompetitionClasses', () {
     test('calls remote.fetchClasses with the correct URL', () async {
-      when(mockLocal.getAll())
-          .thenAnswer((_) async => [tBookmarkedModel]);
-      when(mockRemote.fetchClasses(any))
-          .thenAnswer((_) async => ['Standard', 'Club']);
+      when(mockLocal.getAll()).thenAnswer((_) async => [tBookmarkedModel]);
+      when(
+        mockRemote.fetchClasses(any),
+      ).thenAnswer((_) async => ['Standard', 'Club']);
 
-      final result =
-          await repository.fetchCompetitionClasses('barron-2024');
+      final result = await repository.fetchCompetitionClasses('barron-2024');
 
       expect(result.isRight(), isTrue);
       result.fold(
         (_) => fail('expected Right'),
         (classes) => expect(classes, ['Standard', 'Club']),
       );
-      verify(mockRemote.fetchClasses(
-          'https://www.soaringspot.com/en_gb/barron-2024/'));
+      verify(
+        mockRemote.fetchClasses(
+          'https://www.soaringspot.com/en_gb/barron-2024/',
+        ),
+      );
     });
 
     test('returns Right([]) when competition ID is not bookmarked', () async {
       when(mockLocal.getAll()).thenAnswer((_) async => []);
 
-      final result =
-          await repository.fetchCompetitionClasses('unknown-id');
+      final result = await repository.fetchCompetitionClasses('unknown-id');
 
       expect(result.isRight(), isTrue);
       result.fold(
