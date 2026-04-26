@@ -129,7 +129,8 @@ Operations: `getAll()`, `save(model)`, `delete(id)`.
 - **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Displays day/task number, title, and generation timestamp. "Install as XCSoar Default Task" button calls `DownloadTask` then `XcsoarSafService.writeFile(bytes, 'Default.tsk')`. Shows a green SnackBar on success; if `SAF_NOT_CONFIGURED`, shows a SnackBar with a Settings action button.
 - **XCSoar directory row:** Shows the current SAF directory URI from `XcsoarSafService.getSafDirectoryUri()`, or a "Set up" link to `/settings/xcsoar-directory` if not configured.
 - **Providers used:** `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`.
-- Pull-to-refresh and AppBar refresh icon both invalidate `latestTasksProvider` and `xcsoarDirectoryUriProvider`.
+- Pull-to-refresh awaits `latestTasksProvider` completion (errors are swallowed; child widgets show their own error states). Only `latestTasksProvider` is refreshed — classes and competition details are stable and not re-fetched.
+- AppBar refresh icon invalidates `latestTasksProvider` and replaces itself with a small inline `CircularProgressIndicator` (20×20, strokeWidth 2) while loading; the icon is restored once the provider settles.
 
 ### XCSoar Directory Settings Screen (`/settings/xcsoar-directory`)
 

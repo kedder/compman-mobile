@@ -28,19 +28,32 @@ class CompetitionDetailScreen extends ConsumerWidget {
       competitionDetailProvider(competitionId),
     );
 
+    final isRefreshing =
+        competitionAsync.hasValue &&
+        competitionAsync.value != null &&
+        ref.watch(latestTasksProvider(competitionId)).isLoading;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Competition'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: () {
-              ref.invalidate(latestTasksProvider(competitionId));
-              ref.invalidate(competitionClassesProvider(competitionId));
-              ref.invalidate(xcsoarDirectoryUriProvider);
-            },
-          ),
+          if (isRefreshing)
+            const Padding(
+              padding: EdgeInsets.all(14),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh',
+              onPressed: () {
+                ref.invalidate(latestTasksProvider(competitionId));
+              },
+            ),
         ],
       ),
       body: competitionAsync.when(
@@ -82,8 +95,9 @@ class _CompetitionDetailBody extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(latestTasksProvider(competitionId));
-        ref.invalidate(competitionClassesProvider(competitionId));
-        ref.invalidate(xcsoarDirectoryUriProvider);
+        await ref
+            .read(latestTasksProvider(competitionId).future)
+            .catchError((_) => <TaskInfo>[]);
       },
       child: ListView(
         padding: const EdgeInsets.all(16),
