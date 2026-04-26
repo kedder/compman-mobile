@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../features/competitions/data/datasources/competitions_local_datasource.dart';
 import '../../features/competitions/data/datasources/soarscore_remote_datasource.dart';
@@ -78,4 +79,9 @@ final setCompetitionClassProvider = Provider<SetCompetitionClass>(
 /// Provides a [FetchCompetitionClasses] use case instance.
 final fetchCompetitionClassesProvider = Provider<FetchCompetitionClasses>(
   (ref) => FetchCompetitionClasses(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides the app's [PackageInfo] metadata from the host platform.
+final packageInfoProvider = FutureProvider<PackageInfo>(
+  (ref) => PackageInfo.fromPlatform(),
 );
