@@ -19,10 +19,7 @@ void main() {
         overrides: [
           packageInfoProvider.overrideWith((ref) => completer.future),
         ],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          home: const AboutScreen(),
-        ),
+        child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
       ),
     );
 
@@ -46,10 +43,7 @@ void main() {
             ),
           ),
         ],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          home: const AboutScreen(),
-        ),
+        child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
       ),
     );
     await tester.pump();
@@ -69,10 +63,7 @@ void main() {
             (ref) async => throw Exception('failed'),
           ),
         ],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          home: const AboutScreen(),
-        ),
+        child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
       ),
     );
     await tester.pumpAndSettle();
