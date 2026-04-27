@@ -48,6 +48,7 @@ lib/
 │   ├── network/
 │   │   └── http_client.dart         # Dio instance configuration
 │   ├── platform/                    # MethodChannel service classes (Android/iOS bridges)
+│   ├── widgets/                     # Shared presentation primitives reusable across features
 │   └── theme/
 │       └── app_theme.dart           # AppTheme factory + AppColors ThemeExtension
 │
@@ -103,6 +104,12 @@ All visual tokens live in `lib/core/theme/app_theme.dart`.
 - Hardcoded `Colors.*` values are not permitted in widget code except for transparent / black / white used as modifiers (e.g. shadow alpha).
 - Access `AppColors` via the `BuildContext` extension: `context.appColors`.
 - To add dark mode, add `AppTheme.dark()` in `app_theme.dart` — no widget code will need to change.
+
+## Shared Widgets
+
+Reusable presentation primitives that are not feature-specific live in
+`lib/core/widgets/`. Examples include shared badges, metadata rows, and card
+shells that multiple screens can compose without duplicating visual structure.
 
 ---
 

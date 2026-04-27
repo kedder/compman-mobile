@@ -63,6 +63,7 @@
 
 - ✅ **Centralise app theme** — `lib/core/theme/app_theme.dart` created with `AppTheme.light()` factory and `AppColors` ThemeExtension; all hardcoded colour literals replaced with `colorScheme.*` or `appColors.*` lookups across all presentation files; `CardTheme` elevation 2, `ElevatedButton` bold 16 sp, and `OutlinedButton`/`TextButton` base styles set centrally; `docs/architecture.md` and `docs/ui-guidelines.md` updated
 - ✅ **Design token theme refresh** — aligned `AppTheme.light()` with `docs/design/` tokens: explicit sky-blue `ColorScheme`, Inter via `google_fonts`, per-badge foreground tokens, shared AppBar/Divider themes, and `AppButtonStyles.ghost()`; updated badge guidance in `docs/ui-guidelines.md`
+- ✅ **Shared presentation widgets** — added reusable `AppBadge`, `StatusBadge`, `TwoToneCard`, and `IconMetaRow` primitives with focused widget tests; documented `lib/core/widgets/` in the architecture guide
 
 ### Tests
 - ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository

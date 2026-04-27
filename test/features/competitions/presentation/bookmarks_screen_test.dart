@@ -110,7 +110,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Your Competitions'), findsOneWidget);
+    expect(find.text('Your competitions'), findsOneWidget);
     expect(find.text('Competition One'), findsOneWidget);
     expect(find.text('Competition Two'), findsOneWidget);
     expect(find.byType(StatusBadge), findsNWidgets(2));
