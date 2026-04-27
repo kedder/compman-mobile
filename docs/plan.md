@@ -52,7 +52,7 @@
 
 ### Presentation Layer (`lib/features/competitions/presentation/`)
 - ✅ **Riverpod providers** — `competitionListProvider` (AsyncNotifier), `bookmarkedCompetitionsProvider` (AsyncNotifier); both await Hive box before accessing repository
-- ✅ **Competition List Screen** — search bar, checkbox multi-select via `CompetitionCard` widget, pre-populated from existing bookmarks, footer Back/Done actions
+- ✅ **Competition List Screen** — redesigned Add Competition flow with body search pill, flat checkbox rows via `CompetitionCard`, inline status badges, AppBar Done action, and pre-populated selections from existing bookmarks
 - ✅ **My Competitions Screen** — pull-to-refresh, empty/loading/error states, title + bookmarked date cards, remove with confirmation dialog
 - ✅ **Home screen redesign** — `BookmarksScreen` now matches the refreshed "Your Competitions" design with a centered empty-state CTA, flat rows with inline `StatusBadge`, long-press remove, and a floating add action
 - ✅ **Competition Detail Screen** — full implementation: class picker (chips from SoarScore task list), task display (day/task/title/timestamp), "Install as XCSoar Default Task" button with SAF write and SnackBar feedback, XCSoar directory info row, pull-to-refresh; new providers: `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`; new `/settings/xcsoar-directory` route with `XcsoarDirectorySettingsScreen`

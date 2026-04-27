@@ -137,13 +137,19 @@ void main() {
     await tester.pumpWidget(_buildApp(competitions: _tCompetitions));
     await tester.pump();
 
-    // Initially no item is selected.
-    expect(find.byIcon(Icons.check_circle), findsNothing);
+    expect(find.byType(Checkbox), findsNWidgets(3));
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isFalse);
 
-    // Tap the first competition row.
     await tester.tap(find.text('Alpha Open 2026'));
     await tester.pump();
 
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox).first).value, isTrue);
+  });
+
+  testWidgets('shows Done button in the AppBar', (tester) async {
+    await tester.pumpWidget(_buildApp(competitions: _tCompetitions));
+    await tester.pump();
+
+    expect(find.widgetWithText(TextButton, 'Done'), findsOneWidget);
   });
 }

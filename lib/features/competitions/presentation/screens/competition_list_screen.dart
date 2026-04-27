@@ -44,88 +44,113 @@ class _CompetitionListScreenState extends ConsumerState<CompetitionListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Competition'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search competitions...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: EdgeInsets.zero,
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
-              ),
-              onChanged: (value) => setState(() => _searchQuery = value),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton(
+              onPressed: () => _onDone(context),
+              child: const Text('Done'),
             ),
           ),
-        ),
+        ],
       ),
-      body: competitionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) =>
-            _ErrorView(onRetry: () => ref.invalidate(competitionListProvider)),
-        data: (competitions) {
-          final filtered = _searchQuery.isEmpty
-              ? competitions
-              : competitions
-                    .where(
-                      (c) => c.title.toLowerCase().contains(
-                        _searchQuery.toLowerCase(),
-                      ),
-                    )
-                    .toList();
-
-          if (filtered.isEmpty) {
-            return const Center(child: Text('No competitions found.'));
-          }
-
-          return ListView.builder(
-            // Extra bottom padding so items aren't hidden behind the footer.
-            padding: const EdgeInsets.only(top: 8, bottom: 80),
-            itemCount: filtered.length,
-            itemBuilder: (context, index) {
-              final competition = filtered[index];
-              return CompetitionCard(
-                competition: competition,
-                isSelected: _selectedIds.contains(competition.id),
-                onTap: () => setState(() {
-                  if (_selectedIds.contains(competition.id)) {
-                    _selectedIds.remove(competition.id);
-                  } else {
-                    _selectedIds.add(competition.id);
-                  }
-                }),
-              );
-            },
-          );
-        },
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => context.pop(),
-                  child: const Text('Back'),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: SizedBox(
+              height: 48,
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search competitions...',
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.zero,
                 ),
+                onChanged: (value) => setState(() => _searchQuery = value),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _onDone(context),
-                  child: const Text('Done'),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          Expanded(
+            child: competitionsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => _ErrorView(
+                onRetry: () => ref.invalidate(competitionListProvider),
+              ),
+              data: (competitions) {
+                final filtered = _searchQuery.isEmpty
+                    ? competitions
+                    : competitions
+                          .where(
+                            (c) => c.title.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ),
+                          )
+                          .toList();
+
+                if (filtered.isEmpty) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  final textTheme = Theme.of(context).textTheme;
+
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text(
+                        'No competitions found.',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final competition = filtered[index];
+                    return CompetitionCard(
+                      competition: competition,
+                      isSelected: _selectedIds.contains(competition.id),
+                      onTap: () => setState(() {
+                        if (_selectedIds.contains(competition.id)) {
+                          _selectedIds.remove(competition.id);
+                        } else {
+                          _selectedIds.add(competition.id);
+                        }
+                      }),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

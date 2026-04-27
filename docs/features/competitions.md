@@ -117,10 +117,11 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 ### Competition List Screen (`/add`)
 
 - **State:** Watches `competitionListProvider`
-- Shows a scrollable list of `CompetitionCard` widgets
+- Shows a body search field with a pill-shaped outline and a scrollable list of flat
+  checkbox rows via `CompetitionCard`
 - Pull-to-refresh triggers `competitionListProvider.refresh()`
-- Each card shows: title, description, bookmark toggle button
-- Tap card → navigate to Competition Detail Screen
+- Each row shows: checkbox, title, inline status badge, and description text
+- AppBar includes the completion action (`Done`); the back button cancels without a footer
 - Shows loading spinner while fetching, error message with retry on failure
 
 ### Home Screen (`/`)
