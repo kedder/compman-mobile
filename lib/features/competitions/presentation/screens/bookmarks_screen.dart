@@ -18,7 +18,7 @@ class BookmarksScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Compman Mobile'),
+        title: const Text('Your competitions'),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -64,13 +64,9 @@ class BookmarksScreen extends ConsumerWidget {
             },
             child: ListView.builder(
               padding: const EdgeInsets.only(bottom: 96),
-              itemCount: bookmarks.length + 1,
+              itemCount: bookmarks.length,
               itemBuilder: (context, index) {
-                if (index == 0) {
-                  return const _ListHeader();
-                }
-
-                final bookmark = bookmarks[index - 1];
+                final bookmark = bookmarks[index];
                 return _BookmarkRow(
                   bookmark: bookmark,
                   onTap: () => context.push('/competitions/${bookmark.id}'),
@@ -197,38 +193,6 @@ class _EmptyState extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ListHeader extends StatelessWidget {
-  const _ListHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Your Competitions',
-            style: textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'View and manage your gliding events.',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
       ),
     );
   }
