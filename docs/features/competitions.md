@@ -134,7 +134,7 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 ### Competition Detail Screen (`/competitions/:id`)
 
 - **Header:** Competition title and SoaringSpot URL.
-- **Class selection:** If no class is chosen, fetches available class names from SoarScore and renders them as tappable chips. Tapping a chip persists the selection via `SetCompetitionClass` and refreshes the task section.
+- **Class selection:** If no class is chosen, fetches available class names from SoarScore and renders them as full-width tappable cards with a trophy icon and chevron. Tapping a class card persists the selection via `SetCompetitionClass` and refreshes the task section.
 - **Class display:** If a class is already set, shows the name and a "Change" button that clears the selection.
 - **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Displays day/task number, title, and generation timestamp. "Install as XCSoar Default Task" button calls `DownloadTask` then `XcsoarSafService.writeFile(bytes, 'Default.tsk')`. Shows a green SnackBar on success; if `SAF_NOT_CONFIGURED`, shows a SnackBar with a Settings action button.
 - **XCSoar directory row:** Shows the current SAF directory URI from `XcsoarSafService.getSafDirectoryUri()`, or a "Set up" link to `/settings/xcsoar-directory` if not configured.

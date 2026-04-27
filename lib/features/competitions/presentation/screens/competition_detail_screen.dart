@@ -220,7 +220,7 @@ class _ClassPicker extends ConsumerWidget {
       children: [
         Text(
           'Select your class',
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 12),
         classesAsync.when(
@@ -241,23 +241,23 @@ class _ClassPicker extends ConsumerWidget {
                     ref.invalidate(competitionClassesProvider(competitionId)),
               );
             }
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: classes
-                  .map(
-                    (cls) => _ClassChip(
-                      label: cls,
-                      onTap: () async {
-                        await SetCompetitionClassAction.execute(
-                          ref,
-                          competitionId,
-                          cls,
-                        );
-                      },
-                    ),
-                  )
-                  .toList(),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var index = 0; index < classes.length; index++) ...[
+                  if (index > 0) const SizedBox(height: 12),
+                  _ClassCard(
+                    label: classes[index],
+                    onTap: () async {
+                      await SetCompetitionClassAction.execute(
+                        ref,
+                        competitionId,
+                        classes[index],
+                      );
+                    },
+                  ),
+                ],
+              ],
             );
           },
         ),
@@ -266,27 +266,41 @@ class _ClassPicker extends ConsumerWidget {
   }
 }
 
-class _ClassChip extends StatelessWidget {
-  const _ClassChip({required this.label, required this.onTap});
+class _ClassCard extends StatelessWidget {
+  const _ClassCard({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: color),
+          color: colorScheme.surface,
+          border: Border.all(color: colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
-        child: Text(
-          label,
-          style: TextStyle(color: color, fontWeight: FontWeight.w600),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Icon(Icons.emoji_events_outlined, color: colorScheme.outline),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label, style: theme.textTheme.headlineMedium)),
+            Icon(Icons.chevron_right, color: colorScheme.outline),
+          ],
         ),
       ),
     );
