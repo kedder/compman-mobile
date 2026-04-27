@@ -220,7 +220,7 @@ class _ClassPicker extends ConsumerWidget {
       children: [
         Text(
           'Select your class',
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
         classesAsync.when(
@@ -282,7 +282,7 @@ class _ClassCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: Colors.white,
           border: Border.all(color: colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
@@ -298,7 +298,7 @@ class _ClassCard extends StatelessWidget {
           children: [
             Icon(Icons.emoji_events_outlined, color: colorScheme.outline),
             const SizedBox(width: 12),
-            Expanded(child: Text(label, style: theme.textTheme.headlineMedium)),
+            Expanded(child: Text(label, style: theme.textTheme.titleLarge)),
             Icon(Icons.chevron_right, color: colorScheme.outline),
           ],
         ),
