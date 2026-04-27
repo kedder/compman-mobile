@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/platform/xcsoar_saf_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/icon_meta_row.dart';
+import '../../../../core/widgets/two_tone_card.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/task_info.dart';
 import '../providers/competitions_providers.dart';
@@ -35,7 +36,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Competition'),
+        title: const Text('Competition Details'),
         actions: [
           if (isRefreshing)
             const Padding(
@@ -81,7 +82,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
 // Body
 // ---------------------------------------------------------------------------
 
-class _CompetitionDetailBody extends ConsumerWidget {
+class _CompetitionDetailBody extends ConsumerStatefulWidget {
   const _CompetitionDetailBody({
     required this.competition,
     required this.competitionId,
@@ -91,22 +92,74 @@ class _CompetitionDetailBody extends ConsumerWidget {
   final String competitionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CompetitionDetailBody> createState() =>
+      _CompetitionDetailBodyState();
+}
+
+class _CompetitionDetailBodyState
+    extends ConsumerState<_CompetitionDetailBody> {
+  final List<String> _downloadErrors = <String>[];
+
+  void _appendDownloadError(String message) {
+    setState(() {
+      _downloadErrors.add(message);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(latestTasksProvider(competitionId));
+        ref.invalidate(latestTasksProvider(widget.competitionId));
         await ref
-            .read(latestTasksProvider(competitionId).future)
+            .read(latestTasksProvider(widget.competitionId).future)
             .catchError((_) => <TaskInfo>[]);
       },
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+      child: Stack(
         children: [
-          _HeaderSection(competition: competition),
-          const SizedBox(height: 24),
-          _ClassSection(competition: competition, competitionId: competitionId),
-          const SizedBox(height: 24),
-          _XcsoarDirectoryRow(),
+          ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 128),
+            children: [
+              _HeaderSection(competition: widget.competition),
+              const SizedBox(height: 24),
+              _ClassSection(
+                competition: widget.competition,
+                competitionId: widget.competitionId,
+                onDownloadError: _appendDownloadError,
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              const _XcsoarDirectoryRow(),
+            ],
+          ),
+          if (_downloadErrors.isNotEmpty)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var index = 0; index < _downloadErrors.length; index++)
+                      Padding(
+                        padding: EdgeInsets.only(top: index == 0 ? 0 : 4),
+                        child: _ErrorBanner(
+                          message: _downloadErrors[index],
+                          onDismiss: () {
+                            final message = _downloadErrors[index];
+                            setState(() {
+                              _downloadErrors.remove(message);
+                            });
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -125,34 +178,23 @@ class _HeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           competition.title,
-          style: theme.textTheme.headlineSmall?.copyWith(
+          style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 6),
-        Row(
-          children: [
-            Icon(
-              Icons.link,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                competition.soaringspotUrl,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+        IconMetaRow(
+          icon: Icons.language,
+          text: competition.soaringspotUrl,
+          color: colorScheme.primary,
         ),
       ],
     );
@@ -164,27 +206,44 @@ class _HeaderSection extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ClassSection extends ConsumerWidget {
-  const _ClassSection({required this.competition, required this.competitionId});
+  const _ClassSection({
+    required this.competition,
+    required this.competitionId,
+    required this.onDownloadError,
+  });
 
   final BookmarkedCompetition competition;
   final String competitionId;
+  final ValueChanged<String> onDownloadError;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (competition.selectedClass == null) {
       return _ClassPicker(competitionId: competitionId);
     }
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              'Class: ${competition.selectedClass}',
-              style: Theme.of(context).textTheme.titleMedium,
+              'Class: ',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.secondary,
+              ),
             ),
-            const SizedBox(width: 8),
-            TextButton(
+            Text(
+              competition.selectedClass!,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            OutlinedButton(
               onPressed: () async {
                 await SetCompetitionClassAction.execute(
                   ref,
@@ -192,6 +251,23 @@ class _ClassSection extends ConsumerWidget {
                   null,
                 );
               },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+                side: BorderSide(
+                  color: colorScheme.primary.withValues(alpha: 0.3),
+                ),
+                backgroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
+                textStyle: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: const Text('Change'),
             ),
           ],
@@ -200,6 +276,7 @@ class _ClassSection extends ConsumerWidget {
         _TaskSection(
           competitionId: competitionId,
           selectedClass: competition.selectedClass!,
+          onDownloadError: onDownloadError,
         ),
       ],
     );
@@ -315,10 +392,12 @@ class _TaskSection extends ConsumerStatefulWidget {
   const _TaskSection({
     required this.competitionId,
     required this.selectedClass,
+    required this.onDownloadError,
   });
 
   final String competitionId;
   final String selectedClass;
+  final ValueChanged<String> onDownloadError;
 
   @override
   ConsumerState<_TaskSection> createState() => _TaskSectionState();
@@ -345,33 +424,15 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
     } on PlatformException catch (e) {
       if (!mounted) return;
       if (e.code == 'SAF_NOT_CONFIGURED') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'XCSoar directory not configured — set it in Settings',
-            ),
-            action: SnackBarAction(
-              label: 'Settings',
-              onPressed: () => context.push('/settings/xcsoar-directory'),
-            ),
-          ),
+        widget.onDownloadError(
+          'XCSoar directory not configured — set it in Settings',
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message ?? 'Install failed'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        widget.onDownloadError(e.message ?? 'Install failed');
       }
     } on Failure catch (f) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_failureMessage(f)),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      widget.onDownloadError(_failureMessage(f));
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
@@ -380,38 +441,30 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(latestTasksProvider(widget.competitionId));
-    final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Today's Task", style: theme.textTheme.titleMedium),
-        const SizedBox(height: 12),
-        tasksAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => _ErrorRetry(
-            message: _failureMessage(err),
+    return tasksAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => _ErrorRetry(
+        message: _failureMessage(err),
+        onRetry: () =>
+            ref.invalidate(latestTasksProvider(widget.competitionId)),
+      ),
+      data: (tasks) {
+        final TaskInfo? task = _findTask(tasks, widget.selectedClass);
+        if (task == null) {
+          return _ErrorRetry(
+            message: 'No task available today for ${widget.selectedClass}.',
             onRetry: () =>
                 ref.invalidate(latestTasksProvider(widget.competitionId)),
-          ),
-          data: (tasks) {
-            final TaskInfo? task = _findTask(tasks, widget.selectedClass);
-            if (task == null) {
-              return _ErrorRetry(
-                message: 'No task available today for ${widget.selectedClass}.',
-                onRetry: () =>
-                    ref.invalidate(latestTasksProvider(widget.competitionId)),
-                retryLabel: 'Refresh',
-              );
-            }
-            return _TaskCard(
-              task: task,
-              downloading: _downloading,
-              onInstall: () => _installTask(task),
-            );
-          },
-        ),
-      ],
+            retryLabel: 'Refresh',
+          );
+        }
+        return _TaskCard(
+          task: task,
+          downloading: _downloading,
+          onInstall: () => _installTask(task),
+        );
+      },
     );
   }
 
@@ -437,36 +490,74 @@ class _TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Day ${task.dayNo} · Task ${task.taskNo} · ${task.title}',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Generated ${task.timestamp}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return TwoToneCard(
+      header: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  'Day ${task.dayNo} - Task ${task.taskNo}',
+                  style: textTheme.headlineMedium,
+                ),
+              ),
+              // TODO(new-update): show when newer version available
+              // AppBadge(
+              //   label: 'NEW UPDATE',
+              //   backgroundColor: colorScheme.error,
+              //   foregroundColor: colorScheme.onError,
+              // ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          IconMetaRow(
+            icon: Icons.route,
+            text: task.title,
+            color: colorScheme.primary,
+          ),
+        ],
+      ),
+      footer: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          IconMetaRow(
+            icon: Icons.update,
+            text: 'Generated ${task.timestamp}',
+            iconSize: 16,
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: downloading ? null : onInstall,
+              icon: downloading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.download),
+              label: Text(
+                downloading ? 'Installing...' : 'Install XCSoar Task',
               ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 64,
-              child: downloading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: onInstall,
-                      child: const Text('Install as XCSoar Default Task'),
-                    ),
-            ),
-          ],
-        ),
+          ),
+          // Installed state (when installed):
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: ElevatedButton.icon(
+          //     onPressed: null,
+          //     style: ElevatedButton.styleFrom(backgroundColor: context.appColors.success),
+          //     icon: const Icon(Icons.check_circle),
+          //     label: const Text('Installed'),
+          //   ),
+          // ),
+        ],
       ),
     );
   }
@@ -477,6 +568,8 @@ class _TaskCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _XcsoarDirectoryRow extends ConsumerWidget {
+  const _XcsoarDirectoryRow();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uriAsync = ref.watch(xcsoarDirectoryUriProvider);
@@ -485,49 +578,71 @@ class _XcsoarDirectoryRow extends ConsumerWidget {
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
       data: (uri) {
-        if (uri != null && uri.isNotEmpty) {
-          return Row(
-            children: [
-              Icon(
-                Icons.folder_open,
-                size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  'XCSoar folder: $uri',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          );
-        }
-        return Row(
-          children: [
-            Icon(
-              Icons.folder_off,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'XCSoar folder: Not configured',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 4),
-            TextButton(
-              onPressed: () => context.push('/settings/xcsoar-directory'),
-              child: const Text('Set up'),
-            ),
-          ],
+        final color = Theme.of(
+          context,
+        ).colorScheme.secondary.withValues(alpha: 0.6);
+        final xcsoarPath = uri != null && uri.isNotEmpty
+            ? uri
+            : 'XCSoar folder not configured';
+
+        return IconMetaRow(
+          icon: Icons.folder_open,
+          text: xcsoarPath,
+          iconSize: 14,
+          color: color,
         );
       },
+    );
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  const _ErrorBanner({required this.message, required this.onDismiss});
+
+  final String message;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.error,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.16),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Icon(Icons.warning, color: colorScheme.onError),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onError,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: onDismiss,
+              tooltip: 'Dismiss error',
+              color: colorScheme.onError,
+              icon: const Icon(Icons.close),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

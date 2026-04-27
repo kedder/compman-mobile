@@ -1,12 +1,13 @@
 import 'dart:typed_data';
 
-import 'package:compman_mobile/core/error/failures.dart';
 import 'package:compman_mobile/core/di/providers.dart';
+import 'package:compman_mobile/core/error/failures.dart';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/domain/repositories/competitions_repository.dart';
+import 'package:compman_mobile/features/competitions/domain/usecases/download_task.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/set_competition_class.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/competition_detail_screen.dart';
@@ -18,7 +19,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 
 // ---------------------------------------------------------------------------
-// Test fixture
+// Test fixtures
 // ---------------------------------------------------------------------------
 
 const _competitionId = 'test-comp-2026';
@@ -31,6 +32,17 @@ final _tCompetition = BookmarkedCompetition(
   selectedClass: null,
   startDate: DateTime(2026, 3, 1),
   endDate: DateTime(2026, 3, 7),
+);
+
+final _selectedClassCompetition = _tCompetition.copyWith(selectedClass: 'Club');
+
+const _clubTask = TaskInfo(
+  compClass: 'Club',
+  title: '500km Triangle',
+  dayNo: 4,
+  taskNo: 1,
+  timestamp: '2026-07-14 09:30',
+  taskUrl: 'https://example.com/task.tsk',
 );
 
 // ---------------------------------------------------------------------------
@@ -59,19 +71,24 @@ Widget _buildApp(List<Override> overrides) {
 }
 
 /// Returns the base overrides needed for every test: competition detail,
-/// xcsoar dir, and latest tasks (so [_TaskSection] never fires real requests).
-List<Override> _baseOverrides({required List<String> classes}) {
+/// xcsoar dir, and latest tasks.
+List<Override> _baseOverrides({
+  required List<String> classes,
+  BookmarkedCompetition? competition,
+  List<TaskInfo> tasks = const <TaskInfo>[],
+  String? xcsoarDirectoryUri,
+}) {
+  final resolvedCompetition = competition ?? _tCompetition;
+
   return [
     competitionDetailProvider(
       _competitionId,
-    ).overrideWith((ref) async => _tCompetition),
+    ).overrideWith((ref) async => resolvedCompetition),
     competitionClassesProvider(
       _competitionId,
     ).overrideWith((ref) async => classes),
-    xcsoarDirectoryUriProvider.overrideWith((ref) async => null),
-    latestTasksProvider(
-      _competitionId,
-    ).overrideWith((ref) async => <TaskInfo>[]),
+    xcsoarDirectoryUriProvider.overrideWith((ref) async => xcsoarDirectoryUri),
+    latestTasksProvider(_competitionId).overrideWith((ref) async => tasks),
   ];
 }
 
@@ -88,6 +105,16 @@ class _RecordingSetCompetitionClass extends SetCompetitionClass {
     onCall(competitionId, selectedClass);
     return right(unit);
   }
+}
+
+class _FailingDownloadTask extends DownloadTask {
+  _FailingDownloadTask(this.failure) : super(const _DummyRepository());
+
+  final Failure failure;
+
+  @override
+  Future<Either<Failure, Uint8List>> call(String taskUrl) async =>
+      left(failure);
 }
 
 class _DummyRepository implements CompetitionsRepository {
@@ -213,5 +240,123 @@ void main() {
 
     expect(find.textContaining('No classes found'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('shows the competition title with headlineLarge styling', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const ['Club'],
+          competition: _selectedClassCompetition,
+          tasks: const [_clubTask],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    final title = tester.widget<Text>(find.text('Test Open 2026'));
+    expect(title.style?.fontSize, 32);
+    expect(title.style?.fontWeight, FontWeight.bold);
+    expect(title.style?.color, AppTheme.light().colorScheme.onSurface);
+  });
+
+  testWidgets('shows inline class selector row when a class is selected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const ['Club'],
+          competition: _selectedClassCompetition,
+          tasks: const [_clubTask],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Class: '), findsOneWidget);
+    expect(find.text('Club'), findsOneWidget);
+    expect(find.text('Change'), findsOneWidget);
+  });
+
+  testWidgets('renders the task card without a new-update badge', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const ['Club'],
+          competition: _selectedClassCompetition,
+          tasks: const [_clubTask],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Day 4 - Task 1'), findsOneWidget);
+    expect(find.text('Install XCSoar Task'), findsOneWidget);
+    expect(find.text('NEW UPDATE'), findsNothing);
+  });
+
+  testWidgets('appends a dismissible error banner when task download fails', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(
+          classes: const ['Club'],
+          competition: _selectedClassCompetition,
+          tasks: const [_clubTask],
+        ),
+        downloadTaskProvider.overrideWith(
+          (ref) => _FailingDownloadTask(
+            const NetworkFailure('Task download failed'),
+          ),
+        ),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Install XCSoar Task'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Task download failed'), findsOneWidget);
+    expect(find.byTooltip('Dismiss error'), findsOneWidget);
+  });
+
+  testWidgets('dismissing an error banner removes it from the screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(
+          classes: const ['Club'],
+          competition: _selectedClassCompetition,
+          tasks: const [_clubTask],
+        ),
+        downloadTaskProvider.overrideWith(
+          (ref) => _FailingDownloadTask(
+            const NetworkFailure('Task download failed'),
+          ),
+        ),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Install XCSoar Task'));
+    await tester.pumpAndSettle();
+    expect(find.text('Task download failed'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Dismiss error'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Task download failed'), findsNothing);
   });
 }
