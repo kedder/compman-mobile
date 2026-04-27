@@ -6,7 +6,7 @@ Redesign `CompetitionDetailScreen`
 (`lib/features/competitions/presentation/screens/competition_detail_screen.dart`)
 to match `docs/design/competition_details_full_download_suite/` and
 `docs/design/competition_details_stacked_errors/`. Cards become two-tone (white header +
-tinted footer), the class selector gets a labelled container row, and download errors are
+tinted footer), the class selector becomes a simple inline row, and download errors are
 surfaced as stacked dismissible banners at the bottom of the screen instead of inline
 error states.
 
@@ -15,6 +15,10 @@ error states.
 `competition_detail_screen.dart` only. Depends on:
 - **20260425-01** (theme tokens, `AppColors`)
 - **20260425-06** (shared widgets: `AppBadge`, `TwoToneCard`, `IconMetaRow`)
+
+The `_ClassPicker` widget (shown when no class is selected) is redesigned in a separate
+issue **20260427-01-competition-class-picker-redesign.md**. This issue covers only the
+state where a class has already been selected.
 
 ---
 
@@ -26,6 +30,9 @@ Read these files before starting:
 - `docs/design/competition_details_full_download_suite/code.html`
 - `docs/design/competition_details_stacked_errors/code.html`
 - `docs/ui-guidelines.md`
+
+`competition_details_full_download_suite` is the primary reference for the normal state.
+`competition_details_stacked_errors` is the reference for the error banner overlay.
 
 ---
 
@@ -54,14 +61,32 @@ Replace `_HeaderSection` content:
 
 ### 3 — Class selector (`_ClassSection` when class is selected)
 
-Replace the current `Row([Text, TextButton])` with a labelled container:
+Replace the current `Row([Text, TextButton])` with a streamlined inline row:
 
+```dart
+Row(
+  children: [
+    Text('Class: ', style: textTheme.bodyMedium?.copyWith(color: colorScheme.secondary)),
+    Text(competition.selectedClass!, style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+    const Spacer(),
+    OutlinedButton(
+      onPressed: _onChangeClass,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colorScheme.primary,
+        side: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
+        backgroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        textStyle: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: const Text('Change'),
+    ),
+  ],
+)
 ```
-"Selected class" — `textTheme.bodySmall` bold, `colorScheme.secondary` color
-[Container: surfaceContainerLow bg, outlineVariant/30 border, 8px radius, 12px vertical padding, 12px horizontal]
-  Left: selected class name — bodyLarge semibold, onSurface
-  Right: "Change" `TextButton` — primary color, `textTheme.bodySmall`
-```
+
+No container box or label heading above the row. `_onChangeClass` calls
+`SetCompetitionClassAction.execute(ref, competitionId, null)` (existing behaviour).
 
 ### 4 — Two-tone download cards
 
@@ -73,12 +98,17 @@ and should be omitted from this redesign.
 
 **Task card**:
 
+The header row shows only the task name in the normal state. An `AppBadge` with label
+`'NEW UPDATE'` and error colours is shown only when a newer task version is detected
+(reserved for a future issue — leave the conditional commented-out placeholder as shown).
+
 ```dart
 TwoToneCard(
   header: Column([
     Row([
       Expanded(Text(taskName, style: textTheme.headlineMedium)),
-      AppBadge(label: 'ACTIVE', backgroundColor: colorScheme.primary, foregroundColor: colorScheme.onPrimary),
+      // TODO(new-update): show when newer version available
+      // AppBadge(label: 'NEW UPDATE', backgroundColor: colorScheme.error, foregroundColor: colorScheme.onError),
     ]),
     SizedBox(height: 8),
     IconMetaRow(icon: Icons.route, text: distanceLabel, color: colorScheme.primary),
@@ -163,7 +193,8 @@ Keep the existing full-screen `_ErrorRetry` for the initial competition-load fai
 
 Update or add widget tests for `CompetitionDetailScreen`:
 - Header shows competition title in `headlineLarge`.
-- Task card renders with "ACTIVE" `AppBadge` and install button.
+- Class selector row shows `"Class:"` label, selected class name, and `"Change"` button.
+- Task card renders task name and install button (no badge in normal state).
 - A simulated download error (task) appends a dismissible error banner.
 - Dismissing a banner removes it.
 
@@ -172,5 +203,6 @@ Update or add widget tests for `CompetitionDetailScreen`:
 ## Completion condition
 
 `make test` passes. The competition detail screen shows the `TwoToneCard` Task card,
-`AppBadge` status indicator, `IconMetaRow` metadata rows, and dismissible stacked error
-banners for download failures. Airspace and Waypoints cards are not included.
+a plain task-name header row (no badge), the inline class selector row, `IconMetaRow`
+metadata rows, and dismissible stacked error banners for download failures. Airspace and
+Waypoints cards are not included.
