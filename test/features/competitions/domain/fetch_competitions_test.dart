@@ -18,11 +18,13 @@ void main() {
   });
 
   final tCompetitions = [
-    const Competition(
+    Competition(
       id: 'barron-2024',
       title: 'Barron 2024',
       url: 'https://www.soaringspot.com/en_gb/barron-2024/',
       description: '01 Jan – 07 Jan 2024 · Barron, Australia',
+      startDate: DateTime(2024, 1, 1),
+      endDate: DateTime(2024, 1, 7),
     ),
   ];
 

@@ -34,6 +34,8 @@ void main() {
     title: 'Barron 2024',
     url: 'https://www.soaringspot.com/en_gb/barron-2024/',
     description: '1 Jan – 5 Jan 2024, Australia',
+    startDate: DateTime(2024, 1, 1),
+    endDate: DateTime(2024, 1, 5),
   );
 
   final tCompetition = Competition(
@@ -41,6 +43,8 @@ void main() {
     title: 'Barron 2024',
     url: 'https://www.soaringspot.com/en_gb/barron-2024/',
     description: '1 Jan – 5 Jan 2024, Australia',
+    startDate: DateTime(2024, 1, 1),
+    endDate: DateTime(2024, 1, 5),
   );
 
   final tBookmarkedModel = BookmarkedCompetitionModel(
@@ -48,6 +52,9 @@ void main() {
     title: 'Barron 2024',
     soaringspotUrl: 'https://www.soaringspot.com/en_gb/barron-2024/',
     bookmarkedAt: DateTime(2024, 1, 1),
+    description: '1 Jan – 5 Jan 2024, Australia',
+    startDate: DateTime(2024, 1, 1),
+    endDate: DateTime(2024, 1, 5),
   );
 
   final tBookmarkedCompetition = BookmarkedCompetition(
@@ -55,6 +62,9 @@ void main() {
     title: 'Barron 2024',
     soaringspotUrl: 'https://www.soaringspot.com/en_gb/barron-2024/',
     bookmarkedAt: DateTime(2024, 1, 1),
+    description: '1 Jan – 5 Jan 2024, Australia',
+    startDate: DateTime(2024, 1, 1),
+    endDate: DateTime(2024, 1, 5),
   );
 
   group('fetchCompetitions', () {
@@ -140,7 +150,21 @@ void main() {
       final result = await repository.bookmarkCompetition(tCompetition);
 
       expect(result, equals(const Right<Failure, Unit>(unit)));
-      verify(mockLocal.save(any)).called(1);
+      verify(
+        mockLocal.save(
+          argThat(
+            predicate<BookmarkedCompetitionModel>(
+              (model) =>
+                  model.id == tCompetition.id &&
+                  model.title == tCompetition.title &&
+                  model.soaringspotUrl == tCompetition.url &&
+                  model.description == tCompetition.description &&
+                  model.startDate == tCompetition.startDate &&
+                  model.endDate == tCompetition.endDate,
+            ),
+          ),
+        ),
+      ).called(1);
     });
 
     test('returns Left(StorageFailure) on exception', () async {

@@ -29,6 +29,10 @@ The homepage lists all current and recent competitions. Each competition is repr
 | `title` | Text content of `<a>` inside `<h3>` | Trimmed |
 | `url` | `https://www.soaringspot.com` + `href` | `href` is always relative on soaringspot.com |
 | `description` | Text content of `.info` element | Whitespace-normalised: collapse `\s+` to single space, trim |
+| `startDate` | First date in `.info > span` | Parsed from `d MMMM yyyy` before the en dash |
+| `endDate` | Second date in `.info > span` | Parsed from `d MMMM yyyy` after the en dash |
+
+The listing markup mixes location text, icon text, and date text inside the same `<span>`. The scraper normalises whitespace, finds the final `–` separator, parses the right-hand side as `endDate`, and extracts the trailing `d MMMM yyyy` pattern from the left-hand side as `startDate`. If parsing fails, both dates remain `null` and downstream status stays unknown.
 
 ### Selector Note
 

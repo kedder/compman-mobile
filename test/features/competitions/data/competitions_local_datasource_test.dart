@@ -17,6 +17,9 @@ void main() {
     title: 'Barron 2024',
     soaringspotUrl: 'https://www.soaringspot.com/en_gb/barron-2024/',
     bookmarkedAt: DateTime(2024, 1, 1),
+    description: '1 Jan 2024 – 5 Jan 2024, Australia',
+    startDate: DateTime(2024, 1, 1),
+    endDate: DateTime(2024, 1, 5),
   );
 
   setUpAll(() async {
@@ -76,6 +79,9 @@ void main() {
         title: 'Updated Title',
         soaringspotUrl: tModel.soaringspotUrl,
         bookmarkedAt: tModel.bookmarkedAt,
+        description: tModel.description,
+        startDate: tModel.startDate,
+        endDate: tModel.endDate,
       );
       await dataSource.save(updated);
 
@@ -112,6 +118,9 @@ void main() {
       expect(entity.title, tModel.title);
       expect(entity.soaringspotUrl, tModel.soaringspotUrl);
       expect(entity.bookmarkedAt, tModel.bookmarkedAt);
+      expect(entity.description, tModel.description);
+      expect(entity.startDate, tModel.startDate);
+      expect(entity.endDate, tModel.endDate);
     });
   });
 
@@ -122,6 +131,9 @@ void main() {
         title: 'Test Competition',
         soaringspotUrl: 'https://www.soaringspot.com/en_gb/test-id/',
         bookmarkedAt: DateTime(2025, 6, 15),
+        description: '15 Jun 2025 – 20 Jun 2025, Test',
+        startDate: DateTime(2025, 6, 15),
+        endDate: DateTime(2025, 6, 20),
       );
 
       final model = BookmarkedCompetitionModel.fromEntity(entity);

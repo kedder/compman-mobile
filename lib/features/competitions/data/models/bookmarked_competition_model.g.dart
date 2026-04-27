@@ -9,7 +9,7 @@ part of 'bookmarked_competition_model.dart';
 class BookmarkedCompetitionModelAdapter
     extends TypeAdapter<BookmarkedCompetitionModel> {
   @override
-  final int typeId = 0;
+  final typeId = 0;
 
   @override
   BookmarkedCompetitionModel read(BinaryReader reader) {
@@ -23,13 +23,16 @@ class BookmarkedCompetitionModelAdapter
       soaringspotUrl: fields[2] as String,
       bookmarkedAt: fields[3] as DateTime,
       selectedClass: fields[4] as String?,
+      description: fields[5] as String?,
+      startDate: fields[6] as DateTime?,
+      endDate: fields[7] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BookmarkedCompetitionModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,7 +42,13 @@ class BookmarkedCompetitionModelAdapter
       ..writeByte(3)
       ..write(obj.bookmarkedAt)
       ..writeByte(4)
-      ..write(obj.selectedClass);
+      ..write(obj.selectedClass)
+      ..writeByte(5)
+      ..write(obj.description)
+      ..writeByte(6)
+      ..write(obj.startDate)
+      ..writeByte(7)
+      ..write(obj.endDate);
   }
 
   @override

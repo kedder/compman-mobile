@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,203 +9,278 @@ part of 'competition.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
 /// @nodoc
 mixin _$Competition {
-  String get id => throw _privateConstructorUsedError;
-  String get title => throw _privateConstructorUsedError;
-  String get url => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
 
-  /// Create a copy of Competition
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $CompetitionCopyWith<Competition> get copyWith =>
-      throw _privateConstructorUsedError;
+ String get id; String get title; String get url; String get description; DateTime? get startDate; DateTime? get endDate;
+/// Create a copy of Competition
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CompetitionCopyWith<Competition> get copyWith => _$CompetitionCopyWithImpl<Competition>(this as Competition, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Competition&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.url, url) || other.url == url)&&(identical(other.description, description) || other.description == description)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,title,url,description,startDate,endDate);
+
+@override
+String toString() {
+  return 'Competition(id: $id, title: $title, url: $url, description: $description, startDate: $startDate, endDate: $endDate)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $CompetitionCopyWith<$Res> {
-  factory $CompetitionCopyWith(
-    Competition value,
-    $Res Function(Competition) then,
-  ) = _$CompetitionCopyWithImpl<$Res, Competition>;
-  @useResult
-  $Res call({String id, String title, String url, String description});
-}
+abstract mixin class $CompetitionCopyWith<$Res>  {
+  factory $CompetitionCopyWith(Competition value, $Res Function(Competition) _then) = _$CompetitionCopyWithImpl;
+@useResult
+$Res call({
+ String id, String title, String url, String description, DateTime? startDate, DateTime? endDate
+});
 
+
+
+
+}
 /// @nodoc
-class _$CompetitionCopyWithImpl<$Res, $Val extends Competition>
+class _$CompetitionCopyWithImpl<$Res>
     implements $CompetitionCopyWith<$Res> {
-  _$CompetitionCopyWithImpl(this._value, this._then);
+  _$CompetitionCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final Competition _self;
+  final $Res Function(Competition) _then;
 
-  /// Create a copy of Competition
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? title = null,
-    Object? url = null,
-    Object? description = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            title: null == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String,
-            url: null == url
-                ? _value.url
-                : url // ignore: cast_nullable_to_non_nullable
-                      as String,
-            description: null == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of Competition
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? url = null,Object? description = null,Object? startDate = freezed,Object? endDate = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [Competition].
+extension CompetitionPatterns on Competition {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Competition value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _Competition() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Competition value)  $default,){
+final _that = this;
+switch (_that) {
+case _Competition():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Competition value)?  $default,){
+final _that = this;
+switch (_that) {
+case _Competition() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String url,  String description,  DateTime? startDate,  DateTime? endDate)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _Competition() when $default != null:
+return $default(_that.id,_that.title,_that.url,_that.description,_that.startDate,_that.endDate);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String url,  String description,  DateTime? startDate,  DateTime? endDate)  $default,) {final _that = this;
+switch (_that) {
+case _Competition():
+return $default(_that.id,_that.title,_that.url,_that.description,_that.startDate,_that.endDate);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String url,  String description,  DateTime? startDate,  DateTime? endDate)?  $default,) {final _that = this;
+switch (_that) {
+case _Competition() when $default != null:
+return $default(_that.id,_that.title,_that.url,_that.description,_that.startDate,_that.endDate);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
-abstract class _$$CompetitionImplCopyWith<$Res>
-    implements $CompetitionCopyWith<$Res> {
-  factory _$$CompetitionImplCopyWith(
-    _$CompetitionImpl value,
-    $Res Function(_$CompetitionImpl) then,
-  ) = __$$CompetitionImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({String id, String title, String url, String description});
+
+
+class _Competition extends Competition {
+  const _Competition({required this.id, required this.title, required this.url, required this.description, this.startDate, this.endDate}): super._();
+  
+
+@override final  String id;
+@override final  String title;
+@override final  String url;
+@override final  String description;
+@override final  DateTime? startDate;
+@override final  DateTime? endDate;
+
+/// Create a copy of Competition
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CompetitionCopyWith<_Competition> get copyWith => __$CompetitionCopyWithImpl<_Competition>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Competition&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.url, url) || other.url == url)&&(identical(other.description, description) || other.description == description)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,title,url,description,startDate,endDate);
+
+@override
+String toString() {
+  return 'Competition(id: $id, title: $title, url: $url, description: $description, startDate: $startDate, endDate: $endDate)';
+}
+
+
 }
 
 /// @nodoc
-class __$$CompetitionImplCopyWithImpl<$Res>
-    extends _$CompetitionCopyWithImpl<$Res, _$CompetitionImpl>
-    implements _$$CompetitionImplCopyWith<$Res> {
-  __$$CompetitionImplCopyWithImpl(
-    _$CompetitionImpl _value,
-    $Res Function(_$CompetitionImpl) _then,
-  ) : super(_value, _then);
+abstract mixin class _$CompetitionCopyWith<$Res> implements $CompetitionCopyWith<$Res> {
+  factory _$CompetitionCopyWith(_Competition value, $Res Function(_Competition) _then) = __$CompetitionCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String title, String url, String description, DateTime? startDate, DateTime? endDate
+});
 
-  /// Create a copy of Competition
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? title = null,
-    Object? url = null,
-    Object? description = null,
-  }) {
-    return _then(
-      _$CompetitionImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        title: null == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String,
-        url: null == url
-            ? _value.url
-            : url // ignore: cast_nullable_to_non_nullable
-                  as String,
-        description: null == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String,
-      ),
-    );
-  }
+
+
+
 }
-
 /// @nodoc
+class __$CompetitionCopyWithImpl<$Res>
+    implements _$CompetitionCopyWith<$Res> {
+  __$CompetitionCopyWithImpl(this._self, this._then);
 
-class _$CompetitionImpl implements _Competition {
-  const _$CompetitionImpl({
-    required this.id,
-    required this.title,
-    required this.url,
-    required this.description,
-  });
+  final _Competition _self;
+  final $Res Function(_Competition) _then;
 
-  @override
-  final String id;
-  @override
-  final String title;
-  @override
-  final String url;
-  @override
-  final String description;
-
-  @override
-  String toString() {
-    return 'Competition(id: $id, title: $title, url: $url, description: $description)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$CompetitionImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.url, url) || other.url == url) &&
-            (identical(other.description, description) ||
-                other.description == description));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, id, title, url, description);
-
-  /// Create a copy of Competition
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$CompetitionImplCopyWith<_$CompetitionImpl> get copyWith =>
-      __$$CompetitionImplCopyWithImpl<_$CompetitionImpl>(this, _$identity);
+/// Create a copy of Competition
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? url = null,Object? description = null,Object? startDate = freezed,Object? endDate = freezed,}) {
+  return _then(_Competition(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
 }
 
-abstract class _Competition implements Competition {
-  const factory _Competition({
-    required final String id,
-    required final String title,
-    required final String url,
-    required final String description,
-  }) = _$CompetitionImpl;
 
-  @override
-  String get id;
-  @override
-  String get title;
-  @override
-  String get url;
-  @override
-  String get description;
-
-  /// Create a copy of Competition
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$CompetitionImplCopyWith<_$CompetitionImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }
+
+// dart format on

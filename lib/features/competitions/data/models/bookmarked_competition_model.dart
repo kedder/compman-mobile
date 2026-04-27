@@ -29,6 +29,18 @@ class BookmarkedCompetitionModel {
   @HiveField(4)
   final String? selectedClass;
 
+  /// Competition listing description used for bookmark display.
+  @HiveField(5)
+  final String? description;
+
+  /// Competition start date parsed from the SoaringSpot listing.
+  @HiveField(6)
+  final DateTime? startDate;
+
+  /// Competition end date parsed from the SoaringSpot listing.
+  @HiveField(7)
+  final DateTime? endDate;
+
   /// Creates a [BookmarkedCompetitionModel].
   BookmarkedCompetitionModel({
     required this.id,
@@ -36,6 +48,9 @@ class BookmarkedCompetitionModel {
     required this.soaringspotUrl,
     required this.bookmarkedAt,
     this.selectedClass,
+    this.description,
+    this.startDate,
+    this.endDate,
   });
 
   /// Converts this model to the domain [BookmarkedCompetition] entity.
@@ -45,6 +60,9 @@ class BookmarkedCompetitionModel {
     soaringspotUrl: soaringspotUrl,
     bookmarkedAt: bookmarkedAt,
     selectedClass: selectedClass,
+    description: description,
+    startDate: startDate,
+    endDate: endDate,
   );
 
   /// Creates a [BookmarkedCompetitionModel] from a domain [BookmarkedCompetition].
@@ -55,5 +73,8 @@ class BookmarkedCompetitionModel {
         soaringspotUrl: entity.soaringspotUrl,
         bookmarkedAt: entity.bookmarkedAt,
         selectedClass: entity.selectedClass,
+        description: entity.description,
+        startDate: entity.startDate,
+        endDate: entity.endDate,
       );
 }

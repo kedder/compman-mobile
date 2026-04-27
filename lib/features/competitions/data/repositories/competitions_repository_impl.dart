@@ -68,6 +68,9 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
         title: competition.title,
         soaringspotUrl: competition.url,
         bookmarkedAt: DateTime.now(),
+        description: competition.description,
+        startDate: competition.startDate,
+        endDate: competition.endDate,
       );
       await local.save(model);
       return const Right(unit);
@@ -122,6 +125,9 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
         soaringspotUrl: existing.soaringspotUrl,
         bookmarkedAt: existing.bookmarkedAt,
         selectedClass: selectedClass,
+        description: existing.description,
+        startDate: existing.startDate,
+        endDate: existing.endDate,
       );
       await local.save(updated);
       return const Right(unit);

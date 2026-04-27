@@ -14,23 +14,29 @@ import 'package:go_router/go_router.dart';
 // ---------------------------------------------------------------------------
 
 final _tCompetitions = [
-  const Competition(
+  Competition(
     id: 'alpha-2026',
     title: 'Alpha Open 2026',
     url: 'https://example.com/alpha',
     description: 'Jun 1 - Jun 10, 2026 · Somewhere, DE',
+    startDate: DateTime(2026, 6, 1),
+    endDate: DateTime(2026, 6, 10),
   ),
-  const Competition(
+  Competition(
     id: 'beta-2026',
     title: 'Beta Championship',
     url: 'https://example.com/beta',
     description: 'Jul 5 - Jul 15, 2026 · Elsewhere, FR',
+    startDate: DateTime(2026, 7, 5),
+    endDate: DateTime(2026, 7, 15),
   ),
-  const Competition(
+  Competition(
     id: 'gamma-2026',
     title: 'Gamma Cup',
     url: 'https://example.com/gamma',
     description: 'Aug 1 - Aug 7, 2026 · Nowhere, AT',
+    startDate: DateTime(2026, 8, 1),
+    endDate: DateTime(2026, 8, 7),
   ),
 ];
 

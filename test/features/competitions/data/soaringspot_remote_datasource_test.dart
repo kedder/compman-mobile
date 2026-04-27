@@ -53,6 +53,8 @@ void main() {
           expect(model.id, isNotEmpty);
           expect(model.title, isNotEmpty);
           expect(model.url, startsWith('https://www.soaringspot.com'));
+          expect(model.startDate, isNotNull);
+          expect(model.endDate, isNotNull);
         }
       },
     );
@@ -93,6 +95,8 @@ void main() {
           last.description,
           'St. Johann In Tirol, Austria, 1 May 2026 – 9 May 2026 45 competitors in 2 classes',
         );
+        expect(last.startDate, DateTime(2026, 5, 1));
+        expect(last.endDate, DateTime(2026, 5, 9));
       },
     );
 

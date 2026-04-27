@@ -11,7 +11,7 @@ part 'task_info.freezed.dart';
 /// [timestamp] is the generation timestamp string (e.g. `"01-07-2020 21:35:04"`).
 /// [taskUrl] is the absolute URL to download the `.tsk` file.
 @freezed
-class TaskInfo with _$TaskInfo {
+abstract class TaskInfo with _$TaskInfo {
   /// Creates an immutable [TaskInfo].
   const factory TaskInfo({
     required String compClass,

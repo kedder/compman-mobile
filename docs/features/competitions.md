@@ -24,8 +24,12 @@ class Competition {
   final String title;        // Display name, e.g. "Barron 2024"
   final String url;          // Full SoaringSpot URL
   final String description;  // Dates and location string
+  final DateTime? startDate; // Parsed from the listing when available
+  final DateTime? endDate;   // Parsed from the listing when available
 }
 ```
+
+`Competition.status` is a computed getter returning `CompetitionStatus.live`, `.upcoming`, `.past`, or `null` when dates could not be parsed. The status is never persisted.
 
 ### `BookmarkedCompetition`
 
@@ -37,8 +41,13 @@ class BookmarkedCompetition {
   final String title;
   final String soaringspotUrl;
   final DateTime bookmarkedAt;
+  final String? description;
+  final DateTime? startDate;
+  final DateTime? endDate;
 }
 ```
+
+Bookmarks copy `description`, `startDate`, and `endDate` from the source `Competition` when saved so the UI can render status badges and date text offline. `BookmarkedCompetition.status` is also computed on the fly and never stored.
 
 ---
 
@@ -87,7 +96,7 @@ Returns `List<CompetitionModel>`. Throws `ServerException` on network or parse f
 
 Persists `BookmarkedCompetitionModel` objects in a **Hive** box named `"bookmarks"`.
 
-Operations: `getAll()`, `save(model)`, `delete(id)`.
+Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 
 ---
 

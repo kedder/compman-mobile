@@ -6,6 +6,7 @@ import 'package:html/parser.dart' as html_parser;
 
 import 'package:compman_mobile/features/competitions/data/models/competition_model.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
+import 'package:compman_mobile/features/competitions/domain/entities/competition_status.dart';
 
 void main() {
   late String fixtureHtml;
@@ -55,6 +56,14 @@ void main() {
       },
     );
 
+    test('parses startDate and endDate from the listing info text', () {
+      final element = document.querySelector('.contest')!;
+      final model = CompetitionModel.fromElement(element)!;
+
+      expect(model.startDate, DateTime(2026, 3, 21));
+      expect(model.endDate, DateTime(2026, 3, 24));
+    });
+
     test('returns null for malformed element with no <h3><a>', () {
       final malformed = Element.html(
         '<div class="contest"><p>No anchor</p></div>',
@@ -74,6 +83,38 @@ void main() {
       expect(entity.title, equals(model.title));
       expect(entity.url, equals(model.url));
       expect(entity.description, equals(model.description));
+      expect(entity.startDate, equals(model.startDate));
+      expect(entity.endDate, equals(model.endDate));
+    });
+
+    test('competition status is computed from parsed dates', () {
+      final element = document.querySelector('.contest')!;
+      final entity = CompetitionModel.fromElement(element)!.toEntity();
+
+      expect(
+        CompetitionStatus.of(
+          startDate: entity.startDate,
+          endDate: entity.endDate,
+          now: DateTime(2026, 3, 22),
+        ),
+        CompetitionStatus.live,
+      );
+      expect(
+        CompetitionStatus.of(
+          startDate: entity.startDate,
+          endDate: entity.endDate,
+          now: DateTime(2026, 3, 20),
+        ),
+        CompetitionStatus.upcoming,
+      );
+      expect(
+        CompetitionStatus.of(
+          startDate: entity.startDate,
+          endDate: entity.endDate,
+          now: DateTime(2026, 3, 25),
+        ),
+        CompetitionStatus.past,
+      );
     });
   });
 }

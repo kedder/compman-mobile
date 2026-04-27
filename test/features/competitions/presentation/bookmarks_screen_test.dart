@@ -25,12 +25,16 @@ class _DataBookmarksNotifier extends BookmarkedCompetitionsNotifier {
       title: 'Competition One',
       soaringspotUrl: 'https://example.com/1',
       bookmarkedAt: DateTime(2026, 3, 1),
+      startDate: DateTime(2026, 3, 1),
+      endDate: DateTime(2026, 3, 5),
     ),
     BookmarkedCompetition(
       id: 'comp-2',
       title: 'Competition Two',
       soaringspotUrl: 'https://example.com/2',
       bookmarkedAt: DateTime(2026, 3, 2),
+      startDate: DateTime(2026, 3, 6),
+      endDate: DateTime(2026, 3, 9),
     ),
   ];
 }

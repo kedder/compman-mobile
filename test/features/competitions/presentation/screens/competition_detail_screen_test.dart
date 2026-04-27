@@ -22,6 +22,8 @@ final _tCompetition = BookmarkedCompetition(
   soaringspotUrl: 'https://example.com/test',
   bookmarkedAt: DateTime(2026, 3, 1),
   selectedClass: null,
+  startDate: DateTime(2026, 3, 1),
+  endDate: DateTime(2026, 3, 7),
 );
 
 // ---------------------------------------------------------------------------
