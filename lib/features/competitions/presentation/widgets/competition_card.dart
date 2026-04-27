@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/competition.dart';
+import 'status_badge.dart';
 
 /// Reusable card widget displaying a [Competition] in the Add Competition screen.
 ///
@@ -82,43 +82,13 @@ class CompetitionCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                const _StatusBadge(label: 'Upcoming'),
+                if (competition.status != null) ...[
+                  const SizedBox(width: 8),
+                  StatusBadge(status: competition.status!),
+                ],
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Small colored badge conveying competition status.
-///
-/// Rendered per the badge spec in `docs/ui-guidelines.md`.
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors = context.appColors;
-    // "Upcoming" badge colours per ui-guidelines.md / AppColors
-    final Color background = appColors.badgeUpcoming;
-    final Color foreground = appColors.badgeUpcomingText;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: foreground,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

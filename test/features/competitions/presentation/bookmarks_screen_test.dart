@@ -2,6 +2,7 @@ import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/bookmarks_screen.dart';
+import 'package:compman_mobile/features/competitions/presentation/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -89,11 +90,15 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.text('Add your first competition'), findsOneWidget);
     expect(find.text('Add Competition'), findsOneWidget);
-    expect(find.text('No competitions added yet.'), findsOneWidget);
+    expect(
+      find.text('Start tracking tasks and waypoint downloads.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('shows competition titles when bookmarks are loaded', (
+  testWidgets('shows flat bookmark rows with status badges when loaded', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -105,8 +110,11 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.text('Your Competitions'), findsOneWidget);
     expect(find.text('Competition One'), findsOneWidget);
     expect(find.text('Competition Two'), findsOneWidget);
+    expect(find.byType(StatusBadge), findsNWidgets(2));
+    expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
   testWidgets('shows error message and Retry button on failure', (
@@ -125,7 +133,23 @@ void main() {
     expect(find.text('An unexpected error occurred.'), findsOneWidget);
   });
 
-  testWidgets('shows confirmation dialog when trash icon is tapped', (
+  testWidgets('tapping the FAB navigates to add competition', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        bookmarkedCompetitionsProvider.overrideWith(
+          () => _DataBookmarksNotifier(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add screen'), findsOneWidget);
+  });
+
+  testWidgets('shows confirmation dialog when a row is long-pressed', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -137,7 +161,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.delete_outline).first);
+    await tester.longPress(find.text('Competition One'));
     await tester.pumpAndSettle();
 
     expect(find.text('Remove competition?'), findsOneWidget);

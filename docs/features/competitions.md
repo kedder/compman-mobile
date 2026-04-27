@@ -6,7 +6,7 @@ This document describes the Competitions feature — the core MVP feature of Com
 
 ## Overview
 
-Users can browse all gliding competitions currently listed on SoaringSpot, view basic details, and bookmark competitions they plan to attend. Bookmarked competitions appear in a dedicated "My Competitions" tab for quick access.
+Users can browse all gliding competitions currently listed on SoaringSpot, view basic details, and bookmark competitions they plan to attend. Bookmarked competitions appear on the home screen for quick access.
 
 For the full UI specification — screens, user flows, visual states, error handling, and UX requirements — see **[overview.md](overview.md)**.
 
@@ -114,7 +114,7 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 
 ## Screens
 
-### Competition List Screen (`/`)
+### Competition List Screen (`/add`)
 
 - **State:** Watches `competitionListProvider`
 - Shows a scrollable list of `CompetitionCard` widgets
@@ -123,12 +123,13 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 - Tap card → navigate to Competition Detail Screen
 - Shows loading spinner while fetching, error message with retry on failure
 
-### My Competitions Screen (`/bookmarks`)
+### Home Screen (`/`)
 
 - **State:** Watches `bookmarkedCompetitionsProvider`
 - Shows only bookmarked competitions
-- Empty state: "No bookmarked competitions yet."
-- Each item: title, bookmarked date, remove button
+- Empty state: centered headline + supporting text + "Add Competition" CTA button
+- Non-empty state: body header, flat list rows, inline status badges, and an add `FloatingActionButton`
+- Each item: title, description/date-location text, chevron affordance; tap opens detail and long-press opens the remove confirmation dialog
 
 ### Competition Detail Screen (`/competitions/:id`)
 

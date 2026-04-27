@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../providers/competitions_providers.dart';
+import '../widgets/status_badge.dart';
 
 /// Home screen showing the user's bookmarked competitions.
 class BookmarksScreen extends ConsumerWidget {
@@ -17,13 +18,8 @@ class BookmarksScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Competitions'),
+        title: const Text('Compman Mobile'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Add competition',
-            onPressed: () => context.push('/add'),
-          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) => context.push(value),
@@ -37,31 +33,53 @@ class BookmarksScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButton: switch (bookmarksAsync) {
+        AsyncData(:final value) when value.isNotEmpty => FloatingActionButton(
+          onPressed: () => context.push('/add'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          tooltip: 'Add competition',
+          child: const Icon(Icons.add),
+        ),
+        _ => null,
+      },
       body: bookmarksAsync.when(
         skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => _ErrorView(
           message: _errorMessage(err),
-          onRetry: () => ref.invalidate(bookmarkedCompetitionsProvider),
+          onRetry: () {
+            ref.invalidate(bookmarkedCompetitionsProvider);
+          },
         ),
-        data: (bookmarks) => bookmarks.isEmpty
-            ? _EmptyState(onAdd: () => context.push('/add'))
-            : RefreshIndicator(
-                onRefresh: () async =>
-                    ref.invalidate(bookmarkedCompetitionsProvider),
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: bookmarks.length,
-                  itemBuilder: (context, index) {
-                    final bookmark = bookmarks[index];
-                    return _BookmarkCard(
-                      bookmark: bookmark,
-                      onTap: () => context.push('/competitions/${bookmark.id}'),
-                      onRemove: () => _confirmRemove(context, ref, bookmark),
-                    );
-                  },
-                ),
-              ),
+        data: (bookmarks) {
+          if (bookmarks.isEmpty) {
+            return _EmptyState(onAdd: () => context.push('/add'));
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              final _ = await ref.refresh(
+                bookmarkedCompetitionsProvider.future,
+              );
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 96),
+              itemCount: bookmarks.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return const _ListHeader();
+                }
+
+                final bookmark = bookmarks[index - 1];
+                return _BookmarkRow(
+                  bookmark: bookmark,
+                  onTap: () => context.push('/competitions/${bookmark.id}'),
+                  onRemove: () => _confirmRemove(context, ref, bookmark),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -147,26 +165,35 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'No competitions added yet.',
-              style: Theme.of(context).textTheme.titleMedium,
+              'Add your first competition',
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start tracking tasks and waypoint downloads.',
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: onAdd,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-              child: const Text('Add Competition'),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Competition'),
             ),
           ],
         ),
@@ -175,8 +202,40 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _BookmarkCard extends StatelessWidget {
-  const _BookmarkCard({
+class _ListHeader extends StatelessWidget {
+  const _ListHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Your Competitions',
+            style: textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'View and manage your gliding events.',
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookmarkRow extends StatelessWidget {
+  const _BookmarkRow({
     required this.bookmark,
     required this.onTap,
     required this.onRemove,
@@ -188,52 +247,61 @@ class _BookmarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      elevation: 2,
-      child: ListTile(
-        title: Text(
-          bookmark.title,
-          style: Theme.of(context).textTheme.titleMedium,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          _formatBookmarkedDate(bookmark.bookmarkedAt),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        trailing: Semantics(
-          label: 'Remove ${bookmark.title}',
-          child: IconButton(
-            icon: Icon(
-              Icons.delete_outline,
-              color: Theme.of(context).colorScheme.error,
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          onLongPress: onRemove,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              bookmark.title,
+                              style: textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (bookmark.status != null) ...[
+                            const SizedBox(width: 8),
+                            StatusBadge(status: bookmark.status!),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        bookmark.description ?? '',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.tertiary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Icon(Icons.chevron_right, color: colorScheme.outline),
+              ],
             ),
-            tooltip: 'Remove ${bookmark.title}',
-            onPressed: onRemove,
           ),
         ),
-        onTap: onTap,
-      ),
+        const Divider(height: 1),
+      ],
     );
   }
-}
-
-String _formatBookmarkedDate(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return 'Bookmarked ${months[date.month - 1]} ${date.day}, ${date.year}';
 }

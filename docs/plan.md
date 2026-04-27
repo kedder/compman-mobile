@@ -54,6 +54,7 @@
 - ✅ **Riverpod providers** — `competitionListProvider` (AsyncNotifier), `bookmarkedCompetitionsProvider` (AsyncNotifier); both await Hive box before accessing repository
 - ✅ **Competition List Screen** — search bar, checkbox multi-select via `CompetitionCard` widget, pre-populated from existing bookmarks, footer Back/Done actions
 - ✅ **My Competitions Screen** — pull-to-refresh, empty/loading/error states, title + bookmarked date cards, remove with confirmation dialog
+- ✅ **Home screen redesign** — `BookmarksScreen` now matches the refreshed "Your Competitions" design with a centered empty-state CTA, flat rows with inline `StatusBadge`, long-press remove, and a floating add action
 - ✅ **Competition Detail Screen** — full implementation: class picker (chips from SoarScore task list), task display (day/task/title/timestamp), "Install as XCSoar Default Task" button with SAF write and SnackBar feedback, XCSoar directory info row, pull-to-refresh; new providers: `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`; new `/settings/xcsoar-directory` route with `XcsoarDirectorySettingsScreen`
 - ✅ **Fix: Competition Detail refresh** — pull-to-refresh now awaits `latestTasksProvider` so the spinner shows for the full request duration; AppBar refresh button shows an inline `CircularProgressIndicator` while loading; both paths refresh only `latestTasksProvider` (classes and competition detail not re-fetched)
 - ✅ **Routing** — `GoRouter` with named routes `/`, `/add`, `/competitions/:id`, `/about`; no bottom nav per ui-guidelines
@@ -66,7 +67,7 @@
 ### Tests
 - ✅ **Use case tests** — unit tests for all 4 use cases with mocked repository
 - ✅ **Repository impl tests** — unit tests with mocked datasources
-- ✅ **Widget tests** — BookmarksScreen (4 tests: empty/data/error/dialog) and CompetitionListScreen (4 tests: list/search/no-results/selection)
+- ✅ **Widget tests** — BookmarksScreen (5 tests: empty/data/error/fab navigation/dialog) and CompetitionListScreen (4 tests: list/search/no-results/selection)
 
 ---
 

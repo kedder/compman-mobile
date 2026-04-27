@@ -8,6 +8,6 @@ void main() {
     // GoRouter renders; give it a frame to settle the initial route.
     await tester.pump();
 
-    expect(find.text('Your Competitions'), findsOneWidget);
+    expect(find.text('Compman Mobile'), findsOneWidget);
   });
 }
