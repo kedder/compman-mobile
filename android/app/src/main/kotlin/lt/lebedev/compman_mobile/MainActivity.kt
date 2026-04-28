@@ -24,9 +24,12 @@ class MainActivity : FlutterFragmentActivity() {
             pendingResult = null
 
             if (uri == null) {
+                Log.d("CompmanSAF", "safLauncher: user cancelled")
                 result.success("cancelled")
                 return@registerForActivityResult
             }
+
+            Log.d("CompmanSAF", "safLauncher: user selected URI: $uri")
 
             contentResolver.takePersistableUriPermission(
                 uri,
@@ -38,6 +41,7 @@ class MainActivity : FlutterFragmentActivity() {
                 .putString("xcsoar_tree_uri", uri.toString())
                 .apply()
 
+            Log.d("CompmanSAF", "safLauncher: permission granted and stored")
             result.success("ok")
         }
 
@@ -58,15 +62,19 @@ class MainActivity : FlutterFragmentActivity() {
                     "clearSafPermission" -> {
                         val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
                         val stored = prefs.getString("xcsoar_tree_uri", null)
+                        Log.d("CompmanSAF", "clearSafPermission: stored URI before clear: $stored")
                         if (stored != null) {
                             val treeUri = Uri.parse(stored)
+                            Log.d("CompmanSAF", "clearSafPermission: releasing permission for $treeUri")
                             try {
                                 contentResolver.releasePersistableUriPermission(
                                     treeUri,
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                                 )
+                                Log.d("CompmanSAF", "clearSafPermission: permission released")
                             } catch (_: SecurityException) { /* already released */ }
                             prefs.edit().remove("xcsoar_tree_uri").apply()
+                            Log.d("CompmanSAF", "clearSafPermission: URI removed from prefs")
                         }
                         result.success("ok")
                     }
@@ -75,9 +83,35 @@ class MainActivity : FlutterFragmentActivity() {
             }
     }
 
+    private fun getXcsoarMediaPath(): String {
+        val possiblePackages = listOf("org.xcsoar", "org.xcsoar.play", "org.xcsoar.foss")
+        val externalMediaDir = java.io.File("/sdcard/Android/media")
+        for (pkg in possiblePackages) {
+            val dir = java.io.File(externalMediaDir, pkg)
+            if (dir.exists() && dir.isDirectory) {
+                Log.d("CompmanSAF", "getXcsoarMediaPath: found XCSoar at $pkg")
+                return "primary:Android/media/$pkg"
+            }
+        }
+        Log.d("CompmanSAF", "getXcsoarMediaPath: no XCSoar directory found, using fallback")
+        return "primary:Android/media/org.xcsoar"
+    }
+
     private fun handlePickDirectory(result: MethodChannel.Result) {
         pendingResult = result
-        safLauncher.launch(Uri.parse("content://org.xcsoar.allfiles/document/root:"))
+        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
+        val storedUri = prefs.getString("xcsoar_tree_uri", null)
+        val initialUri = if (storedUri != null) {
+            Log.d("CompmanSAF", "handlePickDirectory: using stored URI: $storedUri")
+            Uri.parse(storedUri)
+        } else {
+            Log.d("CompmanSAF", "handlePickDirectory: no stored URI, detecting XCSoar path")
+            val xcsoarPath = getXcsoarMediaPath()
+            val encodedPath = Uri.encode(xcsoarPath)
+            Uri.parse("content://com.android.externalstorage.documents/document/$encodedPath")
+        }
+        Log.d("CompmanSAF", "handlePickDirectory: launching with URI: $initialUri")
+        safLauncher.launch(initialUri)
     }
 
     private fun handleWriteFile(bytes: ByteArray, filename: String, result: MethodChannel.Result) {
