@@ -229,31 +229,38 @@ class _BookmarkRow extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Flexible(
-                            child: Text(
-                              bookmark.title,
-                              style: textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.onSurface,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  bookmark.title,
+                                  style: textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                  overflow: TextOverflow.visible,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  bookmark.description ?? '',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.tertiary,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
-                          if (bookmark.status != null) ...[
-                            const SizedBox(width: 8),
-                            StatusBadge(status: bookmark.status!),
-                          ],
+                          if (bookmark.status != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: StatusBadge(status: bookmark.status!),
+                            ),
                         ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        bookmark.description ?? '',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.tertiary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

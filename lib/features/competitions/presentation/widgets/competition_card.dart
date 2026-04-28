@@ -62,26 +62,36 @@ class CompetitionCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            crossAxisAlignment: WrapCrossAlignment.center,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                competition.title,
-                                style: titleStyle,
-                                overflow: TextOverflow.ellipsis,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      competition.title,
+                                      style: titleStyle,
+                                      overflow: TextOverflow.visible,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      competition.description,
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.tertiary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               if (competition.status != null)
-                                StatusBadge(status: competition.status!),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: StatusBadge(
+                                    status: competition.status!,
+                                  ),
+                                ),
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            competition.description,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.tertiary,
-                            ),
                           ),
                         ],
                       ),
