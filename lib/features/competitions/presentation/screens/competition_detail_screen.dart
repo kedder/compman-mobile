@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/error/failures.dart';
@@ -195,6 +196,7 @@ class _HeaderSection extends StatelessWidget {
           icon: Icons.language,
           text: competition.soaringspotUrl,
           color: colorScheme.primary,
+          onTap: () => launchUrl(Uri.parse(competition.soaringspotUrl)),
         ),
       ],
     );

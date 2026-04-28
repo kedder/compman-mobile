@@ -13,6 +13,7 @@ class IconMetaRow extends StatelessWidget {
     this.iconSize = 16.0,
     this.color,
     this.style,
+    this.onTap,
   });
 
   /// Icon displayed at the start of the row.
@@ -30,12 +31,15 @@ class IconMetaRow extends StatelessWidget {
   /// Optional text style override. If not provided, defaults to `bodySmall`.
   final TextStyle? style;
 
+  /// Optional callback invoked when the row is tapped.
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final resolvedColor = color ?? Theme.of(context).colorScheme.secondary;
     final resolvedStyle = style ?? Theme.of(context).textTheme.bodySmall;
 
-    return Row(
+    final child = Row(
       children: [
         Icon(icon, size: iconSize, color: resolvedColor),
         const SizedBox(width: 4),
@@ -49,5 +53,15 @@ class IconMetaRow extends StatelessWidget {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: child,
+      );
+    }
+
+    return child;
   }
 }
