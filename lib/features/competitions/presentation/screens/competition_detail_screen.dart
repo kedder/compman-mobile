@@ -536,6 +536,7 @@ class _TaskCard extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: downloading ? null : onInstall,
+              style: AppButtonStyles.primary(context),
               icon: downloading
                   ? const SizedBox(
                       width: 18,
