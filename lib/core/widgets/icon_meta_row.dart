@@ -12,6 +12,7 @@ class IconMetaRow extends StatelessWidget {
     required this.text,
     this.iconSize = 16.0,
     this.color,
+    this.style,
   });
 
   /// Icon displayed at the start of the row.
@@ -26,9 +27,13 @@ class IconMetaRow extends StatelessWidget {
   /// Icon and text color. Defaults to `colorScheme.secondary`.
   final Color? color;
 
+  /// Optional text style override. If not provided, defaults to `bodySmall`.
+  final TextStyle? style;
+
   @override
   Widget build(BuildContext context) {
     final resolvedColor = color ?? Theme.of(context).colorScheme.secondary;
+    final resolvedStyle = style ?? Theme.of(context).textTheme.bodySmall;
 
     return Row(
       children: [
@@ -39,9 +44,7 @@ class IconMetaRow extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: resolvedColor),
+            style: resolvedStyle?.copyWith(color: resolvedColor),
           ),
         ),
       ],

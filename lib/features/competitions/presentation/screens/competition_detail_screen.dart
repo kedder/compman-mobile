@@ -503,7 +503,7 @@ class _TaskCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Day ${task.dayNo} - Task ${task.taskNo}',
-                  style: textTheme.headlineMedium,
+                  style: textTheme.headlineSmall,
                 ),
               ),
               // TODO(new-update): show when newer version available
@@ -519,6 +519,7 @@ class _TaskCard extends StatelessWidget {
             icon: Icons.route,
             text: task.title,
             color: colorScheme.primary,
+            style: textTheme.titleMedium,
           ),
         ],
       ),
