@@ -131,7 +131,7 @@ jobs:
             -e UPLOAD_KEY_PASSWORD="${{ secrets.UPLOAD_KEY_PASSWORD }}" \
             compman-mobile-dev:ci \
             bash -c "flutter pub get && flutter build appbundle --release \
-              --build-name '${{ github.ref_name }}' \
+              --build-name '${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}' \
               --build-number '${{ github.run_number }}'"
 
       # Hand ownership of the cache dirs back to the runner user so that the
