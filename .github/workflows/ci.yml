@@ -27,6 +27,8 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - ci/test-play-upload
 
 permissions:
   contents: read
@@ -138,7 +140,7 @@ jobs:
       # owner than the GitHub Actions runner user.)
       - name: Fix cache dir permissions
         if: always()
-        run: sudo chown -R "$USER" /tmp/pub-cache /tmp/gradle-cache
+        run: sudo chown -R "$USER" /tmp/pub-cache /tmp/gradle-cache "$GITHUB_WORKSPACE"
 
       # Upload the signed AAB to Google Play internal testing track as a draft.
       # Promote to a higher track manually in Play Console after review.
