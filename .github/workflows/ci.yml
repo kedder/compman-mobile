@@ -1,7 +1,7 @@
 # Compman Mobile — Continuous Integration
 #
-# Triggered when a version tag of the form X.Y.Z is pushed (e.g. 2.5.12).
-# Builds a signed release AAB and publishes it as a workflow artifact.
+# Triggered on every push. Builds a signed release AAB.
+# The Google Play upload step runs only on version tags (X.Y.Z).
 #
 # --build-name is set to the tag name (e.g. 2.5.12).
 # --build-number is set to github.run_number (monotonically increasing integer).
@@ -25,8 +25,6 @@ name: CI
 
 on:
   push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: read
@@ -74,23 +72,33 @@ jobs:
             gradle-
 
       # Build the builder image from the project Dockerfile.
-      # `load: true`  — materialise the built image in the local Docker daemon
-      #                 so the subsequent `docker run` can use it.
-      # `push: false` — we never push the image itself, only its layer cache.
+      # `push: true`  — push the image to GHCR so the subsequent `docker pull`
+      #                 can download layers in parallel via the registry protocol,
+      #                 avoiding the slow BuildKit→tarball→daemon import cycle.
+      # `load: false` — image is not needed locally until the pull step below.
       # `cache-from/cache-to` — read and write BuildKit layer cache in GHCR.
       # `mode=max`    — cache all layers (intermediate + final), maximising hits.
       - name: Build builder image (with registry layer cache)
         uses: docker/build-push-action@v7
         with:
           context: .
-          load: true
-          push: false
-          tags: compman-mobile-dev:ci
+          load: false
+          push: true
+          tags: ghcr.io/${{ github.repository }}/builder:latest
           build-args: |
             HOST_UID=1000
             HOST_GID=1000
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/builder-cache:latest
           cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/builder-cache:latest,mode=max
+
+      # Pull the just-pushed image so `docker run` below can use it.
+      # Pulling via the registry is ~3× faster than the tarball load approach above
+      # because Docker downloads layers in parallel instead of importing a serial
+      # socket stream from BuildKit.
+      - name: Pull builder image
+        run: |
+          docker pull ghcr.io/${{ github.repository }}/builder:latest
+          docker tag  ghcr.io/${{ github.repository }}/builder:latest compman-mobile-dev:ci
 
       # Ensure the container's `dev` user (uid 1000) can read/write the workspace
       # and the two host-side cache directories.
@@ -146,6 +154,7 @@ jobs:
       # Required repository secret:
       #   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON — contents of the service account JSON key
       - name: Upload to Google Play (internal track)
+        if: startsWith(github.ref, 'refs/tags/')
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
