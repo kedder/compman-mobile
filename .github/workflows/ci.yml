@@ -7,9 +7,10 @@
 # --build-number is set to github.run_number (monotonically increasing integer).
 #
 # Required repository secrets:
-#   UPLOAD_KEYSTORE_BASE64 — base64-encoded upload-key.jks  (base64 -w 0 upload-key.jks)
-#   UPLOAD_KEY_ALIAS       — key alias inside the keystore
-#   UPLOAD_KEY_PASSWORD    — key password (also used as the store password)
+#   UPLOAD_KEYSTORE_BASE64          — base64-encoded upload-key.jks  (base64 -w 0 upload-key.jks)
+#   UPLOAD_KEY_ALIAS                — key alias inside the keystore
+#   UPLOAD_KEY_PASSWORD             — key password (also used as the store password)
+#   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON — contents of the Google Play service account JSON key
 #
 # Image-layer caching strategy (keeps regular builds fast despite the ~7 GB image):
 #   • docker/build-push-action with BuildKit registry cache stores every layer in
@@ -139,10 +140,16 @@ jobs:
         if: always()
         run: sudo chown -R "$USER" /tmp/pub-cache /tmp/gradle-cache
 
-      # Publish the AAB so it can be downloaded from the workflow run summary.
-      - name: Upload release AAB artifact
-        uses: actions/upload-artifact@v7
+      # Upload the signed AAB to Google Play internal testing track as a draft.
+      # Promote to a higher track manually in Play Console after review.
+      #
+      # Required repository secret:
+      #   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON — contents of the service account JSON key
+      - name: Upload to Google Play (internal track)
+        uses: r0adkll/upload-google-play@v1
         with:
-          name: app-release-${{ github.ref_name }}
-          path: build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: lt.lebedev.compman_mobile
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: draft
