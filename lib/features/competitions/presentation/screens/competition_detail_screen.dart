@@ -418,7 +418,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Default.tsk installed in XCSoar folder'),
+          content: const Text('Task downloaded'),
           backgroundColor: context.appColors.success,
         ),
       );
@@ -547,7 +547,7 @@ class _TaskCard extends StatelessWidget {
                     )
                   : const Icon(Icons.download),
               label: Text(
-                downloading ? 'Installing...' : 'Install XCSoar Task',
+                downloading ? 'Downloading...' : 'Download task',
               ),
             ),
           ),

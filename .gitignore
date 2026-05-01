@@ -21,6 +21,7 @@ secret/
 *.iml
 .vscode/
 *.code-workspace
+.claude/settings.local.json
 
 # OS
 .DS_Store

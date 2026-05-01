@@ -96,6 +96,7 @@
 - ✅ **Competition classes presentation** — `competitionClassesProvider` added to presentation providers; `_ClassPicker` updated to watch `competitionClassesProvider` instead of deriving classes from `latestTasksProvider`; pull-to-refresh and AppBar refresh also invalidate `competitionClassesProvider`; the no-class state now uses full-width class cards with trophy icons and chevrons; 4 widget tests cover cards visible, selection action, empty state, and error+retry
 - ✅ **Competition status domain/data enrichment** — added computed `CompetitionStatus`, nullable `startDate`/`endDate` on competition entities and bookmark storage, parsed SoaringSpot date ranges from listing HTML, and preserved those fields when saving bookmarks
 - ✅ **Competition detail screen redesign** — updated `CompetitionDetailScreen` to use the static "Competition Details" AppBar, large-title URL header, inline selected-class row, two-tone task card, subdued XCSoar directory footer, and stacked dismissible download error banners; widget coverage added for selected-class and error-banner states
+- ✅ **Rename task download button** — button label changed from "Install XCSoar Task" to "Download task", loading state from "Installing..." to "Downloading...", and success SnackBar from "Default.tsk installed in XCSoar folder" to "Task downloaded"; widget tests and docs updated
 - 📋 `docs/features/tasks.md`
 
 ---

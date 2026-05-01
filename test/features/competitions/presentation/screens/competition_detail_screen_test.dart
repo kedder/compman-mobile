@@ -299,7 +299,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Day 4 - Task 1'), findsOneWidget);
-    expect(find.text('Install XCSoar Task'), findsOneWidget);
+    expect(find.text('Download task'), findsOneWidget);
     expect(find.text('NEW UPDATE'), findsNothing);
   });
 
@@ -323,7 +323,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    await tester.tap(find.text('Install XCSoar Task'));
+    await tester.tap(find.text('Download task'));
     await tester.pumpAndSettle();
 
     expect(find.text('Task download failed'), findsOneWidget);
@@ -350,7 +350,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    await tester.tap(find.text('Install XCSoar Task'));
+    await tester.tap(find.text('Download task'));
     await tester.pumpAndSettle();
     expect(find.text('Task download failed'), findsOneWidget);
 

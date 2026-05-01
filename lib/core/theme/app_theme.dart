@@ -102,7 +102,7 @@ class AppColors extends ThemeExtension<AppColors> {
 
 /// Named button style helpers for non-standard button variants.
 abstract final class AppButtonStyles {
-  /// Primary filled button — used for prominent actions like "Install XCSoar Task".
+  /// Primary filled button — used for prominent actions like "Download task".
   /// Uses theme's primary colour for background and onPrimary for foreground.
   static ButtonStyle primary(BuildContext context) {
     return ElevatedButton.styleFrom(
