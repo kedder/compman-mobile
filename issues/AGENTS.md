@@ -60,3 +60,37 @@ A good issue includes:
 - Any relevant context, constraints, or links to docs
 
 Keep issues focused. One logical change per file.
+
+---
+
+## User Stories
+
+User stories are raw requests from the user — ideas, desired improvements, or change descriptions that have not yet been turned into actionable issues.
+
+### Location and naming
+
+```
+issues/userstories/YYYY-MM-DD-<short-description>.md
+```
+
+- `YYYY-MM-DD` — date the story was written (dashes between year, month, day)
+- `<short-description>` — brief, lowercase, hyphen-separated label
+
+**Examples:**
+```
+issues/userstories/2026-05-01-filter-competitions-by-country.md
+issues/userstories/2026-05-01-offline-mode.md
+```
+
+### Content
+
+A user story file starts as a free-form message from the user describing what they want. It may be rough, high-level, or lack technical detail — that is expected. The purpose is to capture intent, not to specify implementation.
+
+### Lifecycle
+
+1. **Written by the user** — placed in `issues/userstories/` as a plain description.
+2. **Enriched by the Product Owner agent** — the PO reads the story, cross-references other open stories and existing feature docs, proposes a UI approach, estimates scope, and rewrites the story file with a title and structured notes for the Planner (see [`../agents/product-owner.md`](../agents/product-owner.md)).
+3. **Planned by the Planner agent** — the Planner reads the enriched story and produces one or more issue files in `issues/` that together implement the request.
+4. **Closed** — once all derived issues have been created, move the user story to `issues/userstories/done/`.
+
+When authoring issues from a user story, reference the story filename in each derived issue so the connection is traceable.
