@@ -26,7 +26,7 @@ task card:
 **Airspace card**
 - Shows the airspace filename, file size, and the last-published timestamp
   sourced from SoaringSpot (e.g. "Updated: 19/04/2026, 12:53")
-- Has an "Install" button to download and install the file onto the device
+- Has a "Download" button to download and install the file onto the device
 - Displays a "NEW UPDATE" badge when the SoaringSpot timestamp is newer than
   the timestamp recorded at last install
 - If no airspace file is listed on SoaringSpot, shows "No airspace file
@@ -64,4 +64,4 @@ installed versions. Likely 3–4 issues.
 - `docs/design/competition_details_full_download_suite/` — authoritative visual
   spec for the full Competition Detail screen including Airspace and Waypoints
   cards with "NEW UPDATE" badges, filenames, file sizes, timestamps, and
-  "Install" buttons
+  "Download" buttons
