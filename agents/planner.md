@@ -28,5 +28,6 @@ relevant to the feature being planned.
 - Do not update `docs/` unless the user explicitly asks.
 - Do not mark tasks in `docs/plan.md` — that is the implementing agent's job.
 - In each issue, reference `AGENTS.md` for general project rules rather than restating them. Only call out constraints specific to this feature.
+- Every issue's **Acceptance criteria** must include `make format` reports no changes, in addition to `make test` and `make analyze`.
 - Use the actual current date from your runtime context for the filename timestamp.
 - If the feature requires a decision the user should make, ask before writing the issue.
