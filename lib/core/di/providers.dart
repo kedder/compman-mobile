@@ -9,9 +9,12 @@ import '../../features/competitions/data/datasources/soaringspot_remote_datasour
 import '../../features/competitions/data/models/bookmarked_competition_model.dart';
 import '../../features/competitions/data/repositories/competitions_repository_impl.dart';
 import '../../features/competitions/domain/repositories/competitions_repository.dart';
+import '../../features/competitions/domain/usecases/download_file.dart';
 import '../../features/competitions/domain/usecases/download_task.dart';
 import '../../features/competitions/domain/usecases/fetch_competition_classes.dart';
+import '../../features/competitions/domain/usecases/fetch_downloads.dart';
 import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
+import '../../features/competitions/domain/usecases/record_file_install.dart';
 import '../../features/competitions/domain/usecases/set_competition_class.dart';
 import '../network/http_client.dart';
 
@@ -79,6 +82,21 @@ final setCompetitionClassProvider = Provider<SetCompetitionClass>(
 /// Provides a [FetchCompetitionClasses] use case instance.
 final fetchCompetitionClassesProvider = Provider<FetchCompetitionClasses>(
   (ref) => FetchCompetitionClasses(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [FetchDownloads] use case instance.
+final fetchDownloadsProvider = Provider<FetchDownloads>(
+  (ref) => FetchDownloads(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [DownloadFile] use case instance.
+final downloadFileProvider = Provider<DownloadFile>(
+  (ref) => DownloadFile(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [RecordFileInstall] use case instance.
+final recordFileInstallProvider = Provider<RecordFileInstall>(
+  (ref) => RecordFileInstall(ref.read(competitionsRepositoryProvider)),
 );
 
 /// Provides the app's [PackageInfo] metadata from the host platform.

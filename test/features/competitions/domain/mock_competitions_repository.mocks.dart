@@ -11,6 +11,8 @@ import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_
     as _i8;
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart'
     as _i6;
+import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart'
+    as _i11;
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart'
     as _i9;
 import 'package:compman_mobile/features/competitions/domain/repositories/competitions_repository.dart'
@@ -178,4 +180,63 @@ class MockCompetitionsRepository extends _i1.Mock
                 ),
           )
           as _i3.Future<_i4.Either<_i5.Failure, List<String>>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, List<_i11.DownloadableFileInfo>>>
+  fetchDownloads(String? competitionId) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchDownloads, [competitionId]),
+            returnValue:
+                _i3.Future<
+                  _i4.Either<_i5.Failure, List<_i11.DownloadableFileInfo>>
+                >.value(
+                  _i7.dummyValue<
+                    _i4.Either<_i5.Failure, List<_i11.DownloadableFileInfo>>
+                  >(this, Invocation.method(#fetchDownloads, [competitionId])),
+                ),
+          )
+          as _i3.Future<
+            _i4.Either<_i5.Failure, List<_i11.DownloadableFileInfo>>
+          >);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>> downloadFile(
+    String? fileUrl,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#downloadFile, [fileUrl]),
+            returnValue:
+                _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>.value(
+                  _i7.dummyValue<_i4.Either<_i5.Failure, _i10.Uint8List>>(
+                    this,
+                    Invocation.method(#downloadFile, [fileUrl]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i10.Uint8List>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>> recordFileInstall(
+    String? competitionId,
+    _i11.DownloadableFileKind? kind,
+    String? version,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#recordFileInstall, [
+              competitionId,
+              kind,
+              version,
+            ]),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
+                this,
+                Invocation.method(#recordFileInstall, [
+                  competitionId,
+                  kind,
+                  version,
+                ]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
 }

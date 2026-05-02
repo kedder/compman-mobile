@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/bookmarked_competition.dart';
 import '../entities/competition.dart';
+import '../entities/downloadable_file_info.dart';
 import '../entities/task_info.dart';
 
 /// Abstract repository interface for the competitions feature.
@@ -48,5 +49,28 @@ abstract class CompetitionsRepository {
   /// Returns an empty list (not a failure) if no classes are found.
   Future<Either<Failure, List<String>>> fetchCompetitionClasses(
     String competitionId,
+  );
+
+  /// Fetches the list of downloadable airspace and waypoint files from the
+  /// SoaringSpot downloads page for the competition identified by
+  /// [competitionId].
+  ///
+  /// Looks up [competitionId] in local bookmarks to obtain the SoaringSpot URL.
+  /// Returns an empty list (not a failure) if no relevant files are found.
+  Future<Either<Failure, List<DownloadableFileInfo>>> fetchDownloads(
+    String competitionId,
+  );
+
+  /// Downloads the raw bytes of an airspace or waypoint file from [fileUrl].
+  Future<Either<Failure, Uint8List>> downloadFile(String fileUrl);
+
+  /// Records the installed version token for an airspace or waypoints file.
+  ///
+  /// [version] is the raw [DownloadableFileInfo.publishedVersion] string
+  /// captured at install time. [kind] determines which field to update.
+  Future<Either<Failure, Unit>> recordFileInstall(
+    String competitionId,
+    DownloadableFileKind kind,
+    String? version,
   );
 }

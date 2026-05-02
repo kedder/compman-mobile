@@ -546,9 +546,7 @@ class _TaskCard extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.download),
-              label: Text(
-                downloading ? 'Downloading...' : 'Download task',
-              ),
+              label: Text(downloading ? 'Downloading...' : 'Download task'),
             ),
           ),
           // Installed state (when installed):

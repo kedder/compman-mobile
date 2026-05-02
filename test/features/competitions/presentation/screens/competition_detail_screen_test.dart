@@ -5,6 +5,7 @@ import 'package:compman_mobile/core/error/failures.dart';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
+import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/domain/repositories/competitions_repository.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_task.dart';
@@ -154,6 +155,22 @@ class _DummyRepository implements CompetitionsRepository {
   Future<Either<Failure, Unit>> setCompetitionClass(
     String competitionId,
     String? selectedClass,
+  ) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, List<DownloadableFileInfo>>> fetchDownloads(
+    String competitionId,
+  ) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Uint8List>> downloadFile(String fileUrl) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, Unit>> recordFileInstall(
+    String competitionId,
+    DownloadableFileKind kind,
+    String? version,
   ) => throw UnimplementedError();
 }
 

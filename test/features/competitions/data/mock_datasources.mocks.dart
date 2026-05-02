@@ -4,20 +4,22 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
-import 'dart:typed_data' as _i9;
+import 'dart:typed_data' as _i6;
 
 import 'package:compman_mobile/features/competitions/data/datasources/competitions_local_datasource.dart'
-    as _i5;
+    as _i7;
 import 'package:compman_mobile/features/competitions/data/datasources/soaringspot_remote_datasource.dart'
     as _i2;
 import 'package:compman_mobile/features/competitions/data/datasources/soarscore_remote_datasource.dart'
-    as _i7;
+    as _i9;
 import 'package:compman_mobile/features/competitions/data/models/bookmarked_competition_model.dart'
-    as _i6;
+    as _i8;
 import 'package:compman_mobile/features/competitions/data/models/competition_model.dart'
     as _i4;
+import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart'
+    as _i5;
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart'
-    as _i8;
+    as _i10;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -61,37 +63,57 @@ class MockSoaringSpotRemoteDataSource extends _i1.Mock
             returnValue: _i3.Future<List<String>>.value(<String>[]),
           )
           as _i3.Future<List<String>>);
+
+  @override
+  _i3.Future<List<_i5.DownloadableFileInfo>> fetchDownloads(
+    String? competitionUrl,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchDownloads, [competitionUrl]),
+            returnValue: _i3.Future<List<_i5.DownloadableFileInfo>>.value(
+              <_i5.DownloadableFileInfo>[],
+            ),
+          )
+          as _i3.Future<List<_i5.DownloadableFileInfo>>);
+
+  @override
+  _i3.Future<_i6.Uint8List> downloadFile(String? fileUrl) =>
+      (super.noSuchMethod(
+            Invocation.method(#downloadFile, [fileUrl]),
+            returnValue: _i3.Future<_i6.Uint8List>.value(_i6.Uint8List(0)),
+          )
+          as _i3.Future<_i6.Uint8List>);
 }
 
 /// A class which mocks [CompetitionsLocalDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockCompetitionsLocalDataSource extends _i1.Mock
-    implements _i5.CompetitionsLocalDataSource {
+    implements _i7.CompetitionsLocalDataSource {
   MockCompetitionsLocalDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<List<_i6.BookmarkedCompetitionModel>> getAll() =>
+  _i3.Future<List<_i8.BookmarkedCompetitionModel>> getAll() =>
       (super.noSuchMethod(
             Invocation.method(#getAll, []),
-            returnValue: _i3.Future<List<_i6.BookmarkedCompetitionModel>>.value(
-              <_i6.BookmarkedCompetitionModel>[],
+            returnValue: _i3.Future<List<_i8.BookmarkedCompetitionModel>>.value(
+              <_i8.BookmarkedCompetitionModel>[],
             ),
           )
-          as _i3.Future<List<_i6.BookmarkedCompetitionModel>>);
+          as _i3.Future<List<_i8.BookmarkedCompetitionModel>>);
 
   @override
-  _i3.Future<_i6.BookmarkedCompetitionModel?> getById(String? id) =>
+  _i3.Future<_i8.BookmarkedCompetitionModel?> getById(String? id) =>
       (super.noSuchMethod(
             Invocation.method(#getById, [id]),
-            returnValue: _i3.Future<_i6.BookmarkedCompetitionModel?>.value(),
+            returnValue: _i3.Future<_i8.BookmarkedCompetitionModel?>.value(),
           )
-          as _i3.Future<_i6.BookmarkedCompetitionModel?>);
+          as _i3.Future<_i8.BookmarkedCompetitionModel?>);
 
   @override
-  _i3.Future<void> save(_i6.BookmarkedCompetitionModel? model) =>
+  _i3.Future<void> save(_i8.BookmarkedCompetitionModel? model) =>
       (super.noSuchMethod(
             Invocation.method(#save, [model]),
             returnValue: _i3.Future<void>.value(),
@@ -113,24 +135,26 @@ class MockCompetitionsLocalDataSource extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSoarScoreRemoteDataSource extends _i1.Mock
-    implements _i7.SoarScoreRemoteDataSource {
+    implements _i9.SoarScoreRemoteDataSource {
   MockSoarScoreRemoteDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<List<_i8.TaskInfo>> fetchLatestTasks(String? competitionId) =>
+  _i3.Future<List<_i10.TaskInfo>> fetchLatestTasks(String? competitionId) =>
       (super.noSuchMethod(
             Invocation.method(#fetchLatestTasks, [competitionId]),
-            returnValue: _i3.Future<List<_i8.TaskInfo>>.value(<_i8.TaskInfo>[]),
+            returnValue: _i3.Future<List<_i10.TaskInfo>>.value(
+              <_i10.TaskInfo>[],
+            ),
           )
-          as _i3.Future<List<_i8.TaskInfo>>);
+          as _i3.Future<List<_i10.TaskInfo>>);
 
   @override
-  _i3.Future<_i9.Uint8List> downloadTask(String? taskUrl) =>
+  _i3.Future<_i6.Uint8List> downloadTask(String? taskUrl) =>
       (super.noSuchMethod(
             Invocation.method(#downloadTask, [taskUrl]),
-            returnValue: _i3.Future<_i9.Uint8List>.value(_i9.Uint8List(0)),
+            returnValue: _i3.Future<_i6.Uint8List>.value(_i6.Uint8List(0)),
           )
-          as _i3.Future<_i9.Uint8List>);
+          as _i3.Future<_i6.Uint8List>);
 }

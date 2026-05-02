@@ -70,14 +70,47 @@ Then re-run the tests. If assertions fail, adjust them to match the new structur
 
 **URL:** `{competition_url}/downloads`
 
-Airspace and waypoint files available for download are listed as:
+Each category (Airspaces, Waypoints) renders two sibling elements with the
+same class `contest-downloads` — a `<div>` (timestamp info) followed by a
+`<ul>` (file list):
 
 ```html
+<h3>Airspaces</h3>
+<div class="contest-downloads">
+    wgc2018_airspace_v5.1.cub
+    <span>Updated:</span>
+    <span>10/07/2018, 17:44</span>   <!-- publishedVersion -->
+</div>
 <ul class="contest-downloads">
-  <li><a href="/downloads/barron-2024/airspace.txt">airspace.txt</a></li>
-  <li><a href="/downloads/barron-2024/waypoints.cup">waypoints.cup</a></li>
+    <li>
+        <a href="https://archive.soaringspot.com/contest/026/2614/airspace/11439.txt">
+            <i class="fa fa-download"></i> wgc2018_airspace_v5.1_openair.txt
+        </a>
+        (134.831 kB)   <!-- fileSize text -->
+    </li>
 </ul>
 ```
+
+### Scraping strategy
+
+The scraper (`fetchDownloads` on `SoaringSpotRemoteDataSourceImpl`) queries
+all `.contest-downloads` elements in document order. A `div` element carries
+the timestamp for the subsequent file group; a `ul` element contains the
+actual file links. The last seen timestamp is applied to every file in the
+following `ul`.
+
+**Timestamp (`publishedVersion`):** The raw text of the **second `<span>`**
+inside `div.contest-downloads` (e.g. `"10/07/2018, 17:44"`). Stored as an
+opaque `String?` — never parsed into a `DateTime` because the server timezone
+is unknown. The badge fires when this string changes between installs.
+
+**File size (`fileSize`):** Parsed from the trailing `(NNN.NNN kB)` text node
+in each `<li>`. The numeric part is treated as a decimal kB value
+(`134.831 kB → 134831 bytes`). Returns `null` if the pattern is absent or
+unparseable.
+
+**Download URL:** Taken directly from `<a href>`. Absolute URLs are used
+as-is; relative URLs are prefixed with `https://www.soaringspot.com`.
 
 ### File Type Detection
 
@@ -86,7 +119,11 @@ Airspace and waypoint files available for download are listed as:
 | `.txt` | Airspace |
 | `.cup` | Waypoints |
 
-> **Note:** This feature is planned for Phase 2. This section documents the intended scraping approach.
+All other extensions are silently skipped.
+
+### Implementation File
+
+`lib/features/competitions/data/datasources/soaringspot_remote_datasource.dart` — `fetchDownloads(String competitionUrl)`
 
 ---
 

@@ -26,13 +26,15 @@ class BookmarkedCompetitionModelAdapter
       description: fields[5] as String?,
       startDate: fields[6] as DateTime?,
       endDate: fields[7] as DateTime?,
+      airspaceVersion: fields[8] as String?,
+      waypointsVersion: fields[9] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, BookmarkedCompetitionModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -48,7 +50,11 @@ class BookmarkedCompetitionModelAdapter
       ..writeByte(6)
       ..write(obj.startDate)
       ..writeByte(7)
-      ..write(obj.endDate);
+      ..write(obj.endDate)
+      ..writeByte(8)
+      ..write(obj.airspaceVersion)
+      ..writeByte(9)
+      ..write(obj.waypointsVersion);
   }
 
   @override

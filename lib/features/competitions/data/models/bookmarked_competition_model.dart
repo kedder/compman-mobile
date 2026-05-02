@@ -41,6 +41,20 @@ class BookmarkedCompetitionModel {
   @HiveField(7)
   final DateTime? endDate;
 
+  /// SoaringSpot version token of the last installed airspace file.
+  ///
+  /// Stored as the raw timestamp string scraped from SoaringSpot at install
+  /// time. Null until an airspace file has been installed.
+  /// Old records without this field deserialise with null.
+  @HiveField(8)
+  final String? airspaceVersion;
+
+  /// SoaringSpot version token of the last installed waypoints file.
+  ///
+  /// Old records without this field deserialise with null.
+  @HiveField(9)
+  final String? waypointsVersion;
+
   /// Creates a [BookmarkedCompetitionModel].
   BookmarkedCompetitionModel({
     required this.id,
@@ -51,6 +65,8 @@ class BookmarkedCompetitionModel {
     this.description,
     this.startDate,
     this.endDate,
+    this.airspaceVersion,
+    this.waypointsVersion,
   });
 
   /// Converts this model to the domain [BookmarkedCompetition] entity.
@@ -63,6 +79,8 @@ class BookmarkedCompetitionModel {
     description: description,
     startDate: startDate,
     endDate: endDate,
+    airspaceVersion: airspaceVersion,
+    waypointsVersion: waypointsVersion,
   );
 
   /// Creates a [BookmarkedCompetitionModel] from a domain [BookmarkedCompetition].
@@ -76,5 +94,7 @@ class BookmarkedCompetitionModel {
         description: entity.description,
         startDate: entity.startDate,
         endDate: entity.endDate,
+        airspaceVersion: entity.airspaceVersion,
+        waypointsVersion: entity.waypointsVersion,
       );
 }

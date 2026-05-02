@@ -72,14 +72,14 @@
 
 ---
 
-## Phase 2: Download Files to XCSoarData *(Planned)*
+## Phase 2: Download Files to XCSoarData *(In Progress)*
 
 *Goal: Download waypoint (.cup) and airspace (.txt) files from a bookmarked competition and write them to `/sdcard/XCSoarData/`.*
 
 - 📋 `MANAGE_EXTERNAL_STORAGE` permission (Android 11+) + permission request flow
-- 📋 `downloads` feature: domain, data, presentation layers
+- ✅ **Airspace & Waypoints domain and data layer** — `DownloadableFileInfo` entity (freezed, `DownloadableFileKind` enum); `fetchDownloads`, `downloadFile`, `recordFileInstall` on repository interface and impl; `FetchDownloads`, `DownloadFile`, `RecordFileInstall` use cases; `fetchDownloads`+`downloadFile` on `SoaringSpotRemoteDataSource` (scrapes `div`+`ul.contest-downloads`, extracts timestamp from second `<span>`, file size from `(NNN.NNN kB)` text); `airspaceVersion`+`waypointsVersion` HiveFields 8–9 on `BookmarkedCompetitionModel`; same fields on `BookmarkedCompetition` entity; DI providers for all three use cases; HTML fixture committed; unit tests for datasource, use cases, and repository methods; `docs/api/soaringspot.md` updated with real HTML structure
+- 📋 Airspace & Waypoints presentation layer (screens/widgets for download UI, "NEW UPDATE" badge)
 - 📋 `docs/features/downloads.md`
-- 📋 `docs/api/soaringspot.md` — add downloads section (already documented)
 
 ---
 

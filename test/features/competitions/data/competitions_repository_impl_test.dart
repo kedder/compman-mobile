@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mockito/mockito.dart';
@@ -9,6 +11,7 @@ import 'package:compman_mobile/features/competitions/data/models/competition_mod
 import 'package:compman_mobile/features/competitions/data/repositories/competitions_repository_impl.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
+import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
 
 import 'mock_datasources.dart';
 
@@ -298,6 +301,188 @@ void main() {
         (classes) => expect(classes, isEmpty),
       );
       verifyNever(mockRemote.fetchClasses(any));
+    });
+  });
+
+  group('fetchDownloads', () {
+    final tFiles = [
+      const DownloadableFileInfo(
+        filename: 'airspace.txt',
+        downloadUrl: 'https://archive.soaringspot.com/airspace.txt',
+        kind: DownloadableFileKind.airspace,
+        publishedVersion: '10/07/2018, 17:44',
+      ),
+    ];
+
+    test('returns Right(files) on success', () async {
+      when(mockLocal.getAll()).thenAnswer((_) async => [tBookmarkedModel]);
+      when(mockRemote.fetchDownloads(any)).thenAnswer((_) async => tFiles);
+
+      final result = await repository.fetchDownloads('barron-2024');
+
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('expected Right'),
+        (files) => expect(files, tFiles),
+      );
+      verify(
+        mockRemote.fetchDownloads(
+          'https://www.soaringspot.com/en_gb/barron-2024/',
+        ),
+      );
+    });
+
+    test('returns Left(NetworkFailure) on ServerException', () async {
+      when(mockLocal.getAll()).thenAnswer((_) async => [tBookmarkedModel]);
+      when(
+        mockRemote.fetchDownloads(any),
+      ).thenThrow(const ServerException('connection refused'));
+
+      final result = await repository.fetchDownloads('barron-2024');
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure, isA<NetworkFailure>()),
+        (_) => fail('expected Left'),
+      );
+    });
+
+    test('returns Right([]) when competition is not bookmarked', () async {
+      when(mockLocal.getAll()).thenAnswer((_) async => []);
+
+      final result = await repository.fetchDownloads('unknown-id');
+
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('expected Right'),
+        (files) => expect(files, isEmpty),
+      );
+      verifyNever(mockRemote.fetchDownloads(any));
+    });
+  });
+
+  group('downloadFile', () {
+    const tFileUrl = 'https://archive.soaringspot.com/airspace.txt';
+    final tBytes = Uint8List.fromList([0x47, 0x52, 0x49, 0x44]);
+
+    test('returns Right(bytes) on success', () async {
+      when(mockRemote.downloadFile(tFileUrl)).thenAnswer((_) async => tBytes);
+
+      final result = await repository.downloadFile(tFileUrl);
+
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('expected Right'),
+        (bytes) => expect(bytes, tBytes),
+      );
+    });
+
+    test('returns Left(NetworkFailure) on ServerException', () async {
+      when(
+        mockRemote.downloadFile(tFileUrl),
+      ).thenThrow(const ServerException('download failed'));
+
+      final result = await repository.downloadFile(tFileUrl);
+
+      expect(
+        result,
+        equals(
+          const Left<Failure, Uint8List>(NetworkFailure('download failed')),
+        ),
+      );
+    });
+  });
+
+  group('recordFileInstall', () {
+    const tVersion = '10/07/2018, 17:44';
+
+    test('updates airspaceVersion and returns Right(unit)', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenAnswer((_) async {});
+
+      final result = await repository.recordFileInstall(
+        'barron-2024',
+        DownloadableFileKind.airspace,
+        tVersion,
+      );
+
+      expect(result, equals(const Right<Failure, Unit>(unit)));
+      verify(
+        mockLocal.save(
+          argThat(
+            predicate<BookmarkedCompetitionModel>(
+              (m) =>
+                  m.airspaceVersion == tVersion && m.waypointsVersion == null,
+            ),
+          ),
+        ),
+      ).called(1);
+    });
+
+    test('updates waypointsVersion and returns Right(unit)', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenAnswer((_) async {});
+
+      final result = await repository.recordFileInstall(
+        'barron-2024',
+        DownloadableFileKind.waypoints,
+        tVersion,
+      );
+
+      expect(result, equals(const Right<Failure, Unit>(unit)));
+      verify(
+        mockLocal.save(
+          argThat(
+            predicate<BookmarkedCompetitionModel>(
+              (m) =>
+                  m.waypointsVersion == tVersion && m.airspaceVersion == null,
+            ),
+          ),
+        ),
+      ).called(1);
+    });
+
+    test(
+      'returns Left(StorageFailure) when competition not bookmarked',
+      () async {
+        when(mockLocal.getById('missing')).thenAnswer((_) async => null);
+
+        final result = await repository.recordFileInstall(
+          'missing',
+          DownloadableFileKind.airspace,
+          tVersion,
+        );
+
+        expect(
+          result,
+          equals(
+            const Left<Failure, Unit>(StorageFailure('Competition not found')),
+          ),
+        );
+      },
+    );
+
+    test('returns Left(StorageFailure) on save exception', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenThrow(Exception('disk full'));
+
+      final result = await repository.recordFileInstall(
+        'barron-2024',
+        DownloadableFileKind.airspace,
+        tVersion,
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure, isA<StorageFailure>()),
+        (_) => fail('expected Left'),
+      );
     });
   });
 }

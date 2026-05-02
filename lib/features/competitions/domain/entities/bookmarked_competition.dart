@@ -21,6 +21,15 @@ abstract class BookmarkedCompetition with _$BookmarkedCompetition {
     String? description,
     DateTime? startDate,
     DateTime? endDate,
+
+    /// SoaringSpot version token of the last installed airspace file.
+    ///
+    /// Stored as the raw timestamp string scraped from SoaringSpot at install
+    /// time. Null until an airspace file has been installed.
+    String? airspaceVersion,
+
+    /// SoaringSpot version token of the last installed waypoints file.
+    String? waypointsVersion,
   }) = _BookmarkedCompetition;
 
   /// Computed status based on [startDate], [endDate], and today's date.

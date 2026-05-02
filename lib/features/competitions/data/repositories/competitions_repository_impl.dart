@@ -6,6 +6,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/competition.dart';
+import '../../domain/entities/downloadable_file_info.dart';
 import '../../domain/entities/task_info.dart';
 import '../../domain/repositories/competitions_repository.dart';
 import '../datasources/competitions_local_datasource.dart';
@@ -152,6 +153,66 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       return Left(NetworkFailure(e.message));
     } on ParseException catch (e) {
       return Left(ParseFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<DownloadableFileInfo>>> fetchDownloads(
+    String competitionId,
+  ) async {
+    try {
+      final models = await local.getAll();
+      final match = models.where((m) => m.id == competitionId).firstOrNull;
+      if (match == null || match.soaringspotUrl.isEmpty) {
+        return const Right([]);
+      }
+      final files = await remote.fetchDownloads(match.soaringspotUrl);
+      return Right(files);
+    } on ServerException catch (e) {
+      return Left(NetworkFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Uint8List>> downloadFile(String fileUrl) async {
+    try {
+      return Right(await remote.downloadFile(fileUrl));
+    } on ServerException catch (e) {
+      return Left(NetworkFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> recordFileInstall(
+    String competitionId,
+    DownloadableFileKind kind,
+    String? version,
+  ) async {
+    try {
+      final existing = await local.getById(competitionId);
+      if (existing == null) {
+        return const Left(StorageFailure('Competition not found'));
+      }
+      final updated = BookmarkedCompetitionModel(
+        id: existing.id,
+        title: existing.title,
+        soaringspotUrl: existing.soaringspotUrl,
+        bookmarkedAt: existing.bookmarkedAt,
+        selectedClass: existing.selectedClass,
+        description: existing.description,
+        startDate: existing.startDate,
+        endDate: existing.endDate,
+        airspaceVersion: kind == DownloadableFileKind.airspace
+            ? version
+            : existing.airspaceVersion,
+        waypointsVersion: kind == DownloadableFileKind.waypoints
+            ? version
+            : existing.waypointsVersion,
+      );
+      await local.save(updated);
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure(e.toString()));
     }
   }
 }
