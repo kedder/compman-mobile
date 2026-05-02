@@ -4,6 +4,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/platform/xcsoar_saf_service.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/competition.dart';
+import '../../domain/entities/downloadable_file_info.dart';
 import '../../domain/entities/task_info.dart';
 import '../../domain/usecases/bookmark_competition.dart';
 import '../../domain/usecases/fetch_competitions.dart';
@@ -105,3 +106,14 @@ final competitionClassesProvider = FutureProvider.autoDispose
 final xcsoarDirectoryUriProvider = FutureProvider.autoDispose<String?>((ref) {
   return XcsoarSafService().getSafDirectoryUri();
 });
+
+/// Fetches the list of downloadable airspace and waypoints files for a
+/// competition from the SoaringSpot downloads page.
+///
+/// Throws the [Failure] if the use case returns a [Left].
+final downloadsProvider = FutureProvider.autoDispose
+    .family<List<DownloadableFileInfo>, String>((ref, competitionId) async {
+      final useCase = ref.read(fetchDownloadsProvider);
+      final result = await useCase(competitionId);
+      return result.fold((f) => throw f, (files) => files);
+    });

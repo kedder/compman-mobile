@@ -7,9 +7,11 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/platform/xcsoar_saf_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/icon_meta_row.dart';
 import '../../../../core/widgets/two_tone_card.dart';
 import '../../domain/entities/bookmarked_competition.dart';
+import '../../domain/entities/downloadable_file_info.dart';
 import '../../domain/entities/task_info.dart';
 import '../providers/competitions_providers.dart';
 
@@ -54,6 +56,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
               tooltip: 'Refresh',
               onPressed: () {
                 ref.invalidate(latestTasksProvider(competitionId));
+                ref.invalidate(downloadsProvider(competitionId));
               },
             ),
         ],
@@ -112,9 +115,15 @@ class _CompetitionDetailBodyState
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(latestTasksProvider(widget.competitionId));
-        await ref
-            .read(latestTasksProvider(widget.competitionId).future)
-            .catchError((_) => <TaskInfo>[]);
+        ref.invalidate(downloadsProvider(widget.competitionId));
+        await Future.wait([
+          ref
+              .read(latestTasksProvider(widget.competitionId).future)
+              .catchError((_) => <TaskInfo>[]),
+          ref
+              .read(downloadsProvider(widget.competitionId).future)
+              .catchError((_) => <DownloadableFileInfo>[]),
+        ]);
       },
       child: Stack(
         children: [
@@ -126,6 +135,18 @@ class _CompetitionDetailBodyState
               _ClassSection(
                 competition: widget.competition,
                 competitionId: widget.competitionId,
+                onDownloadError: _appendDownloadError,
+              ),
+              const SizedBox(height: 12),
+              _AirspaceCard(
+                competitionId: widget.competitionId,
+                competition: widget.competition,
+                onDownloadError: _appendDownloadError,
+              ),
+              const SizedBox(height: 12),
+              _WaypointsCard(
+                competitionId: widget.competitionId,
+                competition: widget.competition,
                 onDownloadError: _appendDownloadError,
               ),
               const SizedBox(height: 16),
@@ -562,6 +583,279 @@ class _TaskCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Airspace & Waypoints cards
+// ---------------------------------------------------------------------------
+
+class _AirspaceCard extends ConsumerWidget {
+  const _AirspaceCard({
+    required this.competitionId,
+    required this.competition,
+    required this.onDownloadError,
+  });
+
+  final String competitionId;
+  final BookmarkedCompetition competition;
+  final ValueChanged<String> onDownloadError;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloadsAsync = ref.watch(downloadsProvider(competitionId));
+    return downloadsAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => _ErrorRetry(
+        message: _failureMessage(err),
+        onRetry: () => ref.invalidate(downloadsProvider(competitionId)),
+      ),
+      data: (files) {
+        final file = files
+            .where((f) => f.kind == DownloadableFileKind.airspace)
+            .firstOrNull;
+        if (file == null) {
+          return Text(
+            'No airspace file available',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          );
+        }
+        return _FileDownloadCard(
+          competitionId: competitionId,
+          fileInfo: file,
+          installedVersion: competition.airspaceVersion,
+          onDownloadError: onDownloadError,
+          sectionTitle: 'Airspace',
+          sectionIcon: Icons.public,
+          successMessage: 'Airspace downloaded',
+        );
+      },
+    );
+  }
+}
+
+class _WaypointsCard extends ConsumerWidget {
+  const _WaypointsCard({
+    required this.competitionId,
+    required this.competition,
+    required this.onDownloadError,
+  });
+
+  final String competitionId;
+  final BookmarkedCompetition competition;
+  final ValueChanged<String> onDownloadError;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloadsAsync = ref.watch(downloadsProvider(competitionId));
+    return downloadsAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => _ErrorRetry(
+        message: _failureMessage(err),
+        onRetry: () => ref.invalidate(downloadsProvider(competitionId)),
+      ),
+      data: (files) {
+        final file = files
+            .where((f) => f.kind == DownloadableFileKind.waypoints)
+            .firstOrNull;
+        if (file == null) {
+          return Text(
+            'No waypoint file available',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          );
+        }
+        return _FileDownloadCard(
+          competitionId: competitionId,
+          fileInfo: file,
+          installedVersion: competition.waypointsVersion,
+          onDownloadError: onDownloadError,
+          sectionTitle: 'Waypoints',
+          sectionIcon: Icons.location_on_outlined,
+          successMessage: 'Waypoints downloaded',
+        );
+      },
+    );
+  }
+}
+
+/// Shared download card for a single airspace or waypoints file.
+///
+/// Shows the file metadata, a "NEW UPDATE" badge when a newer version is
+/// available, and a "Download" / "Downloading…" action button.
+class _FileDownloadCard extends ConsumerStatefulWidget {
+  const _FileDownloadCard({
+    required this.competitionId,
+    required this.fileInfo,
+    required this.installedVersion,
+    required this.onDownloadError,
+    required this.sectionTitle,
+    required this.sectionIcon,
+    required this.successMessage,
+  });
+
+  final String competitionId;
+  final DownloadableFileInfo fileInfo;
+
+  /// The version token stored on [BookmarkedCompetition] at last install.
+  final String? installedVersion;
+  final ValueChanged<String> onDownloadError;
+  final String sectionTitle;
+  final IconData sectionIcon;
+  final String successMessage;
+
+  @override
+  ConsumerState<_FileDownloadCard> createState() => _FileDownloadCardState();
+}
+
+class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
+  bool _downloading = false;
+
+  /// True when the scraped version token differs from the stored install token.
+  bool get _hasNewUpdate =>
+      widget.fileInfo.publishedVersion != null &&
+      widget.fileInfo.publishedVersion != widget.installedVersion;
+
+  Future<void> _download() async {
+    setState(() => _downloading = true);
+    try {
+      final useCase = ref.read(downloadAndInstallFileProvider);
+      final result = await useCase.call(
+        competitionId: widget.competitionId,
+        fileInfo: widget.fileInfo,
+      );
+      result.fold((f) => throw f, (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(widget.successMessage),
+            backgroundColor: context.appColors.success,
+          ),
+        );
+        ref.invalidate(bookmarkedCompetitionsProvider);
+        ref.invalidate(competitionDetailProvider(widget.competitionId));
+      });
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'SAF_NOT_CONFIGURED') {
+        widget.onDownloadError(
+          'XCSoar directory not configured — set it in Settings',
+        );
+      } else {
+        widget.onDownloadError(e.message ?? 'Install failed');
+      }
+    } on Failure catch (f) {
+      if (!mounted) return;
+      widget.onDownloadError(_failureMessage(f));
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final fileInfo = widget.fileInfo;
+    final sizeText = fileInfo.fileSize != null
+        ? _formatBytes(fileInfo.fileSize!)
+        : null;
+
+    return TwoToneCard(
+      header: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(widget.sectionTitle, style: theme.textTheme.headlineSmall),
+              if (_hasNewUpdate)
+                AppBadge(
+                  label: 'NEW UPDATE',
+                  backgroundColor: colorScheme.error,
+                  foregroundColor: colorScheme.onError,
+                  hasRing: true,
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                widget.sectionIcon,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  children: [
+                    Text(
+                      fileInfo.filename,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    if (sizeText != null)
+                      Text(
+                        ' ($sizeText)',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.secondary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      footer: Row(
+        children: [
+          Icon(Icons.history, size: 16, color: colorScheme.secondary),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              fileInfo.publishedVersion ?? '',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 12,
+                color: colorScheme.secondary,
+              ),
+            ),
+          ),
+          OutlinedButton.icon(
+            onPressed: _downloading ? null : _download,
+            style: AppButtonStyles.ghost(context),
+            icon: _downloading
+                ? SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colorScheme.primary,
+                    ),
+                  )
+                : const Icon(Icons.download, size: 16),
+            label: Text(_downloading ? 'Downloading...' : 'Download'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Converts a byte count to a human-readable string (e.g. "134.8 kB").
+  static String _formatBytes(int bytes) {
+    if (bytes < 1000) return '$bytes B';
+    if (bytes < 1000000) return '${(bytes / 1000).toStringAsFixed(1)} kB';
+    return '${(bytes / 1000000).toStringAsFixed(1)} MB';
   }
 }
 

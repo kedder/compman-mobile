@@ -1,18 +1,21 @@
-import 'dart:typed_data';
+import 'dart:async';
 
 import 'package:compman_mobile/core/di/providers.dart';
 import 'package:compman_mobile/core/error/failures.dart';
+import 'package:compman_mobile/core/platform/xcsoar_saf_service.dart';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/domain/repositories/competitions_repository.dart';
+import 'package:compman_mobile/features/competitions/domain/usecases/download_and_install_file.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_task.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/set_competition_class.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/competition_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,11 +75,12 @@ Widget _buildApp(List<Override> overrides) {
 }
 
 /// Returns the base overrides needed for every test: competition detail,
-/// xcsoar dir, and latest tasks.
+/// xcsoar dir, latest tasks, and downloads.
 List<Override> _baseOverrides({
   required List<String> classes,
   BookmarkedCompetition? competition,
   List<TaskInfo> tasks = const <TaskInfo>[],
+  List<DownloadableFileInfo> downloads = const <DownloadableFileInfo>[],
   String? xcsoarDirectoryUri,
 }) {
   final resolvedCompetition = competition ?? _tCompetition;
@@ -90,7 +94,44 @@ List<Override> _baseOverrides({
     ).overrideWith((ref) async => classes),
     xcsoarDirectoryUriProvider.overrideWith((ref) async => xcsoarDirectoryUri),
     latestTasksProvider(_competitionId).overrideWith((ref) async => tasks),
+    downloadsProvider(_competitionId).overrideWith((ref) async => downloads),
   ];
+}
+
+/// Use case stub that resolves after the given future completes — used to
+/// pause mid-download so the button disabled state can be asserted.
+class _CompleterDownloadAndInstallFile extends DownloadAndInstallFile {
+  _CompleterDownloadAndInstallFile(this._future)
+    : super(const _DummyRepository(), _NoOpSafService());
+
+  final Future<Either<Failure, Unit>> _future;
+
+  @override
+  Future<Either<Failure, Unit>> call({
+    required String competitionId,
+    required DownloadableFileInfo fileInfo,
+  }) => _future;
+}
+
+class _ThrowingSafDownloadAndInstallFile extends DownloadAndInstallFile {
+  _ThrowingSafDownloadAndInstallFile(this._exception)
+    : super(const _DummyRepository(), _NoOpSafService());
+
+  final PlatformException _exception;
+
+  @override
+  Future<Either<Failure, Unit>> call({
+    required String competitionId,
+    required DownloadableFileInfo fileInfo,
+  }) async {
+    throw _exception;
+  }
+}
+
+/// SAF service that does nothing (for stub use cases that bypass real logic).
+class _NoOpSafService extends XcsoarSafService {
+  @override
+  Future<void> writeFile(Uint8List bytes, String filename) async {}
 }
 
 class _RecordingSetCompetitionClass extends SetCompetitionClass {
@@ -249,6 +290,9 @@ void main() {
       latestTasksProvider(
         _competitionId,
       ).overrideWith((ref) async => <TaskInfo>[]),
+      downloadsProvider(
+        _competitionId,
+      ).overrideWith((ref) async => <DownloadableFileInfo>[]),
     ];
 
     await tester.pumpWidget(_buildApp(overrides));
@@ -375,5 +419,186 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Task download failed'), findsNothing);
+  });
+
+  // ---------------------------------------------------------------------------
+  // Airspace & Waypoints card tests
+  // ---------------------------------------------------------------------------
+
+  const tAirspaceFile = DownloadableFileInfo(
+    filename: 'airspace_2026.txt',
+    downloadUrl: 'https://example.com/airspace.txt',
+    kind: DownloadableFileKind.airspace,
+    fileSize: 154000,
+    publishedVersion: '10/07/2026, 17:44',
+  );
+
+  const tWaypointsFile = DownloadableFileInfo(
+    filename: 'waypoints_2026.cup',
+    downloadUrl: 'https://example.com/waypoints.cup',
+    kind: DownloadableFileKind.waypoints,
+    fileSize: 48000,
+    publishedVersion: '04/07/2026, 13:22',
+  );
+
+  testWidgets('renders airspace card with filename and Download button', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Airspace'), findsOneWidget);
+    expect(find.text('airspace_2026.txt'), findsOneWidget);
+    expect(find.text('Download'), findsOneWidget);
+  });
+
+  testWidgets('renders waypoints card with filename and Download button', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(classes: const [], downloads: const [tWaypointsFile]),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Waypoints'), findsOneWidget);
+    expect(find.text('waypoints_2026.cup'), findsOneWidget);
+    expect(find.text('Download'), findsOneWidget);
+  });
+
+  testWidgets(
+    'shows NEW UPDATE badge when publishedVersion differs from installedVersion',
+    (tester) async {
+      final competition = _tCompetition.copyWith(
+        airspaceVersion: 'old-version',
+      );
+      await tester.pumpWidget(
+        _buildApp(
+          _baseOverrides(
+            classes: const [],
+            competition: competition,
+            downloads: const [tAirspaceFile],
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('NEW UPDATE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'shows NEW UPDATE badge when competition is freshly bookmarked (no file installed yet)',
+    (tester) async {
+      // airspaceVersion is null → user has never installed the file
+      await tester.pumpWidget(
+        _buildApp(
+          _baseOverrides(
+            classes: const [],
+            competition: _tCompetition, // airspaceVersion is null
+            downloads: const [tAirspaceFile], // has a publishedVersion
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('NEW UPDATE'), findsOneWidget);
+    },
+  );
+
+  testWidgets('hides NEW UPDATE badge when already up to date', (tester) async {
+    final competition = _tCompetition.copyWith(
+      airspaceVersion: tAirspaceFile.publishedVersion,
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const [],
+          competition: competition,
+          downloads: const [tAirspaceFile],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('NEW UPDATE'), findsNothing);
+  });
+
+  testWidgets(
+    'shows "No airspace file available" when downloads list has no airspace entry',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp(_baseOverrides(classes: const [], downloads: const [])),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('No airspace file available'), findsOneWidget);
+      expect(find.text('No waypoint file available'), findsOneWidget);
+    },
+  );
+
+  testWidgets('Download button is disabled while downloading', (tester) async {
+    final completer = Completer<Either<Failure, Unit>>();
+
+    final stubbedUseCase = _CompleterDownloadAndInstallFile(completer.future);
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        downloadAndInstallFileProvider.overrideWithValue(stubbedUseCase),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Download'));
+    await tester.pump();
+
+    expect(find.text('Downloading...'), findsOneWidget);
+    final button = tester.widget<OutlinedButton>(
+      find
+          .ancestor(
+            of: find.text('Downloading...'),
+            matching: find.byType(OutlinedButton),
+          )
+          .first,
+    );
+    expect(button.onPressed, isNull);
+
+    completer.complete(const Right(unit));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('appends error banner when SAF not configured', (tester) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        downloadAndInstallFileProvider.overrideWithValue(
+          _ThrowingSafDownloadAndInstallFile(
+            PlatformException(code: 'SAF_NOT_CONFIGURED'),
+          ),
+        ),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Download'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('XCSoar directory not configured'),
+      findsOneWidget,
+    );
   });
 }

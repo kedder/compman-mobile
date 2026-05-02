@@ -134,16 +134,20 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 
 ### Competition Detail Screen (`/competitions/:id`)
 
-- **AppBar:** Static title "Competition Details" with a refresh action that re-fetches only the latest task list.
+- **AppBar:** Static title "Competition Details" with a refresh action that re-fetches the latest task list and the downloads list.
 - **Header:** Competition title in the large headline style and a primary-coloured `IconMetaRow` showing the SoaringSpot URL.
 - **Class selection:** If no class is chosen, fetches available class names from SoarScore and renders them as full-width tappable cards with a trophy icon and chevron. Tapping a class card persists the selection via `SetCompetitionClass` and refreshes the task section.
 - **Class display:** If a class is already set, shows a streamlined inline row with a `Class:` label, the selected class name, and a bordered "Change" button that clears the selection.
-- **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Renders the selected task in a `TwoToneCard`: header with `Day X - Task Y`, primary `IconMetaRow` route/title text, and footer metadata plus a full-width "Download task" button. Airspace and waypoint cards are intentionally not shown yet.
-- **Download feedback:** Successful installs still show a green confirmation SnackBar. Download/install failures append stacked dismissible error banners fixed to the bottom of the screen instead of showing inline errors or error SnackBars.
+- **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Renders the selected task in a `TwoToneCard`: header with `Day X - Task Y`, primary `IconMetaRow` route/title text, and footer metadata plus a full-width "Download task" button.
+- **Airspace card:** Watches `downloadsProvider` and renders a `TwoToneCard` for the `.txt` (airspace) file. Header shows the section title "Airspace", an optional "NEW UPDATE" badge (`AppBadge` with error colour), and the filename + file size. Footer shows the last-published timestamp and a ghost "Download" / "Downloading…" button. Shows "No airspace file available" in muted text when no `.txt` entry is present.
+- **Waypoints card:** Same layout as the Airspace card but for the `.cup` (waypoints) file, with section title "Waypoints" and a location-pin icon.
+- **"NEW UPDATE" badge logic:** Shown when `DownloadableFileInfo.publishedVersion` is non-null and differs from the corresponding `airspaceVersion` / `waypointsVersion` stored on `BookmarkedCompetition` (string equality). Also shown when the stored version is `null`, meaning the file has never been installed.
+- **File download flow:** Tapping "Download" calls `DownloadAndInstallFile` via `downloadAndInstallFileProvider`. On success, shows a green SnackBar ("Airspace downloaded" / "Waypoints downloaded") and invalidates `bookmarkedCompetitionsProvider` + `competitionDetailProvider` so the badge disappears. `PlatformException(code: 'SAF_NOT_CONFIGURED')` and `Failure` errors append stacked dismissible error banners.
+- **Download feedback:** Successful installs show a green confirmation SnackBar. Download/install failures append stacked dismissible error banners fixed to the bottom of the screen.
 - **XCSoar directory row:** Shows the current SAF directory URI from `XcsoarSafService.getSafDirectoryUri()` as a subdued footer `IconMetaRow`, or "XCSoar folder not configured" when no SAF directory has been chosen.
-- **Providers used:** `competitionDetailProvider`, `latestTasksProvider`, `xcsoarDirectoryUriProvider`.
-- Pull-to-refresh awaits `latestTasksProvider` completion (errors are swallowed; child widgets show their own error states). Only `latestTasksProvider` is refreshed — classes and competition details are stable and not re-fetched.
-- AppBar refresh icon invalidates `latestTasksProvider` and replaces itself with a small inline `CircularProgressIndicator` (20×20, strokeWidth 2) while loading; the icon is restored once the provider settles.
+- **Providers used:** `competitionDetailProvider`, `latestTasksProvider`, `downloadsProvider`, `xcsoarDirectoryUriProvider`.
+- Pull-to-refresh awaits both `latestTasksProvider` and `downloadsProvider` (errors are swallowed; child widgets show their own error states).
+- AppBar refresh icon invalidates `latestTasksProvider` and `downloadsProvider`, and replaces itself with a small inline `CircularProgressIndicator` (20×20, strokeWidth 2) while loading.
 
 ### XCSoar Directory Settings Screen (`/settings/xcsoar-directory`)
 
