@@ -68,7 +68,7 @@ void main() {
 
   group('DownloadAndInstallFile — airspace', () {
     test(
-      'downloads bytes, writes compman.txt, records install, returns Right(unit)',
+      'downloads bytes, writes compman-airspace.txt, records install, returns Right(unit)',
       () async {
         when(
           mockRepository.downloadFile(tAirspaceFile.downloadUrl),
@@ -89,7 +89,7 @@ void main() {
 
         expect(result, const Right<Failure, Unit>(unit));
         expect(recordingSaf.calls, hasLength(1));
-        expect(recordingSaf.calls.first.$2, 'compman.txt');
+        expect(recordingSaf.calls.first.$2, 'compman-airspace.txt');
         expect(recordingSaf.calls.first.$1, tBytes);
         verify(
           mockRepository.recordFileInstall(
@@ -103,7 +103,7 @@ void main() {
   });
 
   group('DownloadAndInstallFile — waypoints', () {
-    test('writes compman.cup for waypoints file', () async {
+    test('writes compman-waypoints.cup for waypoints file', () async {
       when(
         mockRepository.downloadFile(tWaypointsFile.downloadUrl),
       ).thenAnswer((_) async => Right(tBytes));
@@ -118,7 +118,7 @@ void main() {
       );
 
       expect(result, const Right<Failure, Unit>(unit));
-      expect(recordingSaf.calls.first.$2, 'compman.cup');
+      expect(recordingSaf.calls.first.$2, 'compman-waypoints.cup');
       verify(
         mockRepository.recordFileInstall(
           tCompetitionId,

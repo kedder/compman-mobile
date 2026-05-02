@@ -27,9 +27,9 @@ class DownloadAndInstallFile {
 
   /// Downloads and installs [fileInfo] for competition [competitionId].
   ///
-  /// Airspace files are written as `compman.txt`; waypoints files as
-  /// `compman.cup`. The fixed names mean XCSoar only needs to be configured
-  /// once — subsequent updates overwrite the same file.
+  /// Airspace files are written as `compman-airspace.txt`; waypoints files as
+  /// `compman-waypoints.cup`. The fixed names mean XCSoar only needs to be
+  /// configured once — subsequent updates overwrite the same file.
   Future<Either<Failure, Unit>> call({
     required String competitionId,
     required DownloadableFileInfo fileInfo,
@@ -41,8 +41,8 @@ class DownloadAndInstallFile {
     final bytes = bytesResult.getRight().toNullable()!;
 
     final outputName = switch (fileInfo.kind) {
-      DownloadableFileKind.airspace => 'compman.txt',
-      DownloadableFileKind.waypoints => 'compman.cup',
+      DownloadableFileKind.airspace => 'compman-airspace.txt',
+      DownloadableFileKind.waypoints => 'compman-waypoints.cup',
     };
     await _safService.writeFile(bytes, outputName);
 
