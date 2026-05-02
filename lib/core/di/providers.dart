@@ -9,6 +9,7 @@ import '../../features/competitions/data/datasources/soaringspot_remote_datasour
 import '../../features/competitions/data/models/bookmarked_competition_model.dart';
 import '../../features/competitions/data/repositories/competitions_repository_impl.dart';
 import '../../features/competitions/domain/repositories/competitions_repository.dart';
+import '../../features/competitions/domain/usecases/download_and_install_file.dart';
 import '../../features/competitions/domain/usecases/download_file.dart';
 import '../../features/competitions/domain/usecases/download_task.dart';
 import '../../features/competitions/domain/usecases/fetch_competition_classes.dart';
@@ -17,6 +18,7 @@ import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
 import '../../features/competitions/domain/usecases/record_file_install.dart';
 import '../../features/competitions/domain/usecases/set_competition_class.dart';
 import '../network/http_client.dart';
+import '../platform/xcsoar_saf_service.dart';
 
 /// Provides the configured [Dio] instance.
 final dioProvider = Provider<Dio>((ref) => createDioClient());
@@ -97,6 +99,14 @@ final downloadFileProvider = Provider<DownloadFile>(
 /// Provides a [RecordFileInstall] use case instance.
 final recordFileInstallProvider = Provider<RecordFileInstall>(
   (ref) => RecordFileInstall(ref.read(competitionsRepositoryProvider)),
+);
+
+/// Provides a [DownloadAndInstallFile] use case instance.
+final downloadAndInstallFileProvider = Provider<DownloadAndInstallFile>(
+  (ref) => DownloadAndInstallFile(
+    ref.read(competitionsRepositoryProvider),
+    XcsoarSafService(),
+  ),
 );
 
 /// Provides the app's [PackageInfo] metadata from the host platform.

@@ -78,6 +78,7 @@
 
 - 📋 `MANAGE_EXTERNAL_STORAGE` permission (Android 11+) + permission request flow
 - ✅ **Airspace & Waypoints domain and data layer** — `DownloadableFileInfo` entity (freezed, `DownloadableFileKind` enum); `fetchDownloads`, `downloadFile`, `recordFileInstall` on repository interface and impl; `FetchDownloads`, `DownloadFile`, `RecordFileInstall` use cases; `fetchDownloads`+`downloadFile` on `SoaringSpotRemoteDataSource` (scrapes `div`+`ul.contest-downloads`, extracts timestamp from second `<span>`, file size from `(NNN.NNN kB)` text); `airspaceVersion`+`waypointsVersion` HiveFields 8–9 on `BookmarkedCompetitionModel`; same fields on `BookmarkedCompetition` entity; DI providers for all three use cases; HTML fixture committed; unit tests for datasource, use cases, and repository methods; `docs/api/soaringspot.md` updated with real HTML structure
+- ✅ **Airspace & Waypoints SAF write** — `DownloadAndInstallFile` orchestration use case (download → SAF write as `compman.txt`/`compman.cup` → record install timestamp); `downloadAndInstallFileProvider` DI provider; unit tests covering success for both kinds, download failure propagation, and `PlatformException` propagation
 - 📋 Airspace & Waypoints presentation layer (screens/widgets for download UI, "NEW UPDATE" badge)
 - 📋 `docs/features/downloads.md`
 
