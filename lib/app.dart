@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/di/providers.dart';
-import 'core/platform/xcsoar_directory_settings_screen.dart';
+import 'features/xcsoar/presentation/screens/xcsoar_directory_settings_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'features/competitions/presentation/screens/bookmarks_screen.dart';
 import 'features/competitions/presentation/screens/competition_detail_screen.dart';
@@ -40,8 +40,7 @@ final _router = GoRouter(
     GoRoute(
       path: '/settings/xcsoar-directory',
       builder: (context, state) => XcsoarDirectorySettingsScreen(
-        fromDownloadFlow:
-            state.uri.queryParameters['from'] == 'download',
+        fromDownloadFlow: state.uri.queryParameters['from'] == 'download',
       ),
     ),
   ],

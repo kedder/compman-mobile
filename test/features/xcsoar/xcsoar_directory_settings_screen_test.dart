@@ -1,6 +1,6 @@
 import 'package:compman_mobile/core/di/providers.dart';
-import 'package:compman_mobile/core/platform/xcsoar_directory_settings_screen.dart';
-import 'package:compman_mobile/core/platform/xcsoar_flavor.dart';
+import 'package:compman_mobile/features/xcsoar/domain/xcsoar_flavor.dart';
+import 'package:compman_mobile/features/xcsoar/presentation/screens/xcsoar_directory_settings_screen.dart';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,37 +24,23 @@ Widget _buildScreen({
   Set<String> installedPackages = const {},
   Set<String> writablePackages = const {},
 }) {
-  when(
-    _mockService.isPackageInstalled(any),
-  ).thenAnswer((invocation) async {
+  when(_mockService.isPackageInstalled(any)).thenAnswer((invocation) async {
     final pkg = invocation.positionalArguments[0] as String;
     return installedPackages.contains(pkg);
   });
-  when(
-    _mockService.canWriteToMediaDir(any),
-  ).thenAnswer((invocation) async {
+  when(_mockService.canWriteToMediaDir(any)).thenAnswer((invocation) async {
     final pkg = invocation.positionalArguments[0] as String;
     return writablePackages.contains(pkg);
   });
-  when(
-    _mockService.getSafDirectoryUri(),
-  ).thenAnswer((_) async => null);
-  when(
-    _mockService.pickDirectory(),
-  ).thenAnswer((_) async => 'cancelled');
-  when(
-    _mockService.pickDirectoryForPackage(any),
-  ).thenAnswer((_) async => 'ok');
+  when(_mockService.getSafDirectoryUri()).thenAnswer((_) async => null);
+  when(_mockService.pickDirectory()).thenAnswer((_) async => 'cancelled');
+  when(_mockService.pickDirectoryForPackage(any)).thenAnswer((_) async => 'ok');
 
   return ProviderScope(
-    overrides: [
-      xcsoarSafServiceProvider.overrideWithValue(_mockService),
-    ],
+    overrides: [xcsoarSafServiceProvider.overrideWithValue(_mockService)],
     child: MaterialApp(
       theme: AppTheme.light(),
-      home: XcsoarDirectorySettingsScreen(
-        fromDownloadFlow: fromDownloadFlow,
-      ),
+      home: XcsoarDirectorySettingsScreen(fromDownloadFlow: fromDownloadFlow),
     ),
   );
 }
@@ -68,19 +54,18 @@ void main() {
     _mockService = MockXcsoarSafService();
   });
 
-  testWidgets(
-    'all flavors show Not installed badge when none are installed',
-    (tester) async {
-      await tester.pumpWidget(_buildScreen());
-      await tester.pumpAndSettle();
+  testWidgets('all flavors show Not installed badge when none are installed', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen());
+    await tester.pumpAndSettle();
 
-      for (final flavor in kKnownXcsoarFlavors) {
-        expect(find.text(flavor.displayName), findsOneWidget);
-      }
-      // AppBadge uppercases the label
-      expect(find.text('NOT INSTALLED'), findsNWidgets(4));
-    },
-  );
+    for (final flavor in kKnownXcsoarFlavors) {
+      expect(find.text(flavor.displayName), findsOneWidget);
+    }
+    // AppBadge uppercases the label
+    expect(find.text('NOT INSTALLED'), findsNWidgets(4));
+  });
 
   testWidgets(
     'ready flavor shows Ready badge and tap calls pickDirectoryForPackage',
@@ -107,9 +92,7 @@ void main() {
     'warning flavor tap does not call pickDirectoryForPackage and marks tile selected',
     (tester) async {
       const warningPkg = 'com.xcsoar';
-      await tester.pumpWidget(
-        _buildScreen(installedPackages: {warningPkg}),
-      );
+      await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
       await tester.pumpAndSettle();
 
       expect(find.text('NEEDS SETUP'), findsOneWidget);
@@ -126,20 +109,19 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Advanced row is visible and calls pickDirectory on tap',
-    (tester) async {
-      await tester.pumpWidget(_buildScreen());
-      await tester.pumpAndSettle();
+  testWidgets('Advanced row is visible and calls pickDirectory on tap', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen());
+    await tester.pumpAndSettle();
 
-      expect(find.text('Choose custom folder'), findsOneWidget);
+    expect(find.text('Choose custom folder'), findsOneWidget);
 
-      await tester.tap(find.text('Choose custom folder'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Choose custom folder'));
+    await tester.pumpAndSettle();
 
-      verify(_mockService.pickDirectory()).called(1);
-    },
-  );
+    verify(_mockService.pickDirectory()).called(1);
+  });
 
   testWidgets(
     'fromDownloadFlow true renders Set Up XCSoar Folder app bar title',
@@ -151,13 +133,12 @@ void main() {
     },
   );
 
-  testWidgets(
-    'fromDownloadFlow false renders XCSoar Folder app bar title',
-    (tester) async {
-      await tester.pumpWidget(_buildScreen());
-      await tester.pumpAndSettle();
+  testWidgets('fromDownloadFlow false renders XCSoar Folder app bar title', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen());
+    await tester.pumpAndSettle();
 
-      expect(find.text('XCSoar Folder'), findsOneWidget);
-    },
-  );
+    expect(find.text('XCSoar Folder'), findsOneWidget);
+  });
 }

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/di/providers.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/widgets/app_badge.dart';
-import '../../features/competitions/presentation/providers/competitions_providers.dart';
-import 'xcsoar_flavor.dart';
+import '../../../../core/di/providers.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_badge.dart';
+import '../../../competitions/presentation/providers/competitions_providers.dart';
+import '../../domain/xcsoar_flavor.dart';
 
 /// Tracks the installation and writability state of a single XCSoar flavor.
 enum _FlavorState {
@@ -92,8 +92,8 @@ class _XcsoarDirectorySettingsScreenState
         kKnownXcsoarFlavors[i].packageId: !installed[i]
             ? _FlavorState.notInstalled
             : writable[i]
-                ? _FlavorState.ready
-                : _FlavorState.warning,
+            ? _FlavorState.ready
+            : _FlavorState.warning,
     };
     setState(() {
       _flavorStates = states;
@@ -103,13 +103,14 @@ class _XcsoarDirectorySettingsScreenState
 
   List<XcsoarFlavor> get _sortedFlavors {
     return List<XcsoarFlavor>.from(kKnownXcsoarFlavors)..sort(
-      (a, b) => _flavorStateOrder(
-        _flavorStates[a.packageId] ?? _FlavorState.notInstalled,
-      ).compareTo(
-        _flavorStateOrder(
-          _flavorStates[b.packageId] ?? _FlavorState.notInstalled,
-        ),
-      ),
+      (a, b) =>
+          _flavorStateOrder(
+            _flavorStates[a.packageId] ?? _FlavorState.notInstalled,
+          ).compareTo(
+            _flavorStateOrder(
+              _flavorStates[b.packageId] ?? _FlavorState.notInstalled,
+            ),
+          ),
     );
   }
 
@@ -146,8 +147,7 @@ class _XcsoarDirectorySettingsScreenState
   Future<void> _pickDirectory() async {
     setState(() => _pickerLoading = true);
     try {
-      final result =
-          await ref.read(xcsoarSafServiceProvider).pickDirectory();
+      final result = await ref.read(xcsoarSafServiceProvider).pickDirectory();
       if (!mounted) return;
       if (result == 'ok') {
         ref.invalidate(xcsoarDirectoryUriProvider);
@@ -179,22 +179,22 @@ class _XcsoarDirectorySettingsScreenState
     await ref.read(xcsoarSafServiceProvider).clearSafPermission();
     if (!mounted) return;
     ref.invalidate(xcsoarDirectoryUriProvider);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Permission cleared')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Permission cleared')));
   }
 
   Widget _buildFlavorTile(XcsoarFlavor flavor) {
-    final state =
-        _flavorStates[flavor.packageId] ?? _FlavorState.notInstalled;
+    final state = _flavorStates[flavor.packageId] ?? _FlavorState.notInstalled;
     return _FlavorTile(
       flavor: flavor,
       state: state,
       isSelected: _selectedBlockedPackage == flavor.packageId,
       onTap: switch (state) {
         _FlavorState.ready => () => _pickDirectoryForPackage(flavor),
-        _FlavorState.warning => () =>
-            setState(() => _selectedBlockedPackage = flavor.packageId),
+        _FlavorState.warning => () => setState(
+          () => _selectedBlockedPackage = flavor.packageId,
+        ),
         _FlavorState.notInstalled => null,
       },
     );
@@ -208,9 +208,7 @@ class _XcsoarDirectorySettingsScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.fromDownloadFlow
-              ? 'Set Up XCSoar Folder'
-              : 'XCSoar Folder',
+          widget.fromDownloadFlow ? 'Set Up XCSoar Folder' : 'XCSoar Folder',
         ),
       ),
       body: _loading
