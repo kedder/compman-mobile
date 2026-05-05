@@ -176,6 +176,10 @@ override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 
 **Tree URI persistence:** SAF tree URI grants are stored in Android `SharedPreferences` (not Hive) because they must be accessible from Kotlin before Flutter initialises.
 
+**XcsoarFlavor value type:** `lib/core/platform/xcsoar_flavor.dart` defines the `XcsoarFlavor` plain Dart class (display name + package ID) and the `kKnownXcsoarFlavors` constant list of the four known XCSoar variants.
+
+**`xcsoarSafServiceProvider`:** exposed in `lib/core/di/providers.dart` as a `Provider<XcsoarSafService>` so the service can be overridden in tests via `ProviderScope`.
+
 ---
 
 ## Navigation

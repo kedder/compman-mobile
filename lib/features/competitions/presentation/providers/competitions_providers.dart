@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
-import '../../../../core/platform/xcsoar_saf_service.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/competition.dart';
 import '../../domain/entities/downloadable_file_info.dart';
@@ -104,7 +103,7 @@ final competitionClassesProvider = FutureProvider.autoDispose
 
 /// Provider that returns the stored SAF directory URI, or null if not set.
 final xcsoarDirectoryUriProvider = FutureProvider.autoDispose<String?>((ref) {
-  return XcsoarSafService().getSafDirectoryUri();
+  return ref.read(xcsoarSafServiceProvider).getSafDirectoryUri();
 });
 
 /// Fetches the list of downloadable airspace and waypoints files for a

@@ -78,9 +78,51 @@ class MainActivity : FlutterFragmentActivity() {
                         }
                         result.success("ok")
                     }
+                    "isPackageInstalled" -> {
+                        val pkg = call.argument<String>("packageId")!!
+                        val installed = try {
+                            packageManager.getPackageInfo(pkg, 0)
+                            true
+                        } catch (_: android.content.pm.PackageManager.NameNotFoundException) {
+                            false
+                        }
+                        result.success(installed)
+                    }
+                    "canWriteToMediaDir" -> {
+                        val pkg = call.argument<String>("packageId")!!
+                        result.success(checkMediaDirWritable(pkg))
+                    }
+                    "pickDirectoryForPackage" -> {
+                        val pkg = call.argument<String>("packageId")!!
+                        pendingResult = result
+                        safLauncher.launch(externalStorageDocUri(mediaPath(pkg)))
+                    }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /** Returns the `primary:Android/media/<pkg>` document path for [pkg]. */
+    private fun mediaPath(pkg: String) = "primary:Android/media/$pkg"
+
+    /** Returns a SAF document URI for [path] on the external storage provider. */
+    private fun externalStorageDocUri(path: String): Uri =
+        Uri.parse("content://com.android.externalstorage.documents/document/${Uri.encode(path)}")
+
+    private fun checkMediaDirWritable(pkg: String): Boolean {
+        return try {
+            val encoded = Uri.encode(mediaPath(pkg))
+            val treeUri = DocumentsContract.buildTreeDocumentUri(
+                "com.android.externalstorage.documents", encoded
+            )
+            val childUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+                treeUri, DocumentsContract.getTreeDocumentId(treeUri)
+            )
+            contentResolver.query(childUri, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+                null, null, null)?.use { it.count >= 0 } ?: false
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun getXcsoarMediaPath(): String {
@@ -90,11 +132,11 @@ class MainActivity : FlutterFragmentActivity() {
             val dir = java.io.File(externalMediaDir, pkg)
             if (dir.exists() && dir.isDirectory) {
                 Log.d("CompmanSAF", "getXcsoarMediaPath: found XCSoar at $pkg")
-                return "primary:Android/media/$pkg"
+                return mediaPath(pkg)
             }
         }
         Log.d("CompmanSAF", "getXcsoarMediaPath: no XCSoar directory found, using fallback")
-        return "primary:Android/media/org.xcsoar"
+        return mediaPath("org.xcsoar")
     }
 
     private fun handlePickDirectory(result: MethodChannel.Result) {
@@ -106,9 +148,7 @@ class MainActivity : FlutterFragmentActivity() {
             Uri.parse(storedUri)
         } else {
             Log.d("CompmanSAF", "handlePickDirectory: no stored URI, detecting XCSoar path")
-            val xcsoarPath = getXcsoarMediaPath()
-            val encodedPath = Uri.encode(xcsoarPath)
-            Uri.parse("content://com.android.externalstorage.documents/document/$encodedPath")
+            externalStorageDocUri(getXcsoarMediaPath())
         }
         Log.d("CompmanSAF", "handlePickDirectory: launching with URI: $initialUri")
         safLauncher.launch(initialUri)

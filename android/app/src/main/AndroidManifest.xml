@@ -42,5 +42,9 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <package android:name="com.xcsoar" />
+        <package android:name="com.zunuzoid.xcsoar_jet" />
+        <package android:name="com.xcsoar.play" />
+        <package android:name="com.xcsoar.foss" />
     </queries>
 </manifest>

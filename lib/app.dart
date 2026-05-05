@@ -39,7 +39,10 @@ final _router = GoRouter(
     GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
     GoRoute(
       path: '/settings/xcsoar-directory',
-      builder: (context, state) => const XcsoarDirectorySettingsScreen(),
+      builder: (context, state) => XcsoarDirectorySettingsScreen(
+        fromDownloadFlow:
+            state.uri.queryParameters['from'] == 'download',
+      ),
     ),
   ],
 );

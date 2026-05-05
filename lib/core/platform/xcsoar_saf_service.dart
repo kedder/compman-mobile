@@ -37,4 +37,35 @@ class XcsoarSafService {
   /// Releases the stored SAF permission and clears the cached tree URI.
   Future<void> clearSafPermission() =>
       _channel.invokeMethod<void>('clearSafPermission');
+
+  /// Returns true if the given Android package is installed on the device.
+  Future<bool> isPackageInstalled(String packageId) async {
+    final result = await _channel.invokeMethod<bool>('isPackageInstalled', {
+      'packageId': packageId,
+    });
+    return result ?? false;
+  }
+
+  /// Returns true if [Android/media/<packageId>/] is writable via SAF.
+  ///
+  /// Returns false if the package is not installed, the directory does not
+  /// exist, or the OS blocks access (e.g. because XCSoar is using
+  /// Android/data instead).
+  Future<bool> canWriteToMediaDir(String packageId) async {
+    final result = await _channel.invokeMethod<bool>('canWriteToMediaDir', {
+      'packageId': packageId,
+    });
+    return result ?? false;
+  }
+
+  /// Launches the Android folder picker pre-navigated to [Android/media/<packageId>/].
+  ///
+  /// Returns `"ok"` on success or `"cancelled"` if the user dismissed the picker.
+  Future<String> pickDirectoryForPackage(String packageId) async {
+    final result = await _channel.invokeMethod<String>(
+      'pickDirectoryForPackage',
+      {'packageId': packageId},
+    );
+    return result!;
+  }
 }

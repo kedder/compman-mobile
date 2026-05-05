@@ -20,6 +20,11 @@ import '../../features/competitions/domain/usecases/set_competition_class.dart';
 import '../network/http_client.dart';
 import '../platform/xcsoar_saf_service.dart';
 
+/// Provides the [XcsoarSafService] instance used to interact with the Android SAF bridge.
+final xcsoarSafServiceProvider = Provider<XcsoarSafService>(
+  (ref) => XcsoarSafService(),
+);
+
 /// Provides the configured [Dio] instance.
 final dioProvider = Provider<Dio>((ref) => createDioClient());
 
