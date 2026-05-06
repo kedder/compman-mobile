@@ -14,12 +14,13 @@ This issue covers the complete implementation of the feature:
 
 1. A new local data source (`LastViewedLocalDataSource`) that reads and writes
    the last-viewed competition ID to a dedicated Hive box.
-2. A new Riverpod provider (`lastViewedBoxProvider`) for that box.
+2. A new `settingsBoxProvider` (`FutureProvider<Box<String>>`) in
+   `lib/core/di/providers.dart` for the settings Hive box.
 3. Converting `CompetitionDetailScreen` from a `ConsumerWidget` to a
    `ConsumerStatefulWidget` so `initState` can fire-and-forget write the ID.
-4. Refactoring `CompmanApp` from `StatelessWidget` to `ConsumerStatefulWidget`
-   so the router can be constructed with the correct `initialLocation` after
-   reading the persisted ID synchronously against the already-loaded bookmarks.
+4. Extending `main()` to open both Hive boxes before `runApp`, compute
+   `initialLocation`, and pass it to `CompmanApp` as a constructor parameter.
+   `CompmanApp` stays a `StatelessWidget`.
 5. Unit tests, widget tests, and documentation updates.
 
 ## What to build
@@ -52,83 +53,102 @@ final settingsBoxProvider = FutureProvider<Box<String>>((ref) async {
 });
 ```
 
-Also add a provider for the data source:
-
-```dart
-/// Provides the [LastViewedLocalDataSource] once the settings box is ready.
-final lastViewedLocalDataSourceProvider =
-    Provider<LastViewedLocalDataSource>((ref) {
-  final box = ref.watch(settingsBoxProvider).requireValue;
-  return LastViewedLocalDataSource(box);
-});
-```
+No `lastViewedLocalDataSourceProvider` or `lastViewedIdProvider` is needed.
+Both `main()` and `CompetitionDetailScreen.initState` use `LastViewedLocalDataSource`
+directly (see sections 3 and 4). `settingsBoxProvider` is overridden with
+`AsyncData(settingsBox)` in `main()` before `runApp`, so its async body never
+executes in production.
 
 ### 3. Write last-viewed ID from the detail screen
 
 Convert `CompetitionDetailScreen` from `ConsumerWidget` to
-`ConsumerStatefulWidget`. In `initState`, call:
+`ConsumerStatefulWidget`. In `initState`, use a **guarded** write that only
+acts when the settings box is already open:
 
 ```dart
-final dataSource = ref.read(lastViewedLocalDataSourceProvider);
-dataSource.writeLastViewedId(widget.competitionId);
+@override
+void initState() {
+  super.initState();
+  ref.read(settingsBoxProvider).whenData((box) {
+    LastViewedLocalDataSource(box).writeLastViewedId(widget.competitionId);
+  });
+}
 ```
 
-The call is fire-and-forget — do not `await` it, do not show any UI feedback,
-and do not catch errors (a write failure is acceptable to swallow silently).
+The guard is critical for testability: in production, `main()` opens the
+settings box before `runApp` and overrides `settingsBoxProvider` with
+`AsyncData(settingsBox)`, so `whenData` fires immediately on the first frame.
+In any widget test that does not override `settingsBoxProvider`, the provider
+stays in `AsyncLoading` and `whenData` silently no-ops — no platform channel,
+no Hive timer, no deadlock.
 
-`initState` fires exactly once per screen entry, which is the correct semantics.
-Note that `ref` is available in `ConsumerState.initState` as `this.ref` (not
-passed as a parameter).
-
+Note that `ref` is available in `ConsumerState.initState` as `this.ref`.
 The rest of `CompetitionDetailScreen.build` is unchanged.
 
-### 4. Resolve the initial route in `CompmanApp`
+### 4. Resolve the initial route in `main()`
 
-The current `CompmanApp` is a `StatelessWidget` and the router is a module-level
-`final _router`. That design cannot read from async Hive before the first frame.
+Instead of refactoring `CompmanApp` into a stateful widget, move all startup
+logic into `main()` before `runApp`. Both Hive boxes open in single-digit
+milliseconds on subsequent launches (they are already on disk), so no spinner
+is needed.
 
-Refactor as follows:
+Extend `main.dart` as follows:
 
-- Change `CompmanApp` to a `ConsumerStatefulWidget`.
-- In `State.initState`, trigger loading of both `bookmarksBoxProvider` and
-  `settingsBoxProvider` by calling `ref.read(bookmarksBoxProvider.future)` and
-  `ref.read(settingsBoxProvider.future)`.
-- In `build`, watch both providers:
+```dart
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  if (!Hive.isAdapterRegistered(0)) {
+    Hive.registerAdapter(BookmarkedCompetitionModelAdapter());
+  }
+  final bookmarksBox =
+      await Hive.openBox<BookmarkedCompetitionModel>('bookmarks');
+  final settingsBox = await Hive.openBox<String>('settings');
 
-  ```dart
-  final bookmarksBoxAsync = ref.watch(bookmarksBoxProvider);
-  final settingsBoxAsync  = ref.watch(settingsBoxProvider);
-  ```
+  String initialLocation = '/';
+  final lastId = LastViewedLocalDataSource(settingsBox).readLastViewedId();
+  if (lastId != null && bookmarksBox.values.any((m) => m.id == lastId)) {
+    initialLocation = '/competitions/$lastId';
+  }
 
-  - While either is loading, return a minimal `MaterialApp` with a
-    `CircularProgressIndicator` centered on a white background (consistent with
-    the existing loading pattern already implied by the bookmarks provider).
-  - If either errors, fall through to the normal home screen (use
-    `GoRouter(initialLocation: '/')` and log nothing).
-  - When both are ready, compute `initialLocation`:
+  runApp(ProviderScope(
+    overrides: [
+      bookmarksBoxProvider.overrideWithValue(AsyncData(bookmarksBox)),
+      settingsBoxProvider.overrideWithValue(AsyncData(settingsBox)),
+    ],
+    child: CompmanApp(initialLocation: initialLocation),
+  ));
+}
+```
 
-    ```dart
-    String initialLocation = '/';
-    final lastId = LastViewedLocalDataSource(settingsBox).readLastViewedId();
-    if (lastId != null) {
-      final bookmarks = bookmarksBox.values;
-      final stillBookmarked = bookmarks.any((m) => m.id == lastId);
-      if (stillBookmarked) {
-        initialLocation = '/competitions/$lastId';
-      }
-    }
-    ```
+`CompmanApp` gains an `initialLocation` constructor parameter and stays a
+`StatelessWidget`. Its `build` method passes `initialLocation` to the router:
 
-    Then create and cache the router as `_GoRouterCache(initialLocation)` in
-    state so it is not rebuilt on every frame.
+```dart
+class CompmanApp extends StatelessWidget {
+  const CompmanApp({super.key, required this.initialLocation});
 
-- Move the `GoRouter` definition (routes list) into a private factory function
-  `_buildRouter(String initialLocation)` so the routes are not duplicated.
+  final String initialLocation;
 
-This approach guarantees no visible home-screen flash: the app shows a spinner
-until both boxes are open (which takes milliseconds on subsequent launches
-because Hive boxes are already on disk), then renders the correct screen
-directly.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Compman Mobile',
+      theme: AppTheme.light(),
+      routerConfig: _buildRouter(initialLocation),
+    );
+  }
+}
+```
+
+Move the `GoRouter` definition (routes list) into a private top-level function
+`_buildRouter(String initialLocation)` so routes are defined once and the
+module-level `_router` constant is removed.
+
+The `overrideWithValue(AsyncData(...))` calls ensure that every downstream
+provider that watches `bookmarksBoxProvider` or `settingsBoxProvider`
+(including `competitionsLocalDataSourceProvider`) resolves synchronously for
+the entire lifetime of the app.
 
 ### 5. Route list (unchanged)
 
@@ -152,6 +172,105 @@ All edge cases are handled by the logic in step 4:
 - **Box open error**: either `AsyncError` branch → home screen silently.
 - **Only one bookmark**: the stored ID matches → auto-navigate always fires.
 
+### 7. Testing patterns and constraints
+
+> **Background:** the first implementation attempt produced tests that hung
+> indefinitely. Two root causes were identified. The design in sections 3 and 4
+> above structurally prevents both.
+
+#### Root cause 1 — FakeAsync + Hive write timer = deadlock
+
+`testWidgets` wraps every test body in Flutter's `FakeAsync` zone. `FakeAsync`
+intercepts all `Timer` objects — they only advance when the test explicitly calls
+`tester.pump(Duration)` or `tester.pumpAndSettle()`. Hive's `box.put()` uses an
+internal debounce timer to batch writes:
+
+```
+await box.put(key, value)   // inside a testWidgets body
+  └─ waits for a Future
+       └─ whose completion depends on a Timer
+            └─ that will never fire  ← FakeAsync freezes it
+                 └─ DEADLOCK — test hangs forever
+```
+
+**Mitigation:** the `initState` guard (section 3) uses `whenData` which fires
+synchronously when the provider already holds `AsyncData`. In any widget test
+that does not override `settingsBoxProvider`, the provider stays in
+`AsyncLoading` and `whenData` never fires — Hive is never touched at all.
+For the one test that deliberately exercises the write path, `settingsBoxProvider`
+is overridden with `AsyncData(_FakeStringBox())` (an in-memory implementation)
+so no real Hive write occurs inside the `testWidgets` body.
+
+#### Root cause 2 — `initState` silently acquires a new Hive dependency
+
+If `initState` reads a provider that transitively calls `Hive.initFlutter()`,
+every widget test that renders that screen acquires an unexpected platform-channel
+dependency, leading to `MissingPluginException` or unpredictable latency.
+
+**Mitigation:** the `whenData` guard (section 3) never triggers the provider to
+*start* loading — it only acts on a value that is already present. Tests without
+an override see `AsyncLoading`; `whenData` is a no-op.
+
+#### Unit tests for `LastViewedLocalDataSource`
+
+Separate unit tests are not required. The two one-liner methods are covered
+indirectly by the `CompetitionDetailScreen` widget test that verifies the write
+(see below). If the implementer wishes to add plain `test()` (not `testWidgets`)
+tests with a real temp-directory Hive box, that is acceptable — but not
+mandated.
+
+#### Widget tests — `CompetitionDetailScreen`
+
+Pre-existing tests require **no changes**: the `whenData` guard silently no-ops
+when `settingsBoxProvider` is not overridden.
+
+For the new test that asserts the write happened, define `_FakeStringBox` once
+at the top of `competition_detail_screen_test.dart`:
+
+```dart
+/// In-memory fake — no Hive, no timer, no platform channel.
+class _FakeStringBox extends Fake implements Box<String> {
+  final Map<String, String> store = {};
+
+  @override
+  Future<void> put(dynamic key, String value) async {
+    store[key as String] = value;
+  }
+}
+```
+
+Then in the write-verification test:
+
+```dart
+final fakeBox = _FakeStringBox();
+await tester.pumpWidget(_buildApp([
+  ...baseOverrides,
+  settingsBoxProvider.overrideWithValue(AsyncData(fakeBox)),
+]));
+await tester.pump(); // let initState run
+expect(fakeBox.store['lastViewedCompetitionId'], _competitionId);
+```
+
+#### Widget tests — `CompmanApp`
+
+Because `CompmanApp` now accepts `initialLocation` as a constructor parameter,
+tests simply construct the widget with the desired value — no provider overrides,
+no Hive I/O:
+
+```dart
+await tester.pumpWidget(
+  ProviderScope(child: CompmanApp(initialLocation: '/competitions/test-id')),
+);
+// assert CompetitionDetailScreen is rendered
+
+await tester.pumpWidget(
+  ProviderScope(child: const CompmanApp(initialLocation: '/')),
+);
+// assert BookmarksScreen is rendered
+```
+
+---
+
 ## Acceptance criteria
 
 - [ ] Opening the Competition Detail screen for the first time writes its ID to
@@ -166,16 +285,14 @@ All edge cases are handled by the logic in step 4:
   screen).
 - [ ] `flutter analyze` reports no issues.
 - [ ] `flutter test` passes, including:
-  - Unit tests for `LastViewedLocalDataSource.readLastViewedId` (returns `null`
-    when empty, returns stored value when set) and
-    `LastViewedLocalDataSource.writeLastViewedId` (value is readable after
-    write).
-  - A widget test asserting that navigating to `CompetitionDetailScreen` causes
-    `lastViewedLocalDataSourceProvider` to be called with the correct ID.
-  - A widget test for the `CompmanApp` startup behavior: when both boxes are
-    loaded and a matching bookmark exists, the router is created with
-    `initialLocation = '/competitions/<id>'`; when no match exists, with
-    `initialLocation = '/'`.
+  - A widget test for `CompetitionDetailScreen` overrides `settingsBoxProvider`
+    with `AsyncData(_FakeStringBox())` and asserts that `fakeBox.store` contains
+    the correct competition ID after pumping. Pre-existing tests need no changes —
+    the `whenData` guard silently no-ops when `settingsBoxProvider` is not
+    overridden.
+  - Widget tests for `CompmanApp` construct `CompmanApp(initialLocation: '/competitions/<id>')`
+    and `CompmanApp(initialLocation: '/')` directly and assert the correct screen
+    is rendered. No provider overrides or Hive I/O are involved.
 
 ## Documentation to update
 
@@ -200,6 +317,12 @@ All edge cases are handled by the logic in step 4:
   no print statements.
 - Follow all rules in `AGENTS.md`: Dart doc on every new public symbol, no
   `setState` in feature screens, `///` comments on providers.
+- **Widget-test rule — Hive:** Never `await` a real `Box.put()` / `Box.clear()`
+  inside a `testWidgets` body. `FakeAsync` intercepts Hive's internal
+  write-batching `Timer`, creating a deadlock. Supply a `_FakeStringBox`
+  (`class _FakeStringBox extends Fake implements Box<String>`, implementing only
+  the methods the test uses) via
+  `settingsBoxProvider.overrideWithValue(AsyncData(fakeBox))`.
 
 ## Reference
 
