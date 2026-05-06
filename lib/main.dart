@@ -20,11 +20,11 @@ Future<void> main() async {
   );
   final settingsBox = await Hive.openBox<String>('settings');
 
-  String initialLocation = '/';
   final lastId = LastViewedLocalDataSource(settingsBox).readLastViewedId();
-  if (lastId != null && bookmarksBox.values.any((m) => m.id == lastId)) {
-    initialLocation = '/competitions/$lastId';
-  }
+  final initialCompetitionId =
+      (lastId != null && bookmarksBox.values.any((m) => m.id == lastId))
+          ? lastId
+          : null;
 
   runApp(
     ProviderScope(
@@ -32,7 +32,7 @@ Future<void> main() async {
         bookmarksBoxProvider.overrideWithValue(bookmarksBox),
         settingsBoxProvider.overrideWithValue(AsyncData(settingsBox)),
       ],
-      child: CompmanApp(initialLocation: initialLocation),
+      child: CompmanApp(initialCompetitionId: initialCompetitionId),
     ),
   );
 }

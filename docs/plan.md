@@ -73,6 +73,7 @@
 ---
 
 - ✅ **Remember last-viewed competition** — `LastViewedLocalDataSource` in `lib/core/storage/` reads/writes the last-viewed competition ID to a `"settings"` Hive `Box<String>`; `settingsBoxProvider` added to `core/di/providers.dart`; `CompetitionDetailScreen` converted to `ConsumerStatefulWidget` with a `whenData`-guarded `initState` write; `main()` opens both Hive boxes before `runApp`, resolves `initialLocation`, and overrides both box providers; `CompmanApp` gains an `initialLocation` constructor parameter; widget tests and docs updated
+- ✅ **Fix cold-start back-stack** — `CompmanApp` converted to `StatefulWidget`; always starts at `'/'`; `addPostFrameCallback` pushes `/competitions/<id>` on top so back button always returns to the bookmark list; `initialLocation` parameter replaced with `initialCompetitionId`; widget tests and docs updated
 
 ---
 

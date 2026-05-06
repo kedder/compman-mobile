@@ -10,28 +10,55 @@ import 'features/competitions/presentation/screens/competition_detail_screen.dar
 import 'features/competitions/presentation/screens/competition_list_screen.dart';
 
 /// Root application widget with GoRouter-based navigation.
-class CompmanApp extends StatelessWidget {
+class CompmanApp extends StatefulWidget {
   /// Creates the [CompmanApp].
   ///
-  /// [initialLocation] is passed directly to [GoRouter] and determines which
-  /// screen is shown on cold start. Defaults to `'/'` (home screen).
-  const CompmanApp({super.key, this.initialLocation = '/'});
+  /// When [initialCompetitionId] is provided, the app opens the Competition
+  /// Detail screen for that ID on cold start, with the home screen seeded
+  /// behind it so the back button works.
+  const CompmanApp({super.key, this.initialCompetitionId});
 
-  /// The initial route shown on app launch.
-  final String initialLocation;
+  /// If non-null, the app navigates to this competition's detail screen after
+  /// the first frame, placing the home screen behind it on the back-stack.
+  final String? initialCompetitionId;
+
+  @override
+  State<CompmanApp> createState() => _CompmanAppState();
+}
+
+class _CompmanAppState extends State<CompmanApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = _buildRouter();
+    final id = widget.initialCompetitionId;
+    if (id != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _router.push('/competitions/$id'),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Compman Mobile',
       theme: AppTheme.light(),
-      routerConfig: _buildRouter(initialLocation),
+      routerConfig: _router,
     );
   }
 }
 
-GoRouter _buildRouter(String initialLocation) => GoRouter(
-  initialLocation: initialLocation,
+GoRouter _buildRouter() => GoRouter(
+  initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const BookmarksScreen()),
     GoRoute(

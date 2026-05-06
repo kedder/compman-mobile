@@ -173,7 +173,7 @@ CompetitionListScreen
 
 ## Last-Viewed Competition
 
-When the user opens `CompetitionDetailScreen`, the screen writes the competition's ID to a Hive `Box<String>` named `"settings"` under the key `lastViewedCompetitionId`. On the next cold start, `main()` reads that ID, checks whether it still matches a bookmarked competition, and — if so — sets `initialLocation` to `/competitions/<id>` before calling `runApp`. This lets returning pilots skip the home screen on every launch.
+When the user opens `CompetitionDetailScreen`, the screen writes the competition's ID to a Hive `Box<String>` named `"settings"` under the key `lastViewedCompetitionId`. On the next cold start, `main()` reads that ID, checks whether it still matches a bookmarked competition, and — if so — passes `initialCompetitionId` to `CompmanApp`. The app always starts at `'/'` (home screen) and then uses `addPostFrameCallback` to push `/competitions/<id>` on top, so the back button always returns to the bookmark list.
 
 ### Key components
 
@@ -182,7 +182,8 @@ When the user opens `CompetitionDetailScreen`, the screen writes the competition
 | `LastViewedLocalDataSource` | `lib/core/storage/last_viewed_local_datasource.dart` | Reads/writes the last-viewed ID in the settings box |
 | `settingsBoxProvider` | `lib/core/di/providers.dart` | `FutureProvider<Box<String>>` for the settings Hive box |
 | `CompetitionDetailScreen.initState` | competition detail screen | Fire-and-forget write via `whenData` guard |
-| `main()` startup redirect | `lib/main.dart` | Opens both boxes, resolves `initialLocation`, overrides providers |
+| `main()` startup redirect | `lib/main.dart` | Opens both boxes, resolves `initialCompetitionId`, overrides providers |
+| `_CompmanAppState.initState` | `lib/app.dart` | Pushes detail screen via post-frame callback to seed back-stack |
 
 ### Guard pattern in `initState`
 

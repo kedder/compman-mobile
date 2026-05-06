@@ -29,26 +29,18 @@ void main() {
     expect(find.text('Your competitions'), findsOneWidget);
   });
 
-  testWidgets('CompmanApp with initialLocation "/" renders BookmarksScreen', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      const ProviderScope(child: CompmanApp(initialLocation: '/')),
-    );
-    await tester.pump();
-
-    expect(find.text('Your competitions'), findsOneWidget);
-  });
-
   testWidgets(
-    'CompmanApp with initialLocation "/competitions/:id" renders CompetitionDetailScreen',
+    'CompmanApp with initialCompetitionId pushes detail on top of home',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [bookmarksBoxProvider.overrideWithValue(_emptyBox)],
-          child: const CompmanApp(initialLocation: '/competitions/test-id'),
+          child: const CompmanApp(initialCompetitionId: 'test-id'),
         ),
       );
+      // First pump: home screen renders and post-frame callback fires.
+      await tester.pump();
+      // Second pump: router push settles, CompetitionDetailScreen is shown.
       await tester.pump();
 
       expect(find.text('Competition Details'), findsOneWidget);
