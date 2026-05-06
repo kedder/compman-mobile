@@ -20,8 +20,6 @@ final competitionListProvider =
 class CompetitionListNotifier extends AsyncNotifier<List<Competition>> {
   @override
   Future<List<Competition>> build() async {
-    // Wait for the Hive box to be ready before accessing the repository.
-    await ref.watch(bookmarksBoxProvider.future);
     final result = await FetchCompetitions(
       ref.watch(competitionsRepositoryProvider),
     )();
@@ -44,8 +42,6 @@ class BookmarkedCompetitionsNotifier
     extends AsyncNotifier<List<BookmarkedCompetition>> {
   @override
   Future<List<BookmarkedCompetition>> build() async {
-    // Wait for the Hive box to be ready before accessing the repository.
-    await ref.watch(bookmarksBoxProvider.future);
     final result = await GetBookmarkedCompetitions(
       ref.watch(competitionsRepositoryProvider),
     )();

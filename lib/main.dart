@@ -29,7 +29,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
-        bookmarksBoxProvider.overrideWithValue(AsyncData(bookmarksBox)),
+        bookmarksBoxProvider.overrideWithValue(bookmarksBox),
         settingsBoxProvider.overrideWithValue(AsyncData(settingsBox)),
       ],
       child: CompmanApp(initialLocation: initialLocation),

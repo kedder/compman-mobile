@@ -1,6 +1,24 @@
 import 'package:compman_mobile/app.dart';
+import 'package:compman_mobile/core/di/providers.dart';
+import 'package:compman_mobile/features/competitions/data/models/bookmarked_competition_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+
+/// In-memory fake — satisfies [bookmarksBoxProvider] without touching Hive.
+class _EmptyBookmarksBox extends Fake
+    implements Box<BookmarkedCompetitionModel> {
+  @override
+  Iterable<BookmarkedCompetitionModel> get values => const [];
+
+  @override
+  BookmarkedCompetitionModel? get(
+    dynamic key, {
+    BookmarkedCompetitionModel? defaultValue,
+  }) => null;
+}
+
+final _emptyBox = _EmptyBookmarksBox();
 
 void main() {
   testWidgets('App renders home screen', (WidgetTester tester) async {
@@ -26,8 +44,9 @@ void main() {
     'CompmanApp with initialLocation "/competitions/:id" renders CompetitionDetailScreen',
     (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: CompmanApp(initialLocation: '/competitions/test-id'),
+        ProviderScope(
+          overrides: [bookmarksBoxProvider.overrideWithValue(_emptyBox)],
+          child: const CompmanApp(initialLocation: '/competitions/test-id'),
         ),
       );
       await tester.pump();

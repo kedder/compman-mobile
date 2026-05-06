@@ -30,25 +30,22 @@ final dioProvider = Provider<Dio>((ref) => createDioClient());
 
 /// Provides the Hive [Box] used to persist bookmarked competitions.
 ///
-/// Registers [BookmarkedCompetitionModelAdapter] (typeId 0) before opening the
-/// box so that Hive can serialise and deserialise the stored objects.
-final bookmarksBoxProvider = FutureProvider<Box<BookmarkedCompetitionModel>>((
-  ref,
-) async {
-  await Hive.initFlutter();
-  if (!Hive.isAdapterRegistered(0)) {
-    Hive.registerAdapter(BookmarkedCompetitionModelAdapter());
-  }
-  return Hive.openBox<BookmarkedCompetitionModel>('bookmarks');
-});
+/// This provider must always be overridden in [main] via
+/// `bookmarksBoxProvider.overrideWithValue(openedBox)` before [runApp].
+/// The default body exists only to satisfy the [Provider] API — it throws
+/// [UnimplementedError] so any accidental non-override fails loudly.
+final bookmarksBoxProvider = Provider<Box<BookmarkedCompetitionModel>>(
+  (ref) => throw UnimplementedError(
+    'bookmarksBoxProvider must be overridden in main() before runApp.',
+  ),
+);
 
 /// Provides the Hive [Box] used to store cross-feature settings (plain strings).
 ///
 /// No type adapter registration is required for a [Box<String>].
 /// In production, [main] opens the box before [runApp] and overrides this
-/// provider with [AsyncData], so the async body here never executes.
+/// provider with [AsyncData], so the body here never executes.
 final settingsBoxProvider = FutureProvider<Box<String>>((ref) async {
-  await Hive.initFlutter();
   return Hive.openBox<String>('settings');
 });
 
@@ -59,12 +56,9 @@ final soaringSpotRemoteDataSourceProvider =
     );
 
 /// Provides the [CompetitionsLocalDataSource] implementation.
-///
-/// Depends on [bookmarksBoxProvider]; resolves only when the Hive box is open.
 final competitionsLocalDataSourceProvider =
     Provider<CompetitionsLocalDataSource>((ref) {
-      final box = ref.watch(bookmarksBoxProvider).requireValue;
-      return HiveCompetitionsLocalDataSource(box);
+      return HiveCompetitionsLocalDataSource(ref.watch(bookmarksBoxProvider));
     });
 
 /// Provides the [CompetitionsRepository] implementation.
