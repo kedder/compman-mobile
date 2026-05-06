@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/storage/last_viewed_local_datasource.dart';
 import '../../../../core/platform/xcsoar_saf_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_badge.dart';
@@ -19,7 +20,10 @@ import '../providers/competitions_providers.dart';
 ///
 /// Allows the user to select a competition class, view and install the
 /// latest XCSoar task, and see the current XCSoar data directory.
-class CompetitionDetailScreen extends ConsumerWidget {
+///
+/// On first render, records this competition's ID as the last-viewed entry so
+/// that the next cold start can navigate here directly.
+class CompetitionDetailScreen extends ConsumerStatefulWidget {
   /// Creates the [CompetitionDetailScreen].
   const CompetitionDetailScreen({super.key, required this.competitionId});
 
@@ -27,15 +31,33 @@ class CompetitionDetailScreen extends ConsumerWidget {
   final String competitionId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CompetitionDetailScreen> createState() =>
+      _CompetitionDetailScreenState();
+}
+
+class _CompetitionDetailScreenState
+    extends ConsumerState<CompetitionDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // whenData is a no-op when the provider is still AsyncLoading (e.g. in
+    // widget tests that do not override settingsBoxProvider), avoiding any
+    // platform-channel calls or FakeAsync deadlocks.
+    ref.read(settingsBoxProvider).whenData((box) {
+      LastViewedLocalDataSource(box).writeLastViewedId(widget.competitionId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final competitionAsync = ref.watch(
-      competitionDetailProvider(competitionId),
+      competitionDetailProvider(widget.competitionId),
     );
 
     final isRefreshing =
         competitionAsync.hasValue &&
         competitionAsync.value != null &&
-        ref.watch(latestTasksProvider(competitionId)).isLoading;
+        ref.watch(latestTasksProvider(widget.competitionId)).isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -55,8 +77,8 @@ class CompetitionDetailScreen extends ConsumerWidget {
               icon: const Icon(Icons.refresh),
               tooltip: 'Refresh',
               onPressed: () {
-                ref.invalidate(latestTasksProvider(competitionId));
-                ref.invalidate(downloadsProvider(competitionId));
+                ref.invalidate(latestTasksProvider(widget.competitionId));
+                ref.invalidate(downloadsProvider(widget.competitionId));
               },
             ),
         ],
@@ -66,7 +88,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
         error: (err, _) => _ErrorRetry(
           message: _failureMessage(err),
           onRetry: () =>
-              ref.invalidate(competitionDetailProvider(competitionId)),
+              ref.invalidate(competitionDetailProvider(widget.competitionId)),
         ),
         data: (competition) {
           if (competition == null) {
@@ -74,7 +96,7 @@ class CompetitionDetailScreen extends ConsumerWidget {
           }
           return _CompetitionDetailBody(
             competition: competition,
-            competitionId: competitionId,
+            competitionId: widget.competitionId,
           );
         },
       ),

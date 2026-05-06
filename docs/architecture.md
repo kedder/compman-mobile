@@ -151,7 +151,16 @@ Providers translate failures into `AsyncError` states, which screens display as 
 
 ## Local Storage
 
-**Hive** is used for persisting bookmarked competitions. It is fast, requires no schema migrations for this use case, and works well with Flutter. Each feature that needs persistence defines its own Hive box name constant in the `data/datasources/` layer.
+**Hive** is used for all local persistence. It is fast, requires no schema migrations for this use case, and works well with Flutter.
+
+Two Hive boxes are opened in `main()` before `runApp` and injected into `ProviderScope` via `overrideWithValue(AsyncData(...))` so all downstream providers resolve synchronously for the lifetime of the app:
+
+| Box name | Type | Provider | Purpose |
+|---|---|---|---|
+| `"bookmarks"` | `Box<BookmarkedCompetitionModel>` | `bookmarksBoxProvider` | Persisted bookmarked competitions |
+| `"settings"` | `Box<String>` | `settingsBoxProvider` | Cross-feature key/value settings (plain strings) |
+
+Non-feature-specific local persistence helpers live in `lib/core/storage/`. Currently the only helper is `LastViewedLocalDataSource` (reads/writes the last-viewed competition ID). Feature-specific data sources define their own Hive box names in `data/datasources/`.
 
 ---
 

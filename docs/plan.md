@@ -72,6 +72,10 @@
 
 ---
 
+- ✅ **Remember last-viewed competition** — `LastViewedLocalDataSource` in `lib/core/storage/` reads/writes the last-viewed competition ID to a `"settings"` Hive `Box<String>`; `settingsBoxProvider` added to `core/di/providers.dart`; `CompetitionDetailScreen` converted to `ConsumerStatefulWidget` with a `whenData`-guarded `initState` write; `main()` opens both Hive boxes before `runApp`, resolves `initialLocation`, and overrides both box providers; `CompmanApp` gains an `initialLocation` constructor parameter; widget tests and docs updated
+
+---
+
 ## Phase 2: Download Files to XCSoarData *(In Progress)*
 
 *Goal: Download waypoint (.cup) and airspace (.txt) files from a bookmarked competition and write them to `/sdcard/XCSoarData/`.*

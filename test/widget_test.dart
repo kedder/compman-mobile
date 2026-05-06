@@ -10,4 +10,29 @@ void main() {
 
     expect(find.text('Your competitions'), findsOneWidget);
   });
+
+  testWidgets('CompmanApp with initialLocation "/" renders BookmarksScreen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: CompmanApp(initialLocation: '/')),
+    );
+    await tester.pump();
+
+    expect(find.text('Your competitions'), findsOneWidget);
+  });
+
+  testWidgets(
+    'CompmanApp with initialLocation "/competitions/:id" renders CompetitionDetailScreen',
+    (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: CompmanApp(initialLocation: '/competitions/test-id'),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Competition Details'), findsOneWidget);
+    },
+  );
 }

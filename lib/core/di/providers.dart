@@ -42,6 +42,16 @@ final bookmarksBoxProvider = FutureProvider<Box<BookmarkedCompetitionModel>>((
   return Hive.openBox<BookmarkedCompetitionModel>('bookmarks');
 });
 
+/// Provides the Hive [Box] used to store cross-feature settings (plain strings).
+///
+/// No type adapter registration is required for a [Box<String>].
+/// In production, [main] opens the box before [runApp] and overrides this
+/// provider with [AsyncData], so the async body here never executes.
+final settingsBoxProvider = FutureProvider<Box<String>>((ref) async {
+  await Hive.initFlutter();
+  return Hive.openBox<String>('settings');
+});
+
 /// Provides the [SoaringSpotRemoteDataSource] implementation.
 final soaringSpotRemoteDataSourceProvider =
     Provider<SoaringSpotRemoteDataSource>(

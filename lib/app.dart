@@ -12,19 +12,26 @@ import 'features/competitions/presentation/screens/competition_list_screen.dart'
 /// Root application widget with GoRouter-based navigation.
 class CompmanApp extends StatelessWidget {
   /// Creates the [CompmanApp].
-  const CompmanApp({super.key});
+  ///
+  /// [initialLocation] is passed directly to [GoRouter] and determines which
+  /// screen is shown on cold start. Defaults to `'/'` (home screen).
+  const CompmanApp({super.key, this.initialLocation = '/'});
+
+  /// The initial route shown on app launch.
+  final String initialLocation;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Compman Mobile',
       theme: AppTheme.light(),
-      routerConfig: _router,
+      routerConfig: _buildRouter(initialLocation),
     );
   }
 }
 
-final _router = GoRouter(
+GoRouter _buildRouter(String initialLocation) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
     GoRoute(path: '/', builder: (context, state) => const BookmarksScreen()),
     GoRoute(

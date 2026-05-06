@@ -21,6 +21,21 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+
+// ---------------------------------------------------------------------------
+// In-memory Box<String> fake — avoids Hive platform channels and FakeAsync
+// timer deadlocks inside testWidgets bodies.
+// ---------------------------------------------------------------------------
+
+class _FakeStringBox extends Fake implements Box<String> {
+  final Map<String, String> store = {};
+
+  @override
+  Future<void> put(dynamic key, String value) async {
+    store[key as String] = value;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Test fixtures
@@ -601,4 +616,21 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'initState writes competitionId to settings box via settingsBoxProvider',
+    (tester) async {
+      final fakeBox = _FakeStringBox();
+
+      await tester.pumpWidget(
+        _buildApp([
+          ..._baseOverrides(classes: const []),
+          settingsBoxProvider.overrideWithValue(AsyncData(fakeBox)),
+        ]),
+      );
+      await tester.pump(); // let initState run
+
+      expect(fakeBox.store['lastViewedCompetitionId'], _competitionId);
+    },
+  );
 }

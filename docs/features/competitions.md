@@ -169,6 +169,33 @@ CompetitionListScreen
                                      └─ map to List<Competition> (domain entities)
 ```
 
+---
+
+## Last-Viewed Competition
+
+When the user opens `CompetitionDetailScreen`, the screen writes the competition's ID to a Hive `Box<String>` named `"settings"` under the key `lastViewedCompetitionId`. On the next cold start, `main()` reads that ID, checks whether it still matches a bookmarked competition, and — if so — sets `initialLocation` to `/competitions/<id>` before calling `runApp`. This lets returning pilots skip the home screen on every launch.
+
+### Key components
+
+| Component | Location | Role |
+|---|---|---|
+| `LastViewedLocalDataSource` | `lib/core/storage/last_viewed_local_datasource.dart` | Reads/writes the last-viewed ID in the settings box |
+| `settingsBoxProvider` | `lib/core/di/providers.dart` | `FutureProvider<Box<String>>` for the settings Hive box |
+| `CompetitionDetailScreen.initState` | competition detail screen | Fire-and-forget write via `whenData` guard |
+| `main()` startup redirect | `lib/main.dart` | Opens both boxes, resolves `initialLocation`, overrides providers |
+
+### Guard pattern in `initState`
+
+`initState` reads `settingsBoxProvider` and calls `whenData`. In production, `main()` overrides the provider with `AsyncData(settingsBox)` before `runApp`, so `whenData` fires synchronously on the first frame. In widget tests that do not override `settingsBoxProvider`, the provider stays in `AsyncLoading` and `whenData` is a no-op — no Hive I/O, no platform-channel calls, no `FakeAsync` deadlock.
+
+### Edge cases
+
+- **No stored ID** (first launch) → `lastId` is `null` → home screen.
+- **Stored ID not bookmarked** → `any()` returns `false` → home screen.
+- **Only one bookmark** → redirect always fires.
+
+---
+
 ## Data Flow: Bookmarking
 
 ```
