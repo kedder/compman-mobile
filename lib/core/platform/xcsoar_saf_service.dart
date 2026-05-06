@@ -46,11 +46,11 @@ class XcsoarSafService {
     return result ?? false;
   }
 
-  /// Returns true if [Android/media/<packageId>/] is writable via SAF.
+  /// Returns true if [Android/media/<packageId>/] exists on the filesystem.
   ///
-  /// Returns false if the package is not installed, the directory does not
-  /// exist, or the OS blocks access (e.g. because XCSoar is using
-  /// Android/data instead).
+  /// Returns false if the directory does not exist (e.g. XCSoar is using
+  /// Android/data instead, or has never been launched). A true result means
+  /// the user can grant SAF access via the folder picker.
   Future<bool> canWriteToMediaDir(String packageId) async {
     final result = await _channel.invokeMethod<bool>('canWriteToMediaDir', {
       'packageId': packageId,

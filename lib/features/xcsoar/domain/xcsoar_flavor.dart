@@ -9,14 +9,14 @@ class XcsoarFlavor {
   /// Human-readable name shown in the flavor picker list.
   final String displayName;
 
-  /// Android package identifier, e.g. `com.xcsoar`.
+  /// Android package identifier, e.g. `org.xcsoar`.
   final String packageId;
 }
 
 /// The canonical list of known XCSoar variants, in display order.
 const List<XcsoarFlavor> kKnownXcsoarFlavors = [
-  XcsoarFlavor(displayName: 'XCSoar', packageId: 'com.xcsoar'),
-  XcsoarFlavor(displayName: 'XCSoar Jet', packageId: 'com.zunuzoid.xcsoar_jet'),
-  XcsoarFlavor(displayName: 'XCSoar Play', packageId: 'com.xcsoar.play'),
-  XcsoarFlavor(displayName: 'XCSoar FOSS', packageId: 'com.xcsoar.foss'),
+  XcsoarFlavor(displayName: 'XCSoar', packageId: 'org.xcsoar'),
+  XcsoarFlavor(displayName: 'XCSoar Jet', packageId: 'com.zinuzoid.xcsoar_jet'),
+  XcsoarFlavor(displayName: 'XCSoar Play', packageId: 'org.xcsoar.play'),
+  XcsoarFlavor(displayName: 'XCSoar FOSS', packageId: 'org.xcsoar.foss'),
 ];

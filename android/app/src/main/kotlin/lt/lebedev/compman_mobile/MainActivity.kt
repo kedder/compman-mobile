@@ -110,19 +110,11 @@ class MainActivity : FlutterFragmentActivity() {
         Uri.parse("content://com.android.externalstorage.documents/document/${Uri.encode(path)}")
 
     private fun checkMediaDirWritable(pkg: String): Boolean {
-        return try {
-            val encoded = Uri.encode(mediaPath(pkg))
-            val treeUri = DocumentsContract.buildTreeDocumentUri(
-                "com.android.externalstorage.documents", encoded
-            )
-            val childUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                treeUri, DocumentsContract.getTreeDocumentId(treeUri)
-            )
-            contentResolver.query(childUri, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
-                null, null, null)?.use { it.count >= 0 } ?: false
-        } catch (_: Exception) {
-            false
-        }
+        // Android/media is readable without SAF permission (unlike Android/data).
+        // We just check the directory exists; if it does, the user can grant SAF
+        // access to it via the folder picker.
+        val dir = java.io.File(getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile, "media/$pkg")
+        return dir.exists() && dir.isDirectory
     }
 
     private fun getXcsoarMediaPath(): String {

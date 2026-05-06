@@ -34,10 +34,10 @@ Users who need to point Compman at a non-standard location can use the
 
 | Variant | Package |
 |---|---|
-| XCSoar | `com.xcsoar` |
-| XCSoar Jet | `com.zunuzoid.xcsoar_jet` |
-| XCSoar Play | `com.xcsoar.play` |
-| XCSoar FOSS | `com.xcsoar.foss` |
+| XCSoar | `org.xcsoar` |
+| XCSoar Jet | `com.zinuzoid.xcsoar_jet` |
+| XCSoar Play | `org.xcsoar.play` |
+| XCSoar FOSS | `org.xcsoar.foss` |
 
 ### Folder states
 

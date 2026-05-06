@@ -70,7 +70,7 @@ void main() {
   testWidgets(
     'ready flavor shows Ready badge and tap calls pickDirectoryForPackage',
     (tester) async {
-      const readyPkg = 'com.xcsoar';
+      const readyPkg = 'org.xcsoar';
       await tester.pumpWidget(
         _buildScreen(
           installedPackages: {readyPkg},
@@ -91,7 +91,7 @@ void main() {
   testWidgets(
     'warning flavor tap does not call pickDirectoryForPackage and marks tile selected',
     (tester) async {
-      const warningPkg = 'com.xcsoar';
+      const warningPkg = 'org.xcsoar';
       await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
       await tester.pumpAndSettle();
 
