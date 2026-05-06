@@ -5,10 +5,8 @@ import 'package:compman_mobile/core/error/failures.dart';
 import 'package:compman_mobile/core/platform/xcsoar_saf_service.dart';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
-import 'package:compman_mobile/features/competitions/domain/entities/competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
-import 'package:compman_mobile/features/competitions/domain/repositories/competitions_repository.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_and_install_file.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_task.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/set_competition_class.dart';
@@ -22,6 +20,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+
+import '../../domain/mock_competitions_repository.dart';
 
 // ---------------------------------------------------------------------------
 // In-memory Box<String> fake — avoids Hive platform channels and FakeAsync
@@ -117,7 +117,7 @@ List<Override> _baseOverrides({
 /// pause mid-download so the button disabled state can be asserted.
 class _CompleterDownloadAndInstallFile extends DownloadAndInstallFile {
   _CompleterDownloadAndInstallFile(this._future)
-    : super(const _DummyRepository(), _NoOpSafService());
+    : super(MockCompetitionsRepository(), _NoOpSafService());
 
   final Future<Either<Failure, Unit>> _future;
 
@@ -130,7 +130,7 @@ class _CompleterDownloadAndInstallFile extends DownloadAndInstallFile {
 
 class _ThrowingSafDownloadAndInstallFile extends DownloadAndInstallFile {
   _ThrowingSafDownloadAndInstallFile(this._exception)
-    : super(const _DummyRepository(), _NoOpSafService());
+    : super(MockCompetitionsRepository(), _NoOpSafService());
 
   final PlatformException _exception;
 
@@ -150,7 +150,8 @@ class _NoOpSafService extends XcsoarSafService {
 }
 
 class _RecordingSetCompetitionClass extends SetCompetitionClass {
-  _RecordingSetCompetitionClass(this.onCall) : super(const _DummyRepository());
+  _RecordingSetCompetitionClass(this.onCall)
+    : super(MockCompetitionsRepository());
 
   final void Function(String competitionId, String? selectedClass) onCall;
 
@@ -165,69 +166,13 @@ class _RecordingSetCompetitionClass extends SetCompetitionClass {
 }
 
 class _FailingDownloadTask extends DownloadTask {
-  _FailingDownloadTask(this.failure) : super(const _DummyRepository());
+  _FailingDownloadTask(this.failure) : super(MockCompetitionsRepository());
 
   final Failure failure;
 
   @override
   Future<Either<Failure, Uint8List>> call(String taskUrl) async =>
       left(failure);
-}
-
-class _DummyRepository implements CompetitionsRepository {
-  const _DummyRepository();
-
-  @override
-  Future<Either<Failure, Unit>> bookmarkCompetition(Competition competition) =>
-      throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, Uint8List>> downloadTask(String taskUrl) =>
-      throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, List<Competition>>> fetchCompetitions() =>
-      throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, List<String>>> fetchCompetitionClasses(
-    String competitionId,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, List<TaskInfo>>> fetchLatestTasks(
-    String competitionId,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, List<BookmarkedCompetition>>>
-  getBookmarkedCompetitions() => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, Unit>> removeBookmark(String competitionId) =>
-      throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, Unit>> setCompetitionClass(
-    String competitionId,
-    String? selectedClass,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, List<DownloadableFileInfo>>> fetchDownloads(
-    String competitionId,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, Uint8List>> downloadFile(String fileUrl) =>
-      throw UnimplementedError();
-
-  @override
-  Future<Either<Failure, Unit>> recordFileInstall(
-    String competitionId,
-    DownloadableFileKind kind,
-    String? version,
-  ) => throw UnimplementedError();
 }
 
 // ---------------------------------------------------------------------------
