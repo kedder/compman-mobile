@@ -114,32 +114,38 @@ class _XcsoarDirectorySettingsScreenState
     );
   }
 
+  void _showPickerResult(String? result, PlatformException? error) {
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message ?? 'Could not configure folder'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } else if (result == 'ok') {
+      ref.invalidate(xcsoarDirectoryUriProvider);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('XCSoar folder configured'),
+          backgroundColor: context.appColors.success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Folder selection cancelled')),
+      );
+    }
+  }
+
   Future<void> _pickDirectory() async {
     setState(() => _pickerLoading = true);
     try {
       final result = await ref.read(xcsoarSafServiceProvider).pickDirectory();
       if (!mounted) return;
-      if (result == 'ok') {
-        ref.invalidate(xcsoarDirectoryUriProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('XCSoar folder configured'),
-            backgroundColor: context.appColors.success,
-          ),
-        );
-      } else if (result == 'cancelled') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Folder selection cancelled')),
-        );
-      }
+      _showPickerResult(result, null);
     } on PlatformException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Could not configure folder'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showPickerResult(null, e);
     } finally {
       if (mounted) setState(() => _pickerLoading = false);
     }
@@ -161,27 +167,10 @@ class _XcsoarDirectorySettingsScreenState
           .read(xcsoarSafServiceProvider)
           .pickDirectoryForPackage(flavor.packageId);
       if (!mounted) return;
-      if (result == 'ok') {
-        ref.invalidate(xcsoarDirectoryUriProvider);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('XCSoar folder configured'),
-            backgroundColor: context.appColors.success,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Folder selection cancelled')),
-        );
-      }
+      _showPickerResult(result, null);
     } on PlatformException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Could not configure folder'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showPickerResult(null, e);
     }
   }
 

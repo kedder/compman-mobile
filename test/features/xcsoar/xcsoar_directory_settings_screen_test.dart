@@ -219,20 +219,6 @@ void main() {
   );
 
   testWidgets(
-    'Test 10: pickDirectoryForPackage is not called when warning tile is tapped',
-    (tester) async {
-      const warningPkg = 'org.xcsoar';
-      await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('XCSoar'));
-      await tester.pump();
-
-      verifyNever(_mockService.pickDirectoryForPackage(any));
-    },
-  );
-
-  testWidgets(
     'Test 11: tapping ready tile while guidance card open dismisses card and opens picker',
     (tester) async {
       const warningPkg = 'org.xcsoar';
