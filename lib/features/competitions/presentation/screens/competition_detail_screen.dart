@@ -21,6 +21,9 @@ import '../providers/competitions_providers.dart';
 // Screen-scoped providers
 // ---------------------------------------------------------------------------
 
+/// Which file a download button targets.
+enum _DownloadKind { task, airspace, waypoints }
+
 /// Dismissible download error messages shown at the bottom of the screen.
 final _downloadErrorsProvider =
     NotifierProvider.autoDispose<_DownloadErrorsNotifier, List<String>>(
@@ -464,10 +467,13 @@ mixin _SafNavigationMixin<W extends ConsumerStatefulWidget>
   /// - Aborted → appends a cancellation error banner.
   Future<void> _navigateToSettings({
     required String competitionId,
-    required String kind,
+    required _DownloadKind kind,
     required Future<void> Function() onConfigured,
   }) async {
-    final pending = PendingDownload(competitionId: competitionId, kind: kind);
+    final pending = PendingDownload(
+      competitionId: competitionId,
+      kind: kind.name,
+    );
     await context.push<void>(
       '/settings/xcsoar-directory?from=download&${pending.toQueryString()}',
     );
@@ -528,7 +534,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection>
       if (e.code == 'SAF_NOT_CONFIGURED') {
         await _navigateToSettings(
           competitionId: widget.competitionId,
-          kind: 'task',
+          kind: _DownloadKind.task,
           onConfigured: () => _installTask(task),
         );
       } else {
@@ -703,7 +709,7 @@ class _AirspaceCard extends ConsumerWidget {
           competitionId: competitionId,
           fileInfo: file,
           installedVersion: competition.airspaceVersion,
-          downloadKind: 'airspace',
+          downloadKind: _DownloadKind.airspace,
           sectionTitle: 'Airspace',
           sectionIcon: Icons.public,
           successMessage: 'Airspace downloaded',
@@ -748,7 +754,7 @@ class _WaypointsCard extends ConsumerWidget {
           competitionId: competitionId,
           fileInfo: file,
           installedVersion: competition.waypointsVersion,
-          downloadKind: 'waypoints',
+          downloadKind: _DownloadKind.waypoints,
           sectionTitle: 'Waypoints',
           sectionIcon: Icons.location_on_outlined,
           successMessage: 'Waypoints downloaded',
@@ -779,8 +785,8 @@ class _FileDownloadCard extends ConsumerStatefulWidget {
   /// The version token stored on [BookmarkedCompetition] at last install.
   final String? installedVersion;
 
-  /// `"airspace"` or `"waypoints"` — scopes [_fileDownloadingProvider].
-  final String downloadKind;
+  /// Scopes the correct downloading-flag provider and SAF navigation kind.
+  final _DownloadKind downloadKind;
   final String sectionTitle;
   final IconData sectionIcon;
   final String successMessage;
@@ -797,9 +803,11 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard>
       widget.fileInfo.publishedVersion != widget.installedVersion;
 
   // Selects the correct downloading-flag provider for this card's kind.
-  get _downloadingProvider => widget.downloadKind == 'airspace'
-      ? _airspaceDownloadingProvider
-      : _waypointsDownloadingProvider;
+  get _downloadingProvider => switch (widget.downloadKind) {
+    _DownloadKind.airspace => _airspaceDownloadingProvider,
+    _DownloadKind.waypoints => _waypointsDownloadingProvider,
+    _DownloadKind.task => _taskDownloadingProvider,
+  };
 
   Future<void> _download() async {
     ref.read(_downloadingProvider.notifier).value = true;
