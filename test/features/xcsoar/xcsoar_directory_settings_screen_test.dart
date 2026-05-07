@@ -9,6 +9,10 @@ import 'package:mockito/mockito.dart';
 
 import 'mock_xcsoar_saf_service.dart';
 
+/// Returns true when a [RichText] widget's plain text contains [substring].
+bool _richTextContains(Widget w, String substring) =>
+    w is RichText && w.text.toPlainText().contains(substring);
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -141,4 +145,121 @@ void main() {
 
     expect(find.text('XCSoar Folder'), findsOneWidget);
   });
+
+  testWidgets(
+    'Test 7: tapping warning tile shows guidance card with flavor name and card title',
+    (tester) async {
+      const warningPkg = 'org.xcsoar';
+      await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pump();
+
+      expect(
+        find.text("XCSoar can't be reached in its current location"),
+        findsOneWidget,
+      );
+      expect(find.textContaining('XCSoar is installed'), findsOneWidget);
+      expect(find.textContaining(warningPkg), findsWidgets);
+    },
+  );
+
+  testWidgets('Test 8: guidance card contains exact numbered option headers', (
+    tester,
+  ) async {
+    const warningPkg = 'org.xcsoar';
+    await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('XCSoar'));
+    await tester.pump();
+
+    expect(
+      find.byWidgetPredicate(
+        (w) => _richTextContains(w, '1. Back up, uninstall, and reinstall'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) => _richTextContains(w, "2. Clear XCSoar's app data"),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) => _richTextContains(w, '3. Uninstall and reinstall'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'Test 9: tapping same warning tile again collapses the guidance card',
+    (tester) async {
+      const warningPkg = 'org.xcsoar';
+      await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pump();
+      expect(
+        find.text("XCSoar can't be reached in its current location"),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pump();
+      expect(
+        find.text("XCSoar can't be reached in its current location"),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets(
+    'Test 10: pickDirectoryForPackage is not called when warning tile is tapped',
+    (tester) async {
+      const warningPkg = 'org.xcsoar';
+      await tester.pumpWidget(_buildScreen(installedPackages: {warningPkg}));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pump();
+
+      verifyNever(_mockService.pickDirectoryForPackage(any));
+    },
+  );
+
+  testWidgets(
+    'Test 11: tapping ready tile while guidance card open dismisses card and opens picker',
+    (tester) async {
+      const warningPkg = 'org.xcsoar';
+      const readyPkg = 'com.zinuzoid.xcsoar_jet';
+      await tester.pumpWidget(
+        _buildScreen(
+          installedPackages: {warningPkg, readyPkg},
+          writablePackages: {readyPkg},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pump();
+      expect(
+        find.text("XCSoar can't be reached in its current location"),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('XCSoar Jet'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text("XCSoar can't be reached in its current location"),
+        findsNothing,
+      );
+      verify(_mockService.pickDirectoryForPackage(readyPkg)).called(1);
+    },
+  );
 }

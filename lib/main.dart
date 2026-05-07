@@ -23,8 +23,8 @@ Future<void> main() async {
   final lastId = LastViewedLocalDataSource(settingsBox).readLastViewedId();
   final initialCompetitionId =
       (lastId != null && bookmarksBox.values.any((m) => m.id == lastId))
-          ? lastId
-          : null;
+      ? lastId
+      : null;
 
   runApp(
     ProviderScope(

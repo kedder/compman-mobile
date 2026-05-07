@@ -113,5 +113,5 @@
 
 - 📋 Background refresh / manual refresh on app open
 - 📋 XCSoar profile configuration (`xcsoar` feature)
-- 📋 **XCSoar flavor picker** — flavor-list UI with per-flavor writability badges (`_FlavorState.ready/warning/notInstalled`), `XcsoarFlavor` value type, `kKnownXcsoarFlavors` constant, `isPackageInstalled`/`canWriteToMediaDir`/`pickDirectoryForPackage` MethodChannel additions, `xcsoarSafServiceProvider` in DI, `fromDownloadFlow` AppBar variant; blocked-writability guidance card and auto-navigation from Competition Detail on `SAF_NOT_CONFIGURED` pending in follow-up issues
+- 🚧 **XCSoar flavor picker** — flavor-list UI with per-flavor writability badges (`_FlavorState.ready/warning/notInstalled`), `XcsoarFlavor` value type, `kKnownXcsoarFlavors` constant, `isPackageInstalled`/`canWriteToMediaDir`/`pickDirectoryForPackage` MethodChannel additions, `xcsoarSafServiceProvider` in DI, `fromDownloadFlow` AppBar variant; blocked-writability guidance card (`_BlockedFlavorGuidanceCard`) with toggle and 3 recovery options added; auto-navigation from Competition Detail on `SAF_NOT_CONFIGURED` pending in follow-up issue
 - 📋 `docs/features/xcsoar.md`

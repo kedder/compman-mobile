@@ -52,6 +52,14 @@ Each variant shows one of three states:
 Variants are sorted ready → needs setup → not installed so the actionable
 choice is always at the top.
 
+### Blocked-writability guidance
+
+When a warning-state flavor tile is tapped, a non-dismissible `Card`
+(`_BlockedFlavorGuidanceCard`) appears inline in the `ListView` directly below
+the tile. It lists three numbered recovery options for moving XCSoar out of
+the restricted `Android/data` path. Tapping the same tile again collapses the
+card (toggle). No SAF picker is launched for warning-state flavors.
+
 ### Entry points
 
 The screen is reachable from the **Settings** menu (title: "XCSoar Folder")

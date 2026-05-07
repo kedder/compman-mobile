@@ -129,6 +129,7 @@ Button shape and sizing tokens are defined in [`docs/design/design.md`](design/d
 - Confirmation dialogs must name the specific item: "Remove **World Gliding Championship 2026**?" — not "Are you sure?".
 - Two buttons only: **Cancel** (left, secondary weight) and the action verb (right, primary or destructive weight).
 - Do not use dialogs for non-destructive choices or navigation decisions. Navigate instead.
+- For non-dismissible recovery guidance (e.g. the XCSoar blocked-writability card), use a `Card` widget placed inline in the `ListView`. Do not use a dialog.
 
 ---
 
