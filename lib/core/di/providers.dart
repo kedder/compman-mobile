@@ -10,6 +10,7 @@ import '../../features/competitions/data/models/bookmarked_competition_model.dar
 import '../../features/competitions/data/repositories/competitions_repository_impl.dart';
 import '../../features/competitions/domain/repositories/competitions_repository.dart';
 import '../../features/competitions/domain/usecases/download_and_install_file.dart';
+import '../../features/competitions/domain/usecases/download_and_install_task.dart';
 import '../../features/competitions/domain/usecases/download_file.dart';
 import '../../features/competitions/domain/usecases/download_task.dart';
 import '../../features/competitions/domain/usecases/fetch_competition_classes.dart';
@@ -115,6 +116,14 @@ final downloadAndInstallFileProvider = Provider<DownloadAndInstallFile>(
   (ref) => DownloadAndInstallFile(
     ref.read(competitionsRepositoryProvider),
     XcsoarSafService(),
+  ),
+);
+
+/// Provides a [DownloadAndInstallTask] use case instance.
+final downloadAndInstallTaskProvider = Provider<DownloadAndInstallTask>(
+  (ref) => DownloadAndInstallTask(
+    ref.read(competitionsRepositoryProvider),
+    ref.read(xcsoarSafServiceProvider),
   ),
 );
 

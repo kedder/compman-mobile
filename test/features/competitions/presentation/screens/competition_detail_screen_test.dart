@@ -8,7 +8,7 @@ import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_
 import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_and_install_file.dart';
-import 'package:compman_mobile/features/competitions/domain/usecases/download_task.dart';
+import 'package:compman_mobile/features/competitions/domain/usecases/download_and_install_task.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/set_competition_class.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/competition_detail_screen.dart';
@@ -152,21 +152,26 @@ class _NoOpSafService extends XcsoarSafService {
   Future<void> writeFile(Uint8List bytes, String filename) async {}
 }
 
-/// SAF service whose [writeFile] throws SAF_NOT_CONFIGURED.
-class _SafNotConfiguredService extends XcsoarSafService {
+/// [DownloadAndInstallTask] that throws [PlatformException].
+class _ThrowingSafDownloadAndInstallTask extends DownloadAndInstallTask {
+  _ThrowingSafDownloadAndInstallTask(this._exception)
+    : super(MockCompetitionsRepository(), _NoOpSafService());
+
+  final PlatformException _exception;
+
   @override
-  Future<void> writeFile(Uint8List bytes, String filename) async {
-    throw PlatformException(code: 'SAF_NOT_CONFIGURED');
-  }
+  Future<Either<Failure, Unit>> call(String taskUrl) async => throw _exception;
 }
 
-/// [DownloadTask] that always succeeds with empty bytes.
-class _SuccessDownloadTask extends DownloadTask {
-  _SuccessDownloadTask() : super(MockCompetitionsRepository());
+/// [DownloadAndInstallTask] that returns [Left(Failure)].
+class _FailingDownloadAndInstallTask extends DownloadAndInstallTask {
+  _FailingDownloadAndInstallTask(this._failure)
+    : super(MockCompetitionsRepository(), _NoOpSafService());
+
+  final Failure _failure;
 
   @override
-  Future<Either<Failure, Uint8List>> call(String taskUrl) async =>
-      right(Uint8List(0));
+  Future<Either<Failure, Unit>> call(String taskUrl) async => Left(_failure);
 }
 
 class _RecordingSetCompetitionClass extends SetCompetitionClass {
@@ -183,16 +188,6 @@ class _RecordingSetCompetitionClass extends SetCompetitionClass {
     onCall(competitionId, selectedClass);
     return right(unit);
   }
-}
-
-class _FailingDownloadTask extends DownloadTask {
-  _FailingDownloadTask(this.failure) : super(MockCompetitionsRepository());
-
-  final Failure failure;
-
-  @override
-  Future<Either<Failure, Uint8List>> call(String taskUrl) async =>
-      left(failure);
 }
 
 // ---------------------------------------------------------------------------
@@ -354,8 +349,8 @@ void main() {
           competition: _selectedClassCompetition,
           tasks: const [_clubTask],
         ),
-        downloadTaskProvider.overrideWith(
-          (ref) => _FailingDownloadTask(
+        downloadAndInstallTaskProvider.overrideWithValue(
+          _FailingDownloadAndInstallTask(
             const NetworkFailure('Task download failed'),
           ),
         ),
@@ -381,8 +376,8 @@ void main() {
           competition: _selectedClassCompetition,
           tasks: const [_clubTask],
         ),
-        downloadTaskProvider.overrideWith(
-          (ref) => _FailingDownloadTask(
+        downloadAndInstallTaskProvider.overrideWithValue(
+          _FailingDownloadAndInstallTask(
             const NetworkFailure('Task download failed'),
           ),
         ),
@@ -621,8 +616,11 @@ void main() {
           competition: _selectedClassCompetition,
           tasks: const [_clubTask],
         ),
-        downloadTaskProvider.overrideWith((ref) => _SuccessDownloadTask()),
-        xcsoarSafServiceProvider.overrideWithValue(_SafNotConfiguredService()),
+        downloadAndInstallTaskProvider.overrideWithValue(
+          _ThrowingSafDownloadAndInstallTask(
+            PlatformException(code: 'SAF_NOT_CONFIGURED'),
+          ),
+        ),
       ]),
     );
     await tester.pump();

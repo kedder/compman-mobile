@@ -173,19 +173,19 @@ class _CompetitionDetailBodyState
             .where((t) => t.compClass == comp!.selectedClass)
             .firstOrNull;
         if (!mounted || task == null) return;
-        final result = await ref.read(downloadTaskProvider)(task.taskUrl);
-        final bytes = result.fold((f) => throw f, (b) => b);
-        await ref
-            .read(xcsoarSafServiceProvider)
-            .writeFile(bytes, 'Default.tsk');
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Task downloaded'),
-            backgroundColor: context.appColors.success,
-          ),
+        final result = await ref.read(downloadAndInstallTaskProvider)(
+          task.taskUrl,
         );
-        ref.invalidate(xcsoarDirectoryUriProvider);
+        if (!mounted) return;
+        result.fold((f) => _appendDownloadError(_failureMessage(f)), (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Task downloaded'),
+              backgroundColor: context.appColors.success,
+            ),
+          );
+          ref.invalidate(xcsoarDirectoryUriProvider);
+        });
       } else {
         final downloads = await ref.read(
           downloadsProvider(widget.competitionId).future,
@@ -221,9 +221,6 @@ class _CompetitionDetailBodyState
     } on PlatformException catch (e) {
       if (!mounted) return;
       _appendDownloadError(e.message ?? 'Download failed');
-    } on Failure catch (f) {
-      if (!mounted) return;
-      _appendDownloadError(_failureMessage(f));
     }
   }
 
@@ -561,18 +558,19 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
   Future<void> _installTask(TaskInfo task) async {
     setState(() => _downloading = true);
     try {
-      final downloadUseCase = ref.read(downloadTaskProvider);
-      final result = await downloadUseCase(task.taskUrl);
-      final bytes = result.fold((f) => throw f, (b) => b);
-      await ref.read(xcsoarSafServiceProvider).writeFile(bytes, 'Default.tsk');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Task downloaded'),
-          backgroundColor: context.appColors.success,
-        ),
+      final result = await ref.read(downloadAndInstallTaskProvider)(
+        task.taskUrl,
       );
-      ref.invalidate(xcsoarDirectoryUriProvider);
+      if (!mounted) return;
+      result.fold((f) => widget.onDownloadError(_failureMessage(f)), (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Task downloaded'),
+            backgroundColor: context.appColors.success,
+          ),
+        );
+        ref.invalidate(xcsoarDirectoryUriProvider);
+      });
     } on PlatformException catch (e) {
       if (!mounted) return;
       if (e.code == 'SAF_NOT_CONFIGURED') {
@@ -580,9 +578,6 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
       } else {
         widget.onDownloadError(e.message ?? 'Install failed');
       }
-    } on Failure catch (f) {
-      if (!mounted) return;
-      widget.onDownloadError(_failureMessage(f));
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
@@ -871,22 +866,24 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
   Future<void> _download() async {
     setState(() => _downloading = true);
     try {
-      final useCase = ref.read(downloadAndInstallFileProvider);
-      final result = await useCase.call(
+      final result = await ref.read(downloadAndInstallFileProvider).call(
         competitionId: widget.competitionId,
         fileInfo: widget.fileInfo,
       );
-      result.fold((f) => throw f, (_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget.successMessage),
-            backgroundColor: context.appColors.success,
-          ),
-        );
-        ref.invalidate(bookmarkedCompetitionsProvider);
-        ref.invalidate(competitionDetailProvider(widget.competitionId));
-      });
+      if (!mounted) return;
+      result.fold(
+        (f) => widget.onDownloadError(_failureMessage(f)),
+        (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.successMessage),
+              backgroundColor: context.appColors.success,
+            ),
+          );
+          ref.invalidate(bookmarkedCompetitionsProvider);
+          ref.invalidate(competitionDetailProvider(widget.competitionId));
+        },
+      );
     } on PlatformException catch (e) {
       if (!mounted) return;
       if (e.code == 'SAF_NOT_CONFIGURED') {
@@ -894,9 +891,6 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
       } else {
         widget.onDownloadError(e.message ?? 'Install failed');
       }
-    } on Failure catch (f) {
-      if (!mounted) return;
-      widget.onDownloadError(_failureMessage(f));
     } finally {
       if (mounted) setState(() => _downloading = false);
     }
