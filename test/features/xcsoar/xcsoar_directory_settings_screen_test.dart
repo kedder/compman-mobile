@@ -5,6 +5,7 @@ import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 
 import 'mock_xcsoar_saf_service.dart';
@@ -54,6 +55,56 @@ Widget _buildScreen({
       theme: AppTheme.light(),
       home: XcsoarDirectorySettingsScreen(fromDownloadFlow: fromDownloadFlow),
     ),
+  );
+}
+
+/// Builds the screen inside a two-route go_router app starting at home,
+/// so that [context.pop()] can be observed as the screen leaving the tree.
+Widget _buildScreenWithNav({
+  bool fromDownloadFlow = false,
+  Set<String> installedPackages = const {},
+  Set<String> writablePackages = const {},
+  String? storedUri,
+  String? activePackageId,
+  String pickDirectoryResult = 'cancelled',
+  String pickDirectoryForPackageResult = 'ok',
+}) {
+  when(_mockService.isPackageInstalled(any)).thenAnswer((invocation) async {
+    final pkg = invocation.positionalArguments[0] as String;
+    return installedPackages.contains(pkg);
+  });
+  when(_mockService.canWriteToMediaDir(any)).thenAnswer((invocation) async {
+    final pkg = invocation.positionalArguments[0] as String;
+    return writablePackages.contains(pkg);
+  });
+  when(_mockService.getSafDirectoryUri()).thenAnswer((_) async => storedUri);
+  when(_mockService.pickDirectory()).thenAnswer(
+    (_) async => pickDirectoryResult,
+  );
+  when(_mockService.pickDirectoryForPackage(any)).thenAnswer(
+    (_) async => pickDirectoryForPackageResult,
+  );
+  when(
+    _mockService.resolveFlavorPackageId(any, any),
+  ).thenAnswer((_) async => activePackageId);
+
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) => const Scaffold(body: Center(child: Text('Home'))),
+      ),
+      GoRoute(
+        path: '/xcsoar',
+        builder: (_, __) =>
+            XcsoarDirectorySettingsScreen(fromDownloadFlow: fromDownloadFlow),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [xcsoarSafServiceProvider.overrideWithValue(_mockService)],
+    child: MaterialApp.router(routerConfig: router, theme: AppTheme.light()),
   );
 }
 
@@ -342,4 +393,108 @@ void main() {
 
     expect(find.byIcon(Icons.check_circle), findsNothing);
   });
+
+  // -----------------------------------------------------------------------
+  // Download-flow auto-pop tests
+  // -----------------------------------------------------------------------
+
+  testWidgets(
+    'fromDownloadFlow + pickDirectoryForPackage ok → screen pops, no success SnackBar',
+    (tester) async {
+      const readyPkg = 'org.xcsoar';
+      await tester.pumpWidget(
+        _buildScreenWithNav(
+          fromDownloadFlow: true,
+          installedPackages: {readyPkg},
+          writablePackages: {readyPkg},
+          pickDirectoryForPackageResult: 'ok',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      tester.element(find.text('Home')).push('/xcsoar');
+      await tester.pumpAndSettle();
+
+      expect(find.byType(XcsoarDirectorySettingsScreen), findsOneWidget);
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(XcsoarDirectorySettingsScreen), findsNothing);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('XCSoar folder configured'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'fromDownloadFlow + pickDirectory ok → screen pops, no success SnackBar',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildScreenWithNav(
+          fromDownloadFlow: true,
+          pickDirectoryResult: 'ok',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      tester.element(find.text('Home')).push('/xcsoar');
+      await tester.pumpAndSettle();
+
+      expect(find.byType(XcsoarDirectorySettingsScreen), findsOneWidget);
+
+      await tester.tap(find.text('Choose custom folder'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(XcsoarDirectorySettingsScreen), findsNothing);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('XCSoar folder configured'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'fromDownloadFlow false + pickDirectoryForPackage ok → stays on screen, shows SnackBar',
+    (tester) async {
+      const readyPkg = 'org.xcsoar';
+      await tester.pumpWidget(
+        _buildScreenWithNav(
+          fromDownloadFlow: false,
+          installedPackages: {readyPkg},
+          writablePackages: {readyPkg},
+          pickDirectoryForPackageResult: 'ok',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      tester.element(find.text('Home')).push('/xcsoar');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('XCSoar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(XcsoarDirectorySettingsScreen), findsOneWidget);
+      expect(find.text('XCSoar folder configured'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'fromDownloadFlow false + pickDirectory ok → stays on screen, shows SnackBar',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildScreenWithNav(
+          fromDownloadFlow: false,
+          pickDirectoryResult: 'ok',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      tester.element(find.text('Home')).push('/xcsoar');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Choose custom folder'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(XcsoarDirectorySettingsScreen), findsOneWidget);
+      expect(find.text('XCSoar folder configured'), findsOneWidget);
+    },
+  );
 }

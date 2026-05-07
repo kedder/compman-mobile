@@ -66,6 +66,18 @@ widget:
 `fromDownloadFlow: true` → title is **"Set Up XCSoar Folder"** (reached from a pending
 download that failed with `SAF_NOT_CONFIGURED`).
 
+### Auto-pop on success (download flow)
+
+When `fromDownloadFlow` is `true`, a successful SAF picker result (either
+`_pickDirectoryForPackage` or `_pickDirectory` returning `'ok'`) calls
+`context.pop()` instead of showing the "XCSoar folder configured" SnackBar.
+The competition detail screen resumes immediately and auto-starts the download.
+The suppression of the SnackBar is intentional — the download-completion
+SnackBar shown moments later makes a setup SnackBar redundant and noisy.
+
+When `fromDownloadFlow` is `false`, the existing behaviour is unchanged: the
+screen stays open and the success SnackBar is shown.
+
 ### Blocked-writability guidance card (`_BlockedFlavorGuidanceCard`)
 
 Tapping a `warning`-state tile toggles an inline non-dismissible `Card` shown directly

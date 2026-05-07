@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -167,7 +168,11 @@ class _XcsoarDirectorySettingsScreenState
       if (result == 'ok') {
         ref.invalidate(xcsoarDirectoryUriProvider);
         _resolveActiveFlavor();
-        _showPickerSuccess();
+        if (widget.fromDownloadFlow) {
+          context.pop();
+        } else {
+          _showPickerSuccess();
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Folder selection cancelled')),
@@ -201,7 +206,11 @@ class _XcsoarDirectorySettingsScreenState
       if (result == 'ok') {
         ref.invalidate(xcsoarDirectoryUriProvider);
         _resolveActiveFlavor();
-        _showPickerSuccess();
+        if (widget.fromDownloadFlow) {
+          context.pop();
+        } else {
+          _showPickerSuccess();
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Folder selection cancelled')),
