@@ -113,6 +113,6 @@
 
 - 📋 Background refresh / manual refresh on app open
 - 📋 XCSoar profile configuration (`xcsoar` feature)
-- 🚧 **XCSoar flavor picker** — flavor-list UI with per-flavor writability badges (`_FlavorState.ready/warning/notInstalled`), `XcsoarFlavor` value type, `kKnownXcsoarFlavors` constant, `isPackageInstalled`/`canWriteToMediaDir`/`pickDirectoryForPackage` MethodChannel additions, `xcsoarSafServiceProvider` in DI, `fromDownloadFlow` AppBar variant; blocked-writability guidance card (`_BlockedFlavorGuidanceCard`) with toggle and 3 recovery options added
+- ✅ **XCSoar flavor picker** — flavor-list UI with per-flavor writability badges (`_FlavorState.ready/warning/notInstalled`), `XcsoarFlavor` value type, `kKnownXcsoarFlavors` constant, `isPackageInstalled`/`canWriteToMediaDir`/`pickDirectoryForPackage` MethodChannel additions, `xcsoarSafServiceProvider` in DI, `fromDownloadFlow` AppBar variant; blocked-writability guidance card (`_BlockedFlavorGuidanceCard`) with toggle and 3 recovery options added
 - ✅ **SAF_NOT_CONFIGURED navigation** — `PendingDownload` entity encodes download context; tapping any download button when SAF is unconfigured navigates to `/settings/xcsoar-directory?from=download&competitionId=<id>&kind=<kind>`; on return, if SAF is configured the download auto-resumes, otherwise a cancellation error banner appears; `_CompetitionDetailBodyState._navigateToSettings` / `_autoResumeDownload` implement the flow
-- 📋 `docs/features/xcsoar.md`
+- ✅ `docs/features/xcsoar.md` — XCSoar flavor picker feature doc; see docs/features/xcsoar.md

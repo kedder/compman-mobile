@@ -187,7 +187,7 @@ override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 
 **`xcsoarSafServiceProvider`:** exposed in `lib/core/di/providers.dart` as a `Provider<XcsoarSafService>` so the service can be overridden in tests via `ProviderScope`.
 
-The XCSoar folder-setup UI lives in `lib/features/xcsoar/` — see [docs/features/configuration.md](features/configuration.md).
+The XCSoar folder-setup UI lives in `lib/features/xcsoar/` — see [docs/features/xcsoar.md](features/xcsoar.md).
 
 ---
 

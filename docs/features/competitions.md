@@ -143,7 +143,7 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 - **Waypoints card:** Same layout as the Airspace card but for the `.cup` (waypoints) file, with section title "Waypoints" and a location-pin icon.
 - **"NEW UPDATE" badge logic:** Shown when `DownloadableFileInfo.publishedVersion` is non-null and differs from the corresponding `airspaceVersion` / `waypointsVersion` stored on `BookmarkedCompetition` (string equality). Also shown when the stored version is `null`, meaning the file has never been installed.
 - **File download flow:** Tapping "Download" calls `DownloadAndInstallFile` via `downloadAndInstallFileProvider`. On success, shows a green SnackBar ("Airspace downloaded" / "Waypoints downloaded") and invalidates `bookmarkedCompetitionsProvider` + `competitionDetailProvider` so the badge disappears. Non-SAF `Failure` errors append stacked dismissible error banners.
-- **SAF_NOT_CONFIGURED flow:** When any download throws `PlatformException(code: 'SAF_NOT_CONFIGURED')`, the app navigates to `/settings/xcsoar-directory?from=download&competitionId=<id>&kind=<kind>` instead of showing an inline error banner. `kind` is `"task"`, `"airspace"`, or `"waypoints"`. See "Pending-download auto-resume" below.
+- **SAF_NOT_CONFIGURED flow:** When any download throws `PlatformException(code: 'SAF_NOT_CONFIGURED')`, the app navigates to `/settings/xcsoar-directory` (see **[docs/features/xcsoar.md](xcsoar.md)**) passing `?from=download&competitionId=<id>&kind=<kind>`. On return, if a SAF directory is now configured the pending download auto-resumes without user action; otherwise a dismissible error banner "XCSoar folder setup was cancelled" is shown.
 - **Download feedback:** Successful installs show a green confirmation SnackBar. Non-SAF download/install failures append stacked dismissible error banners fixed to the bottom of the screen.
 - **XCSoar directory row:** Shows the current SAF directory URI from `XcsoarSafService.getSafDirectoryUri()` as a subdued footer `IconMetaRow`, or "XCSoar folder not configured" when no SAF directory has been chosen.
 - **Providers used:** `competitionDetailProvider`, `latestTasksProvider`, `downloadsProvider`, `xcsoarDirectoryUriProvider`.
@@ -152,29 +152,7 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 
 ### XCSoar Directory Settings Screen (`/settings/xcsoar-directory`)
 
-Lets the user point Compman at the correct XCSoar data folder. See **[docs/features/configuration.md](configuration.md)** for the full description.
-
----
-
-## Pending-download auto-resume
-
-When a download fails with `SAF_NOT_CONFIGURED`, the competition detail screen navigates to the XCSoar directory settings screen rather than showing an error banner. The pending download is encoded in the settings screen URI as `?from=download&competitionId=<id>&kind=<kind>`.
-
-The `PendingDownload` value object (`lib/features/competitions/domain/entities/pending_download.dart`) serialises and deserialises the download context:
-
-```dart
-class PendingDownload {
-  final String competitionId; // SoaringSpot slug
-  final String kind;          // "task" | "airspace" | "waypoints"
-}
-```
-
-On return from the settings screen, `_CompetitionDetailBodyState._navigateToSettings` awaits the `context.push` future and then reads `xcsoarDirectoryUriProvider`:
-
-- **Configured (non-null URI):** calls `_autoResumeDownload(kind)`, which reads the necessary providers and re-runs the download without any user action.
-- **Aborted (null/empty URI):** appends the dismissible error banner "XCSoar folder setup was cancelled. Go to Settings → XCSoar Folder to try again."
-
-The auto-resume trigger fires exactly once per navigation return (the `context.push` future prevents double-firing).
+See **[docs/features/xcsoar.md](xcsoar.md)**.
 
 ---
 
