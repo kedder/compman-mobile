@@ -17,6 +17,52 @@ import '../../domain/entities/pending_download.dart';
 import '../../domain/entities/task_info.dart';
 import '../providers/competitions_providers.dart';
 
+// ---------------------------------------------------------------------------
+// Screen-scoped providers
+// ---------------------------------------------------------------------------
+
+/// Dismissible download error messages shown at the bottom of the screen.
+final _downloadErrorsProvider =
+    NotifierProvider.autoDispose<_DownloadErrorsNotifier, List<String>>(
+      _DownloadErrorsNotifier.new,
+    );
+
+class _DownloadErrorsNotifier extends Notifier<List<String>> {
+  @override
+  List<String> build() => const [];
+
+  /// Appends [message] to the error list.
+  void add(String message) => state = [...state, message];
+
+  /// Removes [message] from the error list.
+  void dismiss(String message) =>
+      state = state.where((e) => e != message).toList();
+}
+
+/// Loading flag for the task download button.
+final _taskDownloadingProvider =
+    NotifierProvider.autoDispose<_BoolNotifier, bool>(_BoolNotifier.new);
+
+/// Loading flag for the airspace download button.
+final _airspaceDownloadingProvider =
+    NotifierProvider.autoDispose<_BoolNotifier, bool>(_BoolNotifier.new);
+
+/// Loading flag for the waypoints download button.
+final _waypointsDownloadingProvider =
+    NotifierProvider.autoDispose<_BoolNotifier, bool>(_BoolNotifier.new);
+
+class _BoolNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  // ignore: avoid_setters_without_getters
+  set value(bool v) => state = v;
+}
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
+
 /// Screen showing the detail of a single bookmarked competition.
 ///
 /// Allows the user to select a competition class, view and install the
@@ -109,7 +155,7 @@ class _CompetitionDetailScreenState
 // Body
 // ---------------------------------------------------------------------------
 
-class _CompetitionDetailBody extends ConsumerStatefulWidget {
+class _CompetitionDetailBody extends ConsumerWidget {
   const _CompetitionDetailBody({
     required this.competition,
     required this.competitionId,
@@ -119,122 +165,18 @@ class _CompetitionDetailBody extends ConsumerStatefulWidget {
   final String competitionId;
 
   @override
-  ConsumerState<_CompetitionDetailBody> createState() =>
-      _CompetitionDetailBodyState();
-}
-
-class _CompetitionDetailBodyState
-    extends ConsumerState<_CompetitionDetailBody> {
-  final List<String> _downloadErrors = <String>[];
-
-  void _appendDownloadError(String message) {
-    setState(() {
-      _downloadErrors.add(message);
-    });
-  }
-
-  /// Navigates to the XCSoar directory settings screen with [kind] encoded as a
-  /// pending download. On return, auto-resumes the download if SAF was
-  /// configured, or shows an error banner if the user aborted.
-  Future<void> _navigateToSettings(String kind) async {
-    final pending = PendingDownload(
-      competitionId: widget.competitionId,
-      kind: kind,
-    );
-    final uri =
-        '/settings/xcsoar-directory?from=download&${pending.toQueryString()}';
-    await context.push<void>(uri);
-    if (!mounted) return;
-    final storedUri = await ref.read(xcsoarDirectoryUriProvider.future);
-    if (!mounted) return;
-    if (storedUri != null && storedUri.isNotEmpty) {
-      await _autoResumeDownload(kind);
-    } else {
-      _appendDownloadError(
-        'XCSoar folder setup was cancelled. '
-        'Go to Settings → XCSoar Folder to try again.',
-      );
-    }
-  }
-
-  /// Resumes the pending download of [kind] after the SAF directory was
-  /// successfully configured. Errors are shown as download error banners.
-  Future<void> _autoResumeDownload(String kind) async {
-    try {
-      if (kind == 'task') {
-        final comp = await ref.read(
-          competitionDetailProvider(widget.competitionId).future,
-        );
-        if (!mounted || comp?.selectedClass == null) return;
-        final tasks = await ref.read(
-          latestTasksProvider(widget.competitionId).future,
-        );
-        final task = tasks
-            .where((t) => t.compClass == comp!.selectedClass)
-            .firstOrNull;
-        if (!mounted || task == null) return;
-        final result = await ref.read(downloadAndInstallTaskProvider)(
-          task.taskUrl,
-        );
-        if (!mounted) return;
-        result.fold((f) => _appendDownloadError(_failureMessage(f)), (_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Task downloaded'),
-              backgroundColor: context.appColors.success,
-            ),
-          );
-        });
-      } else {
-        final downloads = await ref.read(
-          downloadsProvider(widget.competitionId).future,
-        );
-        final kindEnum = kind == 'airspace'
-            ? DownloadableFileKind.airspace
-            : DownloadableFileKind.waypoints;
-        final file = downloads.where((f) => f.kind == kindEnum).firstOrNull;
-        if (!mounted || file == null) return;
-        final result = await ref
-            .read(downloadAndInstallFileProvider)
-            .call(competitionId: widget.competitionId, fileInfo: file);
-        result.fold(
-          (f) {
-            if (mounted) _appendDownloadError(_failureMessage(f));
-          },
-          (_) {
-            if (!mounted) return;
-            final msg = kind == 'airspace'
-                ? 'Airspace downloaded'
-                : 'Waypoints downloaded';
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(msg),
-                backgroundColor: context.appColors.success,
-              ),
-            );
-            ref.invalidate(bookmarkedCompetitionsProvider);
-            ref.invalidate(competitionDetailProvider(widget.competitionId));
-          },
-        );
-      }
-    } on PlatformException catch (e) {
-      if (!mounted) return;
-      _appendDownloadError(e.message ?? 'Download failed');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloadErrors = ref.watch(_downloadErrorsProvider);
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(latestTasksProvider(widget.competitionId));
-        ref.invalidate(downloadsProvider(widget.competitionId));
+        ref.invalidate(latestTasksProvider(competitionId));
+        ref.invalidate(downloadsProvider(competitionId));
         await Future.wait([
           ref
-              .read(latestTasksProvider(widget.competitionId).future)
+              .read(latestTasksProvider(competitionId).future)
               .catchError((_) => <TaskInfo>[]),
           ref
-              .read(downloadsProvider(widget.competitionId).future)
+              .read(downloadsProvider(competitionId).future)
               .catchError((_) => <DownloadableFileInfo>[]),
         ]);
       },
@@ -243,27 +185,21 @@ class _CompetitionDetailBodyState
           ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 128),
             children: [
-              _HeaderSection(competition: widget.competition),
+              _HeaderSection(competition: competition),
               const SizedBox(height: 24),
               _ClassSection(
-                competition: widget.competition,
-                competitionId: widget.competitionId,
-                onDownloadError: _appendDownloadError,
-                onSafNotConfigured: (kind) => _navigateToSettings(kind),
+                competition: competition,
+                competitionId: competitionId,
               ),
               const SizedBox(height: 12),
               _AirspaceCard(
-                competitionId: widget.competitionId,
-                competition: widget.competition,
-                onDownloadError: _appendDownloadError,
-                onSafNotConfigured: (kind) => _navigateToSettings(kind),
+                competitionId: competitionId,
+                competition: competition,
               ),
               const SizedBox(height: 12),
               _WaypointsCard(
-                competitionId: widget.competitionId,
-                competition: widget.competition,
-                onDownloadError: _appendDownloadError,
-                onSafNotConfigured: (kind) => _navigateToSettings(kind),
+                competitionId: competitionId,
+                competition: competition,
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -271,7 +207,7 @@ class _CompetitionDetailBodyState
               const _XcsoarDirectoryRow(),
             ],
           ),
-          if (_downloadErrors.isNotEmpty)
+          if (downloadErrors.isNotEmpty)
             Positioned(
               left: 16,
               right: 16,
@@ -281,17 +217,14 @@ class _CompetitionDetailBodyState
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    for (var index = 0; index < _downloadErrors.length; index++)
+                    for (var index = 0; index < downloadErrors.length; index++)
                       Padding(
                         padding: EdgeInsets.only(top: index == 0 ? 0 : 4),
                         child: _ErrorBanner(
-                          message: _downloadErrors[index],
-                          onDismiss: () {
-                            final message = _downloadErrors[index];
-                            setState(() {
-                              _downloadErrors.remove(message);
-                            });
-                          },
+                          message: downloadErrors[index],
+                          onDismiss: () => ref
+                              .read(_downloadErrorsProvider.notifier)
+                              .dismiss(downloadErrors[index]),
                         ),
                       ),
                   ],
@@ -345,19 +278,10 @@ class _HeaderSection extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _ClassSection extends ConsumerWidget {
-  const _ClassSection({
-    required this.competition,
-    required this.competitionId,
-    required this.onDownloadError,
-    required this.onSafNotConfigured,
-  });
+  const _ClassSection({required this.competition, required this.competitionId});
 
   final BookmarkedCompetition competition;
   final String competitionId;
-  final ValueChanged<String> onDownloadError;
-
-  /// Called when SAF is not configured; [kind] is `"task"`.
-  final ValueChanged<String> onSafNotConfigured;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -419,8 +343,6 @@ class _ClassSection extends ConsumerWidget {
         _TaskSection(
           competitionId: competitionId,
           selectedClass: competition.selectedClass!,
-          onDownloadError: onDownloadError,
-          onSafNotConfigured: onSafNotConfigured,
         ),
       ],
     );
@@ -529,6 +451,43 @@ class _ClassCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Shared navigation logic
+// ---------------------------------------------------------------------------
+
+/// Provides [_navigateToSettings] for [ConsumerState] subclasses that trigger
+/// SAF directory setup from a download action.
+mixin _SafNavigationMixin<W extends ConsumerStatefulWidget>
+    on ConsumerState<W> {
+  /// Navigates to `/settings/xcsoar-directory` with [kind] and [competitionId]
+  /// encoded as query parameters. On return:
+  /// - SAF configured → calls [onConfigured] to resume the download.
+  /// - Aborted → appends a cancellation error banner.
+  Future<void> _navigateToSettings({
+    required String competitionId,
+    required String kind,
+    required Future<void> Function() onConfigured,
+  }) async {
+    final pending = PendingDownload(competitionId: competitionId, kind: kind);
+    await context.push<void>(
+      '/settings/xcsoar-directory?from=download&${pending.toQueryString()}',
+    );
+    if (!mounted) return;
+    final storedUri = await ref.read(xcsoarDirectoryUriProvider.future);
+    if (!mounted) return;
+    if (storedUri != null && storedUri.isNotEmpty) {
+      await onConfigured();
+    } else {
+      ref
+          .read(_downloadErrorsProvider.notifier)
+          .add(
+            'XCSoar folder setup was cancelled. '
+            'Go to Settings → XCSoar Folder to try again.',
+          );
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Task section
 // ---------------------------------------------------------------------------
 
@@ -536,54 +495,56 @@ class _TaskSection extends ConsumerStatefulWidget {
   const _TaskSection({
     required this.competitionId,
     required this.selectedClass,
-    required this.onDownloadError,
-    required this.onSafNotConfigured,
   });
 
   final String competitionId;
   final String selectedClass;
-  final ValueChanged<String> onDownloadError;
-
-  /// Called with `"task"` when SAF is not configured during task install.
-  final ValueChanged<String> onSafNotConfigured;
 
   @override
   ConsumerState<_TaskSection> createState() => _TaskSectionState();
 }
 
-class _TaskSectionState extends ConsumerState<_TaskSection> {
-  bool _downloading = false;
-
+class _TaskSectionState extends ConsumerState<_TaskSection>
+    with _SafNavigationMixin<_TaskSection> {
   Future<void> _installTask(TaskInfo task) async {
-    setState(() => _downloading = true);
+    ref.read(_taskDownloadingProvider.notifier).value = true;
     try {
       final result = await ref.read(downloadAndInstallTaskProvider)(
         task.taskUrl,
       );
       if (!mounted) return;
-      result.fold((f) => widget.onDownloadError(_failureMessage(f)), (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      result.fold(
+        (f) =>
+            ref.read(_downloadErrorsProvider.notifier).add(_failureMessage(f)),
+        (_) => ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Task downloaded'),
             backgroundColor: context.appColors.success,
           ),
-        );
-      });
+        ),
+      );
     } on PlatformException catch (e) {
       if (!mounted) return;
       if (e.code == 'SAF_NOT_CONFIGURED') {
-        widget.onSafNotConfigured('task');
+        await _navigateToSettings(
+          competitionId: widget.competitionId,
+          kind: 'task',
+          onConfigured: () => _installTask(task),
+        );
       } else {
-        widget.onDownloadError(e.message ?? 'Install failed');
+        ref
+            .read(_downloadErrorsProvider.notifier)
+            .add(e.message ?? 'Install failed');
       }
     } finally {
-      if (mounted) setState(() => _downloading = false);
+      if (mounted) ref.read(_taskDownloadingProvider.notifier).value = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(latestTasksProvider(widget.competitionId));
+    final downloading = ref.watch(_taskDownloadingProvider);
 
     return tasksAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -604,7 +565,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
         }
         return _TaskCard(
           task: task,
-          downloading: _downloading,
+          downloading: downloading,
           onInstall: () => _installTask(task),
         );
       },
@@ -711,19 +672,10 @@ class _TaskCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _AirspaceCard extends ConsumerWidget {
-  const _AirspaceCard({
-    required this.competitionId,
-    required this.competition,
-    required this.onDownloadError,
-    required this.onSafNotConfigured,
-  });
+  const _AirspaceCard({required this.competitionId, required this.competition});
 
   final String competitionId;
   final BookmarkedCompetition competition;
-  final ValueChanged<String> onDownloadError;
-
-  /// Called when SAF is not configured during airspace download.
-  final ValueChanged<String> onSafNotConfigured;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -751,8 +703,6 @@ class _AirspaceCard extends ConsumerWidget {
           competitionId: competitionId,
           fileInfo: file,
           installedVersion: competition.airspaceVersion,
-          onDownloadError: onDownloadError,
-          onSafNotConfigured: onSafNotConfigured,
           downloadKind: 'airspace',
           sectionTitle: 'Airspace',
           sectionIcon: Icons.public,
@@ -767,16 +717,10 @@ class _WaypointsCard extends ConsumerWidget {
   const _WaypointsCard({
     required this.competitionId,
     required this.competition,
-    required this.onDownloadError,
-    required this.onSafNotConfigured,
   });
 
   final String competitionId;
   final BookmarkedCompetition competition;
-  final ValueChanged<String> onDownloadError;
-
-  /// Called when SAF is not configured during waypoints download.
-  final ValueChanged<String> onSafNotConfigured;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -804,8 +748,6 @@ class _WaypointsCard extends ConsumerWidget {
           competitionId: competitionId,
           fileInfo: file,
           installedVersion: competition.waypointsVersion,
-          onDownloadError: onDownloadError,
-          onSafNotConfigured: onSafNotConfigured,
           downloadKind: 'waypoints',
           sectionTitle: 'Waypoints',
           sectionIcon: Icons.location_on_outlined,
@@ -825,8 +767,6 @@ class _FileDownloadCard extends ConsumerStatefulWidget {
     required this.competitionId,
     required this.fileInfo,
     required this.installedVersion,
-    required this.onDownloadError,
-    required this.onSafNotConfigured,
     required this.downloadKind,
     required this.sectionTitle,
     required this.sectionIcon,
@@ -838,12 +778,8 @@ class _FileDownloadCard extends ConsumerStatefulWidget {
 
   /// The version token stored on [BookmarkedCompetition] at last install.
   final String? installedVersion;
-  final ValueChanged<String> onDownloadError;
 
-  /// Called with [downloadKind] when SAF is not configured.
-  final ValueChanged<String> onSafNotConfigured;
-
-  /// `"airspace"` or `"waypoints"` — passed back via [onSafNotConfigured].
+  /// `"airspace"` or `"waypoints"` — scopes [_fileDownloadingProvider].
   final String downloadKind;
   final String sectionTitle;
   final IconData sectionIcon;
@@ -853,24 +789,28 @@ class _FileDownloadCard extends ConsumerStatefulWidget {
   ConsumerState<_FileDownloadCard> createState() => _FileDownloadCardState();
 }
 
-class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
-  bool _downloading = false;
-
+class _FileDownloadCardState extends ConsumerState<_FileDownloadCard>
+    with _SafNavigationMixin<_FileDownloadCard> {
   /// True when the scraped version token differs from the stored install token.
   bool get _hasNewUpdate =>
       widget.fileInfo.publishedVersion != null &&
       widget.fileInfo.publishedVersion != widget.installedVersion;
 
+  // Selects the correct downloading-flag provider for this card's kind.
+  get _downloadingProvider => widget.downloadKind == 'airspace'
+      ? _airspaceDownloadingProvider
+      : _waypointsDownloadingProvider;
+
   Future<void> _download() async {
-    setState(() => _downloading = true);
+    ref.read(_downloadingProvider.notifier).value = true;
     try {
-      final result = await ref.read(downloadAndInstallFileProvider).call(
-        competitionId: widget.competitionId,
-        fileInfo: widget.fileInfo,
-      );
+      final result = await ref
+          .read(downloadAndInstallFileProvider)
+          .call(competitionId: widget.competitionId, fileInfo: widget.fileInfo);
       if (!mounted) return;
       result.fold(
-        (f) => widget.onDownloadError(_failureMessage(f)),
+        (f) =>
+            ref.read(_downloadErrorsProvider.notifier).add(_failureMessage(f)),
         (_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -885,17 +825,24 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
     } on PlatformException catch (e) {
       if (!mounted) return;
       if (e.code == 'SAF_NOT_CONFIGURED') {
-        widget.onSafNotConfigured(widget.downloadKind);
+        await _navigateToSettings(
+          competitionId: widget.competitionId,
+          kind: widget.downloadKind,
+          onConfigured: _download,
+        );
       } else {
-        widget.onDownloadError(e.message ?? 'Install failed');
+        ref
+            .read(_downloadErrorsProvider.notifier)
+            .add(e.message ?? 'Install failed');
       }
     } finally {
-      if (mounted) setState(() => _downloading = false);
+      if (mounted) ref.read(_downloadingProvider.notifier).value = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final downloading = ref.watch(_downloadingProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final fileInfo = widget.fileInfo;
@@ -969,9 +916,9 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
             ),
           ),
           OutlinedButton.icon(
-            onPressed: _downloading ? null : _download,
+            onPressed: downloading ? null : _download,
             style: AppButtonStyles.ghost(context),
-            icon: _downloading
+            icon: downloading
                 ? SizedBox(
                     width: 14,
                     height: 14,
@@ -981,7 +928,7 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard> {
                     ),
                   )
                 : const Icon(Icons.download, size: 16),
-            label: Text(_downloading ? 'Downloading...' : 'Download'),
+            label: Text(downloading ? 'Downloading...' : 'Download'),
           ),
         ],
       ),
