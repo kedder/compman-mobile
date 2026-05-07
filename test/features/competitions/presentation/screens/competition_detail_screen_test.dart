@@ -78,7 +78,10 @@ Widget _buildApp(List<Override> overrides) {
       ),
       GoRoute(
         path: '/settings/xcsoar-directory',
-        builder: (_, __) => const Scaffold(body: Text('XCSoar dir settings')),
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(title: const Text('XCSoar dir settings')),
+          body: Text('kind=${state.uri.queryParameters['kind'] ?? ''}'),
+        ),
       ),
     ],
   );
@@ -147,6 +150,23 @@ class _ThrowingSafDownloadAndInstallFile extends DownloadAndInstallFile {
 class _NoOpSafService extends XcsoarSafService {
   @override
   Future<void> writeFile(Uint8List bytes, String filename) async {}
+}
+
+/// SAF service whose [writeFile] throws SAF_NOT_CONFIGURED.
+class _SafNotConfiguredService extends XcsoarSafService {
+  @override
+  Future<void> writeFile(Uint8List bytes, String filename) async {
+    throw PlatformException(code: 'SAF_NOT_CONFIGURED');
+  }
+}
+
+/// [DownloadTask] that always succeeds with empty bytes.
+class _SuccessDownloadTask extends DownloadTask {
+  _SuccessDownloadTask() : super(MockCompetitionsRepository());
+
+  @override
+  Future<Either<Failure, Uint8List>> call(String taskUrl) async =>
+      right(Uint8List(0));
 }
 
 class _RecordingSetCompetitionClass extends SetCompetitionClass {
@@ -539,7 +559,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('appends error banner when SAF not configured', (tester) async {
+  testWidgets('SAF_NOT_CONFIGURED on airspace download navigates to settings', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _buildApp([
         ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
@@ -556,10 +578,92 @@ void main() {
     await tester.tap(find.text('Download'));
     await tester.pumpAndSettle();
 
+    expect(find.text('kind=airspace'), findsOneWidget);
     expect(
       find.textContaining('XCSoar directory not configured'),
-      findsOneWidget,
+      findsNothing,
     );
+  });
+
+  testWidgets(
+    'SAF_NOT_CONFIGURED on waypoints download navigates to settings',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp([
+          ..._baseOverrides(
+            classes: const [],
+            downloads: const [tWaypointsFile],
+          ),
+          downloadAndInstallFileProvider.overrideWithValue(
+            _ThrowingSafDownloadAndInstallFile(
+              PlatformException(code: 'SAF_NOT_CONFIGURED'),
+            ),
+          ),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Download'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('kind=waypoints'), findsOneWidget);
+    },
+  );
+
+  testWidgets('SAF_NOT_CONFIGURED on task download navigates to settings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(
+          classes: const ['Club'],
+          competition: _selectedClassCompetition,
+          tasks: const [_clubTask],
+        ),
+        downloadTaskProvider.overrideWith((ref) => _SuccessDownloadTask()),
+        xcsoarSafServiceProvider.overrideWithValue(_SafNotConfiguredService()),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Download task'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('kind=task'), findsOneWidget);
+    expect(
+      find.textContaining('XCSoar directory not configured'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('aborting settings navigation shows cancellation error banner', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        downloadAndInstallFileProvider.overrideWithValue(
+          _ThrowingSafDownloadAndInstallFile(
+            PlatformException(code: 'SAF_NOT_CONFIGURED'),
+          ),
+        ),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // Navigate to settings screen.
+    await tester.tap(find.text('Download'));
+    await tester.pumpAndSettle();
+    expect(find.text('kind=airspace'), findsOneWidget);
+
+    // Go back without configuring (xcsoarDirectoryUri stays null).
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('setup was cancelled'), findsOneWidget);
   });
 
   testWidgets(
