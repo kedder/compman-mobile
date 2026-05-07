@@ -97,6 +97,15 @@ class MainActivity : FlutterFragmentActivity() {
                         pendingResult = result
                         safLauncher.launch(externalStorageDocUri(mediaPath(pkg)))
                     }
+                    "resolveFlavorPackageId" -> {
+                        val uri = call.argument<String>("uri")!!
+                        @Suppress("UNCHECKED_CAST")
+                        val candidates = call.argument<List<String>>("candidates")!!
+                        result.success(candidates.firstOrNull { pkg ->
+                            externalStorageTreeUri(mediaPath(pkg)).toString()
+                                .equals(uri, ignoreCase = true)
+                        })
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -108,6 +117,10 @@ class MainActivity : FlutterFragmentActivity() {
     /** Returns a SAF document URI for [path] on the external storage provider. */
     private fun externalStorageDocUri(path: String): Uri =
         Uri.parse("content://com.android.externalstorage.documents/document/${Uri.encode(path)}")
+
+    /** Returns a SAF tree URI for [path] on the external storage provider. */
+    private fun externalStorageTreeUri(path: String): Uri =
+        Uri.parse("content://com.android.externalstorage.documents/tree/${Uri.encode(path)}")
 
     private fun checkMediaDirWritable(pkg: String): Boolean {
         // Android/media is readable without SAF permission (unlike Android/data).

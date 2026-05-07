@@ -100,4 +100,15 @@ class MockXcsoarSafService extends _i1.Mock implements _i2.XcsoarSafService {
             ),
           )
           as _i3.Future<String>);
+
+  @override
+  _i3.Future<String?> resolveFlavorPackageId(
+    String? storedUri,
+    List<String>? candidates,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#resolveFlavorPackageId, [storedUri, candidates]),
+            returnValue: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
 }

@@ -55,6 +55,7 @@ dependencies:
   json_annotation: ^4.9.0
 
   # Functional programming utilities
+  collection: ^1.19.1
   fpdart: ^1.1.0
   intl: ^0.20.2
   google_fonts: ^6.2.1

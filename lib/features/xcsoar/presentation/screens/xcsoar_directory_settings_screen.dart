@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,14 +18,15 @@ enum _FlavorState {
   warning,
 
   /// XCSoar is not installed on this device.
-  notInstalled,
-}
+  notInstalled;
 
-int _flavorStateOrder(_FlavorState s) => switch (s) {
-  _FlavorState.ready => 0,
-  _FlavorState.warning => 1,
-  _FlavorState.notInstalled => 2,
-};
+  /// Sort order: ready tiles first, not-installed tiles last.
+  int get order => switch (this) {
+    _FlavorState.ready => 0,
+    _FlavorState.warning => 1,
+    _FlavorState.notInstalled => 2,
+  };
+}
 
 /// Settings screen for configuring the XCSoar data directory via SAF.
 ///
@@ -64,10 +66,39 @@ class _XcsoarDirectorySettingsScreenState
   /// Package ID of the currently selected warning-state tile, or null.
   String? _selectedBlockedPackage;
 
+  /// Active flavor resolved from the stored URI; null until loaded or if unrecognised.
+  XcsoarFlavor? _activeFlavor;
+
   @override
   void initState() {
     super.initState();
     _loadFlavorStates();
+    _resolveActiveFlavor();
+  }
+
+  /// Resolves [_activeFlavor] by comparing the stored SAF URI against each known
+  /// flavor's canonical media-directory tree URI via the Kotlin bridge.
+  Future<void> _resolveActiveFlavor() async {
+    final uri = await ref.read(xcsoarDirectoryUriProvider.future);
+    if (uri == null || uri.isEmpty) {
+      if (mounted) setState(() => _activeFlavor = null);
+      return;
+    }
+    final packageId = await ref
+        .read(xcsoarSafServiceProvider)
+        .resolveFlavorPackageId(
+          uri,
+          kKnownXcsoarFlavors.map((f) => f.packageId).toList(),
+        );
+    if (mounted) {
+      setState(() {
+        _activeFlavor = packageId == null
+            ? null
+            : kKnownXcsoarFlavors.firstWhereOrNull(
+                (f) => f.packageId == packageId,
+              );
+      });
+    }
   }
 
   Future<void> _loadFlavorStates() async {
@@ -103,38 +134,29 @@ class _XcsoarDirectorySettingsScreenState
 
   List<XcsoarFlavor> get _sortedFlavors {
     return List<XcsoarFlavor>.from(kKnownXcsoarFlavors)..sort(
-      (a, b) =>
-          _flavorStateOrder(
-            _flavorStates[a.packageId] ?? _FlavorState.notInstalled,
-          ).compareTo(
-            _flavorStateOrder(
-              _flavorStates[b.packageId] ?? _FlavorState.notInstalled,
-            ),
+      (a, b) => (_flavorStates[a.packageId] ?? _FlavorState.notInstalled).order
+          .compareTo(
+            (_flavorStates[b.packageId] ?? _FlavorState.notInstalled).order,
           ),
     );
   }
 
-  void _showPickerResult(String? result, PlatformException? error) {
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.message ?? 'Could not configure folder'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-    } else if (result == 'ok') {
-      ref.invalidate(xcsoarDirectoryUriProvider);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('XCSoar folder configured'),
-          backgroundColor: context.appColors.success,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Folder selection cancelled')),
-      );
-    }
+  void _showPickerSuccess() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('XCSoar folder configured'),
+        backgroundColor: context.appColors.success,
+      ),
+    );
+  }
+
+  void _showPickerError(PlatformException error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error.message ?? 'Could not configure folder'),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
   }
 
   Future<void> _pickDirectory() async {
@@ -142,10 +164,18 @@ class _XcsoarDirectorySettingsScreenState
     try {
       final result = await ref.read(xcsoarSafServiceProvider).pickDirectory();
       if (!mounted) return;
-      _showPickerResult(result, null);
+      if (result == 'ok') {
+        ref.invalidate(xcsoarDirectoryUriProvider);
+        _resolveActiveFlavor();
+        _showPickerSuccess();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Folder selection cancelled')),
+        );
+      }
     } on PlatformException catch (e) {
       if (!mounted) return;
-      _showPickerResult(null, e);
+      _showPickerError(e);
     } finally {
       if (mounted) setState(() => _pickerLoading = false);
     }
@@ -155,6 +185,7 @@ class _XcsoarDirectorySettingsScreenState
     await ref.read(xcsoarSafServiceProvider).clearSafPermission();
     if (!mounted) return;
     ref.invalidate(xcsoarDirectoryUriProvider);
+    _resolveActiveFlavor();
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Permission cleared')));
@@ -167,10 +198,18 @@ class _XcsoarDirectorySettingsScreenState
           .read(xcsoarSafServiceProvider)
           .pickDirectoryForPackage(flavor.packageId);
       if (!mounted) return;
-      _showPickerResult(result, null);
+      if (result == 'ok') {
+        ref.invalidate(xcsoarDirectoryUriProvider);
+        _resolveActiveFlavor();
+        _showPickerSuccess();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Folder selection cancelled')),
+        );
+      }
     } on PlatformException catch (e) {
       if (!mounted) return;
-      _showPickerResult(null, e);
+      _showPickerError(e);
     }
   }
 
@@ -184,6 +223,7 @@ class _XcsoarDirectorySettingsScreenState
       flavor: flavor,
       state: state,
       isSelected: _selectedBlockedPackage == flavor.packageId,
+      isActiveFlavor: _activeFlavor?.packageId == flavor.packageId,
       onTap: switch (state) {
         _FlavorState.ready => () => _pickDirectoryForPackage(flavor),
         _FlavorState.warning => () => setState(() {
@@ -201,6 +241,12 @@ class _XcsoarDirectorySettingsScreenState
     final uriAsync = ref.watch(xcsoarDirectoryUriProvider);
     final theme = Theme.of(context);
 
+    final statusText = _activeFlavor != null
+        ? '${_activeFlavor!.displayName} selected'
+        : (uriAsync.value?.isNotEmpty == true
+              ? 'Custom folder'
+              : 'Not configured');
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -211,6 +257,23 @@ class _XcsoarDirectorySettingsScreenState
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Text(
+                    statusText,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const _SectionLabel('XCSOAR APP'),
+                for (final flavor in _sortedFlavors) ...[
+                  _buildFlavorTile(flavor),
+                  if (_isGuidanceCardVisible(flavor))
+                    _BlockedFlavorGuidanceCard(flavor: flavor),
+                ],
+                const Divider(),
+                const _SectionLabel('ADVANCED'),
                 ListTile(
                   leading: const Icon(Icons.folder_outlined),
                   title: const Text('XCSoar folder'),
@@ -219,36 +282,9 @@ class _XcsoarDirectorySettingsScreenState
                     error: (_, __) => const Text('Could not read folder'),
                     data: (uri) => Text(
                       uri != null && uri.isNotEmpty ? uri : 'Not configured',
-                    ),
-                  ),
-                ),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Text(
-                    'XCSOAR APP',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      letterSpacing: 1.2,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                for (final flavor in _sortedFlavors) ...[
-                  _buildFlavorTile(flavor),
-                  if (_isGuidanceCardVisible(flavor))
-                    _BlockedFlavorGuidanceCard(
-                      flavorName: flavor.displayName,
-                      packageId: flavor.packageId,
-                    ),
-                ],
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Text(
-                    'ADVANCED',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      letterSpacing: 1.2,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ),
@@ -299,12 +335,21 @@ class _FlavorTile extends StatelessWidget {
     required this.flavor,
     required this.state,
     required this.isSelected,
+    required this.isActiveFlavor,
     required this.onTap,
   });
 
   final XcsoarFlavor flavor;
   final _FlavorState state;
+
+  /// True when the user tapped a warning-state tile to reveal the recovery
+  /// guidance card. Controls the [ListTile.selected] background tint.
   final bool isSelected;
+
+  /// True when this flavor's canonical media-directory tree URI matches the
+  /// currently stored SAF URI, i.e. this is the active flavor.
+  final bool isActiveFlavor;
+
   final VoidCallback? onTap;
 
   @override
@@ -331,6 +376,12 @@ class _FlavorTile extends StatelessWidget {
     };
 
     return ListTile(
+      leading: Icon(
+        isActiveFlavor ? Icons.check_circle : Icons.radio_button_unchecked,
+        color: isActiveFlavor
+            ? theme.colorScheme.primary
+            : theme.colorScheme.outline,
+      ),
       title: Text(flavor.displayName),
       subtitle: Text(
         flavor.packageId,
@@ -350,27 +401,45 @@ class _FlavorTile extends StatelessWidget {
   }
 }
 
+/// An all-caps section label with standard list padding.
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Text(
+        text,
+        style: theme.textTheme.labelSmall?.copyWith(
+          letterSpacing: 1.2,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
 /// Inline recovery guidance shown below a warning-state XCSoar flavor tile.
 ///
 /// Non-dismissible. Lists three numbered options for moving XCSoar out of
 /// the restricted `Android/data` path so Compman can write files to it.
 class _BlockedFlavorGuidanceCard extends StatelessWidget {
-  /// Creates a [_BlockedFlavorGuidanceCard].
-  const _BlockedFlavorGuidanceCard({
-    required this.flavorName,
-    required this.packageId,
-  });
+  /// Creates a [_BlockedFlavorGuidanceCard] for [flavor].
+  const _BlockedFlavorGuidanceCard({required this.flavor});
 
-  /// Display name of the warning-state XCSoar flavor, e.g. "XCSoar Jet".
-  final String flavorName;
-
-  /// Android package ID of the warning-state flavor, e.g. "com.zinuzoid.xcsoar_jet".
-  final String packageId;
+  /// The warning-state XCSoar flavor this card describes.
+  final XcsoarFlavor flavor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final body = theme.textTheme.bodyMedium;
+    final flavorName = flavor.displayName;
+    final packageId = flavor.packageId;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

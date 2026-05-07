@@ -60,6 +60,36 @@ the tile. It lists three numbered recovery options for moving XCSoar out of
 the restricted `Android/data` path. Tapping the same tile again collapses the
 card (toggle). No SAF picker is launched for warning-state flavors.
 
+### Active flavor indicator
+
+When the screen loads (and after every successful directory pick), it calls the
+`resolveFlavorPackageId` Kotlin bridge method, passing the stored SAF tree URI
+and the list of known package IDs from `kKnownXcsoarFlavors`. Kotlin iterates
+the candidates and returns the package ID whose canonical
+`content://…/tree/primary%3AAndroid%2Fmedia%2F<pkg>` URI matches the stored
+value, or null if none match.
+
+The result drives two visual indicators:
+
+- **Status line** — a compact text line above the "XCSOAR APP" section shows
+  `"<DisplayName> selected"` (e.g. "XCSoar Jet selected") when a known flavor
+  is active, `"Custom folder"` when a URI is stored but matches no known flavor,
+  or `"Not configured"` when no URI is stored.
+- **Leading icons** — every flavor tile shows `Icons.check_circle` (in
+  `colorScheme.primary`) for the active flavor and `Icons.radio_button_unchecked`
+  (in `colorScheme.outline`) for all others, satisfying the color-is-not-the-
+  sole-indicator rule from `docs/ui-guidelines.md`.
+
+No new value is persisted; the active flavor is re-derived from the stored SAF
+URI on every screen entry.
+
+### Raw URI (Advanced section)
+
+The stored SAF tree URI is shown in the **Advanced** section as a `ListTile`
+with title "XCSoar folder". The subtitle is styled in `bodySmall` /
+`onSurfaceVariant` to de-emphasize it. This is useful for debugging but not
+needed for normal use.
+
 ### Entry points
 
 The screen is reachable from the **Settings** menu (title: "XCSoar Folder")

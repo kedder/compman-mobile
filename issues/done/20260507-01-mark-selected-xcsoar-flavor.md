@@ -25,8 +25,8 @@ session:
 3. Restructure the screen layout: replace the current prominent URI header tile with a
    compact status line, and move the raw URI display into the "ADVANCED" section.
 
-This issue does **not** touch the Kotlin `MainActivity.kt` or add new MethodChannel
-methods. No new Hive field is written. No new persisted value is introduced.
+This issue adds one new MethodChannel method (`resolveFlavorPackageId`) to
+`MainActivity.kt`. No new Hive field is written. No new persisted value is introduced.
 
 ## Read first
 
@@ -67,6 +67,12 @@ introducing `_canonicalTreeUriForPackage` in Dart would duplicate that knowledge
 Instead, expose a single new Kotlin method `resolveFlavorPackageId` that Dart calls once
 to obtain the active `packageId`.
 
+**Kotlin is framework glue; Dart owns the flavor list.** Rather than duplicating
+`kKnownXcsoarFlavors` in Kotlin as a hardcoded `kKnownXcsoarPackages` list, Dart passes
+the candidate package IDs with each call. Kotlin iterates the supplied list and returns
+whichever ID's canonical URI matches. This keeps `kKnownXcsoarFlavors` as the single
+source of truth for flavor identity and `MainActivity.kt` free of business logic.
+
 ### Kotlin changes — `MainActivity.kt`
 
 Add a private tree-URI builder alongside the existing document-URI builder:
@@ -77,30 +83,17 @@ private fun externalStorageTreeUri(path: String): Uri =
     Uri.parse("content://com.android.externalstorage.documents/tree/${Uri.encode(path)}")
 ```
 
-Add a private resolver method (the known-packages list must include all four flavors,
-matching `kKnownXcsoarFlavors` on the Dart side):
-
-```kotlin
-private val kKnownXcsoarPackages = listOf(
-    "org.xcsoar",
-    "com.zinuzoid.xcsoar_jet",
-    "org.xcsoar.play",
-    "org.xcsoar.foss",
-)
-
-/** Returns the packageId whose canonical media-dir tree URI matches [storedUri], or null. */
-private fun resolveFlavorPackageId(storedUri: String): String? =
-    kKnownXcsoarPackages.firstOrNull { pkg ->
-        externalStorageTreeUri(mediaPath(pkg)).toString().equals(storedUri, ignoreCase = true)
-    }
-```
-
-Wire it into the `MethodChannel` handler alongside the existing cases:
+Wire the resolver directly into the `MethodChannel` handler alongside the existing cases.
+No `kKnownXcsoarPackages` constant is added — the candidates arrive from Dart:
 
 ```kotlin
 "resolveFlavorPackageId" -> {
     val uri = call.argument<String>("uri")!!
-    result.success(resolveFlavorPackageId(uri))
+    @Suppress("UNCHECKED_CAST")
+    val candidates = call.argument<List<String>>("candidates")!!
+    result.success(candidates.firstOrNull { pkg ->
+        externalStorageTreeUri(mediaPath(pkg)).toString().equals(uri, ignoreCase = true)
+    })
 }
 ```
 
@@ -109,10 +102,13 @@ Wire it into the `MethodChannel` handler alongside the existing cases:
 Add one new method to `lib/core/platform/xcsoar_saf_service.dart`:
 
 ```dart
-/// Returns the [XcsoarFlavor.packageId] whose canonical media-directory
-/// tree URI matches [storedUri], or null if no known flavor matches.
-Future<String?> resolveFlavorPackageId(String storedUri) =>
-    _channel.invokeMethod<String>('resolveFlavorPackageId', {'uri': storedUri});
+/// Returns the [XcsoarFlavor.packageId] from [candidates] whose canonical
+/// media-directory tree URI matches [storedUri], or null if none match.
+Future<String?> resolveFlavorPackageId(String storedUri, List<String> candidates) =>
+    _channel.invokeMethod<String>('resolveFlavorPackageId', {
+      'uri': storedUri,
+      'candidates': candidates,
+    });
 ```
 
 ### Screen usage
@@ -143,7 +139,10 @@ Future<void> _resolveActiveFlavor() async {
     if (mounted) setState(() => _activeFlavor = null);
     return;
   }
-  final packageId = await ref.read(xcsoarSafServiceProvider).resolveFlavorPackageId(uri);
+  final packageId = await ref.read(xcsoarSafServiceProvider).resolveFlavorPackageId(
+    uri,
+    kKnownXcsoarFlavors.map((f) => f.packageId).toList(),
+  );
   if (mounted) {
     setState(() {
       _activeFlavor = packageId == null
@@ -155,15 +154,17 @@ Future<void> _resolveActiveFlavor() async {
 ```
 
 This keeps all URI knowledge in Kotlin and the Dart side purely maps a packageId to a
-display model.
+display model. `kKnownXcsoarFlavors` remains the single source of truth for the set of
+known flavors.
 
 ## What to build
 
 ### 1. Extend Kotlin and `XcsoarSafService`
 
 Follow the Kotlin and Dart changes described in "Active flavor derivation" above:
-add `externalStorageTreeUri`, `kKnownXcsoarPackages`, and `resolveFlavorPackageId` to
-`MainActivity.kt`; add `resolveFlavorPackageId(String)` to `XcsoarSafService`; add
+add `externalStorageTreeUri` and the `resolveFlavorPackageId` channel handler to
+`MainActivity.kt` (no `kKnownXcsoarPackages` constant); add
+`resolveFlavorPackageId(String, List<String>)` to `XcsoarSafService`; add
 `_activeFlavor` state and `_resolveActiveFlavor()` to the screen.
 
 Do **not** add any URI-construction logic to Dart or to `XcsoarFlavor`.
@@ -299,7 +300,7 @@ Widget _buildScreen({
   String? activePackageId,   // new — null means custom folder / not configured
 }) {
   when(_mockService.getSafDirectoryUri()).thenAnswer((_) async => storedUri);
-  when(_mockService.resolveFlavorPackageId(any))
+  when(_mockService.resolveFlavorPackageId(any, any))
       .thenAnswer((_) async => activePackageId);
   // ...
 }
@@ -351,9 +352,10 @@ Add the following tests:
 ## Acceptance criteria
 
 - [ ] `MainActivity.kt` exposes a `resolveFlavorPackageId` method channel call that
-  returns the `packageId` whose canonical tree URI matches the given stored URI, or null.
-  No URI-construction logic is added to Dart.
-- [ ] `XcsoarSafService` exposes `resolveFlavorPackageId(String uri)`.
+  accepts a stored URI and a list of candidate package IDs from Dart, and returns the
+  first candidate whose canonical tree URI matches, or null. No `kKnownXcsoarPackages`
+  list is added to Kotlin; no URI-construction logic is added to Dart.
+- [ ] `XcsoarSafService` exposes `resolveFlavorPackageId(String storedUri, List<String> candidates)`.
 - [ ] The flavor picker screen calls `resolveFlavorPackageId` (via `_resolveActiveFlavor`)
   on load and after every successful directory pick to determine the active flavor. No new
   value is persisted; no `packageId` is written to Hive.
@@ -382,6 +384,9 @@ Add the following tests:
   Hive `"settings"` box.
 - **URI construction stays in Kotlin.** Do not add any SAF URI construction to Dart or
   to `XcsoarFlavor`. All URI format knowledge lives in `MainActivity.kt`.
+- **The flavor list is owned by Dart.** Do not add any hardcoded list of flavor package
+  IDs to `MainActivity.kt`. `kKnownXcsoarFlavors` in Dart is the single source of truth
+  for flavor identity; Kotlin receives the candidate IDs as a call argument.
 - **No new color tokens.** Use `colorScheme.primary`, `colorScheme.outline`,
   `colorScheme.onSurfaceVariant` — all already in use on this screen.
 - **Color is not the sole indicator.** The `Icons.check_circle` / `Icons.radio_button_unchecked`

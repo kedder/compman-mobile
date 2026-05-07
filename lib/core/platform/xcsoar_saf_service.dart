@@ -68,4 +68,17 @@ class XcsoarSafService {
     );
     return result!;
   }
+
+  /// Returns the package ID from [candidates] whose canonical media-directory
+  /// tree URI matches [storedUri], or null if none match.
+  ///
+  /// URI construction is performed on the Kotlin side; [candidates] is the
+  /// authoritative list of package IDs to test (typically from [kKnownXcsoarFlavors]).
+  Future<String?> resolveFlavorPackageId(
+    String storedUri,
+    List<String> candidates,
+  ) => _channel.invokeMethod<String>('resolveFlavorPackageId', {
+    'uri': storedUri,
+    'candidates': candidates,
+  });
 }

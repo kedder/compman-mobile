@@ -23,10 +23,15 @@ late MockXcsoarSafService _mockService;
 ///
 /// [installedPackages] and [writablePackages] control the flavor state
 /// returned by the mock. All packages default to not-installed / not-writable.
+/// [storedUri] is what [getSafDirectoryUri] returns (null means not configured).
+/// [activePackageId] is what [resolveFlavorPackageId] returns (null means no
+/// known flavor matched, i.e. custom folder or not configured).
 Widget _buildScreen({
   bool fromDownloadFlow = false,
   Set<String> installedPackages = const {},
   Set<String> writablePackages = const {},
+  String? storedUri,
+  String? activePackageId,
 }) {
   when(_mockService.isPackageInstalled(any)).thenAnswer((invocation) async {
     final pkg = invocation.positionalArguments[0] as String;
@@ -36,9 +41,12 @@ Widget _buildScreen({
     final pkg = invocation.positionalArguments[0] as String;
     return writablePackages.contains(pkg);
   });
-  when(_mockService.getSafDirectoryUri()).thenAnswer((_) async => null);
+  when(_mockService.getSafDirectoryUri()).thenAnswer((_) async => storedUri);
   when(_mockService.pickDirectory()).thenAnswer((_) async => 'cancelled');
   when(_mockService.pickDirectoryForPackage(any)).thenAnswer((_) async => 'ok');
+  when(
+    _mockService.resolveFlavorPackageId(any, any),
+  ).thenAnswer((_) async => activePackageId);
 
   return ProviderScope(
     overrides: [xcsoarSafServiceProvider.overrideWithValue(_mockService)],
@@ -248,4 +256,90 @@ void main() {
       verify(_mockService.pickDirectoryForPackage(readyPkg)).called(1);
     },
   );
+
+  testWidgets('status line shows Not configured when no URI is stored', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen());
+    await tester.pumpAndSettle();
+
+    // Appears in the status line (bodyMedium) and in the raw URI tile subtitle (bodySmall).
+    expect(find.text('Not configured'), findsNWidgets(2));
+  });
+
+  testWidgets(
+    'status line shows flavor display name when resolver returns a known packageId',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildScreen(
+          storedUri: 'content://any',
+          activePackageId: 'org.xcsoar',
+          installedPackages: {'org.xcsoar'},
+          writablePackages: {'org.xcsoar'},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('XCSoar selected'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'status line shows Custom folder when resolver returns null for non-empty URI',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildScreen(storedUri: 'content://custom', activePackageId: null),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Custom folder'), findsOneWidget);
+    },
+  );
+
+  testWidgets('selected flavor tile shows check_circle icon', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen(
+        storedUri: 'content://any',
+        activePackageId: 'org.xcsoar',
+        installedPackages: {'org.xcsoar'},
+        writablePackages: {'org.xcsoar'},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+  });
+
+  testWidgets('unselected flavor tiles show radio_button_unchecked icon', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildScreen(
+        storedUri: 'content://any',
+        activePackageId: 'org.xcsoar',
+        installedPackages: {'org.xcsoar'},
+        writablePackages: {'org.xcsoar'},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.radio_button_unchecked), findsNWidgets(3));
+  });
+
+  testWidgets('raw URI tile appears in the ADVANCED section', (tester) async {
+    await tester.pumpWidget(_buildScreen(storedUri: 'content://example'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('XCSoar folder'), findsOneWidget);
+    expect(find.text('content://example'), findsOneWidget);
+  });
+
+  testWidgets('no flavor tile shows check_circle when no URI is stored', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen());
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.check_circle), findsNothing);
+  });
 }
