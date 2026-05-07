@@ -184,7 +184,6 @@ class _CompetitionDetailBodyState
               backgroundColor: context.appColors.success,
             ),
           );
-          ref.invalidate(xcsoarDirectoryUriProvider);
         });
       } else {
         final downloads = await ref.read(
@@ -569,7 +568,6 @@ class _TaskSectionState extends ConsumerState<_TaskSection> {
             backgroundColor: context.appColors.success,
           ),
         );
-        ref.invalidate(xcsoarDirectoryUriProvider);
       });
     } on PlatformException catch (e) {
       if (!mounted) return;
