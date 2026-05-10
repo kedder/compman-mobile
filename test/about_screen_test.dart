@@ -35,18 +35,19 @@ Widget _buildScreen({required AsyncValue<PackageInfo> override}) {
 
 void main() {
   testWidgets('renders identity block', (tester) async {
-    await tester.pumpWidget(
-      _buildScreen(override: AsyncData(_fakeInfo)),
-    );
+    await tester.pumpWidget(_buildScreen(override: AsyncData(_fakeInfo)));
     await tester.pump();
 
     expect(
       find.byWidgetPredicate(
-        (w) => w is Image && w.image is AssetImage && (w.image as AssetImage).assetName == 'assets/icon/app_icon.png',
+        (w) =>
+            w is Image &&
+            w.image is AssetImage &&
+            (w.image as AssetImage).assetName == 'assets/icon/app_icon.png',
       ),
       findsOneWidget,
     );
-    expect(find.text('Competition Manager Mobile'), findsOneWidget);
+    expect(find.text('Competition Manager'), findsOneWidget);
     expect(
       find.textContaining('An Android app for glider pilots'),
       findsOneWidget,
@@ -55,33 +56,25 @@ void main() {
   });
 
   testWidgets('renders author row', (tester) async {
-    await tester.pumpWidget(
-      _buildScreen(override: AsyncData(_fakeInfo)),
-    );
+    await tester.pumpWidget(_buildScreen(override: AsyncData(_fakeInfo)));
     await tester.pump();
 
     expect(find.text('Written by Andrey Lebedev'), findsOneWidget);
   });
 
   testWidgets('renders source code row with open_in_new icon', (tester) async {
-    await tester.pumpWidget(
-      _buildScreen(override: AsyncData(_fakeInfo)),
-    );
+    await tester.pumpWidget(_buildScreen(override: AsyncData(_fakeInfo)));
     await tester.pump();
 
     expect(find.text('Source & bug reports'), findsOneWidget);
     expect(
-      find.byWidgetPredicate(
-        (w) => w is Icon && w.icon == Icons.open_in_new,
-      ),
+      find.byWidgetPredicate((w) => w is Icon && w.icon == Icons.open_in_new),
       findsWidgets,
     );
   });
 
   testWidgets('renders data source rows', (tester) async {
-    await tester.pumpWidget(
-      _buildScreen(override: AsyncData(_fakeInfo)),
-    );
+    await tester.pumpWidget(_buildScreen(override: AsyncData(_fakeInfo)));
     await tester.pump();
 
     expect(find.text('Competition data'), findsOneWidget);
@@ -89,9 +82,7 @@ void main() {
   });
 
   testWidgets('shows loading state and hides identity block', (tester) async {
-    await tester.pumpWidget(
-      _buildScreen(override: const AsyncLoading()),
-    );
+    await tester.pumpWidget(_buildScreen(override: const AsyncLoading()));
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);

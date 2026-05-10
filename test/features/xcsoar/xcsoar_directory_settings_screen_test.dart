@@ -78,12 +78,12 @@ Widget _buildScreenWithNav({
     return writablePackages.contains(pkg);
   });
   when(_mockService.getSafDirectoryUri()).thenAnswer((_) async => storedUri);
-  when(_mockService.pickDirectory()).thenAnswer(
-    (_) async => pickDirectoryResult,
-  );
-  when(_mockService.pickDirectoryForPackage(any)).thenAnswer(
-    (_) async => pickDirectoryForPackageResult,
-  );
+  when(
+    _mockService.pickDirectory(),
+  ).thenAnswer((_) async => pickDirectoryResult);
+  when(
+    _mockService.pickDirectoryForPackage(any),
+  ).thenAnswer((_) async => pickDirectoryForPackageResult);
   when(
     _mockService.resolveFlavorPackageId(any, any),
   ).thenAnswer((_) async => activePackageId);
@@ -430,10 +430,7 @@ void main() {
     'fromDownloadFlow + pickDirectory ok → screen pops, no success SnackBar',
     (tester) async {
       await tester.pumpWidget(
-        _buildScreenWithNav(
-          fromDownloadFlow: true,
-          pickDirectoryResult: 'ok',
-        ),
+        _buildScreenWithNav(fromDownloadFlow: true, pickDirectoryResult: 'ok'),
       );
       await tester.pumpAndSettle();
 
@@ -480,10 +477,7 @@ void main() {
     'fromDownloadFlow false + pickDirectory ok → stays on screen, shows SnackBar',
     (tester) async {
       await tester.pumpWidget(
-        _buildScreenWithNav(
-          fromDownloadFlow: false,
-          pickDirectoryResult: 'ok',
-        ),
+        _buildScreenWithNav(fromDownloadFlow: false, pickDirectoryResult: 'ok'),
       );
       await tester.pumpAndSettle();
 
