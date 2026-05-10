@@ -20,7 +20,7 @@ COMPOSE := docker compose
 RUN     := $(COMPOSE) run --rm dev
 
 .PHONY: help build-image deps codegen codegen-watch \
-        test test-coverage \
+        test test-coverage screenshots \
         analyze format format-check \
         build build-release build-aab install \
         flutter-run \
@@ -50,10 +50,13 @@ codegen-watch: ## Run code generation in watch mode  (keeps running; Ctrl-C to s
 # ── Testing ───────────────────────────────────────────────────────────────────
 
 test: ## Run all unit and widget tests
-	$(RUN) flutter test
+	$(RUN) flutter test --exclude-tags screenshots
 
 test-coverage: ## Run tests with coverage report  (output: coverage/lcov.info)
-	$(RUN) flutter test --coverage
+	$(RUN) flutter test --coverage --exclude-tags screenshots
+
+screenshots: ## Regenerate Play Store screenshots  (output: assets/google-play/)
+	$(RUN) flutter test --update-goldens --tags screenshots test/screenshots/
 
 # ── Code quality ──────────────────────────────────────────────────────────────
 
