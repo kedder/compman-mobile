@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 // ---------------------------------------------------------------------------
 // AppColors — ThemeExtension for tokens that live outside standard
@@ -110,7 +109,7 @@ abstract final class AppButtonStyles {
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
       minimumSize: const Size.fromHeight(48),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+      textStyle: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 16),
     );
   }
 
@@ -121,7 +120,7 @@ abstract final class AppButtonStyles {
       foregroundColor: primary,
       backgroundColor: Colors.white,
       side: BorderSide(color: primary.withValues(alpha: 0.3)),
-      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+      textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w700),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       minimumSize: Size.zero,
@@ -183,7 +182,7 @@ abstract final class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      textTheme: GoogleFonts.interTextTheme(),
+      textTheme: Typography.material2021().black.apply(fontFamily: 'Inter'),
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
@@ -209,19 +208,19 @@ abstract final class AppTheme {
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          textStyle: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, fontSize: 16),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          textStyle: const TextStyle(fontSize: 16),
+          textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 16),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          textStyle: const TextStyle(fontSize: 16),
+          textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 16),
         ),
       ),
       extensions: const [
