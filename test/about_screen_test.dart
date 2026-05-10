@@ -8,66 +8,93 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+final _fakeInfo = PackageInfo(
+  appName: 'Compman Mobile',
+  packageName: 'com.example.compman_mobile',
+  version: '1.0.0',
+  buildNumber: '1',
+);
+
+Widget _buildScreen({required AsyncValue<PackageInfo> override}) {
+  return ProviderScope(
+    overrides: [
+      packageInfoProvider.overrideWith((ref) {
+        switch (override) {
+          case AsyncData(:final value):
+            return Future.value(value);
+          case AsyncError(:final error):
+            return Future.error(error);
+          case AsyncLoading():
+            return Completer<PackageInfo>().future;
+        }
+      }),
+    ],
+    child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
+  );
+}
+
 void main() {
-  testWidgets('shows loading state while package info is loading', (
-    tester,
-  ) async {
-    final completer = Completer<PackageInfo>();
-
+  testWidgets('renders identity block', (tester) async {
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          packageInfoProvider.overrideWith((ref) => completer.future),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
-      ),
-    );
-
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-  });
-
-  testWidgets('shows runtime app version when package info loads', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          packageInfoProvider.overrideWith(
-            (ref) => Future.value(
-              PackageInfo(
-                appName: 'Compman Mobile',
-                packageName: 'com.example.compman_mobile',
-                version: '0.1.0',
-                buildNumber: '1',
-              ),
-            ),
-          ),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
-      ),
+      _buildScreen(override: AsyncData(_fakeInfo)),
     );
     await tester.pump();
 
-    expect(find.text('Compman Mobile'), findsOneWidget);
-    expect(find.text('Version: 0.1.0'), findsOneWidget);
-    expect(find.text('Data provided by SoaringSpot'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Image && w.image is AssetImage && (w.image as AssetImage).assetName == 'assets/icon/app_icon.png',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Competition Manager Mobile'), findsOneWidget);
+    expect(
+      find.textContaining('An Android app for glider pilots'),
+      findsOneWidget,
+    );
+    expect(find.text('Version 1.0.0'), findsOneWidget);
   });
 
-  testWidgets('shows fallback message when package info load fails', (
-    tester,
-  ) async {
+  testWidgets('renders author row', (tester) async {
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          packageInfoProvider.overrideWith(
-            (ref) async => throw Exception('failed'),
-          ),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), home: const AboutScreen()),
-      ),
+      _buildScreen(override: AsyncData(_fakeInfo)),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.text('Version unavailable'), findsOneWidget);
+    expect(find.text('Written by Andrey Lebedev'), findsOneWidget);
+  });
+
+  testWidgets('renders source code row with open_in_new icon', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen(override: AsyncData(_fakeInfo)),
+    );
+    await tester.pump();
+
+    expect(find.text('Source & bug reports'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Icon && w.icon == Icons.open_in_new,
+      ),
+      findsWidgets,
+    );
+  });
+
+  testWidgets('renders data source rows', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen(override: AsyncData(_fakeInfo)),
+    );
+    await tester.pump();
+
+    expect(find.text('Competition data'), findsOneWidget);
+    expect(find.text('XCSoar tasks'), findsOneWidget);
+  });
+
+  testWidgets('shows loading state and hides identity block', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen(override: const AsyncLoading()),
+    );
+    await tester.pump();
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Competition Manager Mobile'), findsNothing);
   });
 }

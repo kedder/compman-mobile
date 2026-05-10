@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'core/di/providers.dart';
 import 'features/xcsoar/presentation/screens/xcsoar_directory_settings_screen.dart';
@@ -91,34 +92,101 @@ class AboutScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('About')),
-      body: Center(
-        child: packageInfoAsync.when(
-          loading: () => const CircularProgressIndicator(),
-          error: (_, _) => Text(
-            'Version unavailable',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          data: (info) => Column(
-            mainAxisSize: MainAxisSize.min,
+      body: packageInfoAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => const Center(child: Text('Version unavailable')),
+        data: (info) => SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Compman Mobile',
-                style: Theme.of(context).textTheme.bodyLarge,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Semantics(
+                    label: 'App icon',
+                    excludeSemantics: true,
+                    child: Image.asset(
+                      'assets/icon/app_icon.png',
+                      width: 96,
+                      height: 96,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Competition Manager Mobile',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'An Android app for glider pilots. Browse competitions, '
+                    'bookmark the ones you attend, and download waypoint, '
+                    'airspace, and task files directly to XCSoar on your device.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Version ${info.version}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Version: ${info.version}',
-                style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const ListTile(
+              leading: Icon(Icons.person_outline),
+              title: Text('Written by Andrey Lebedev'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.code),
+              title: const Text('Source & bug reports'),
+              subtitle: const Text('github.com/kedder/compman-mobile'),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () => launchUrl(
+                Uri.parse('https://github.com/kedder/compman-mobile'),
+                mode: LaunchMode.externalApplication,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Data provided by SoaringSpot',
-                style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(
+                'Data sources',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ],
-          ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text('Competition data'),
+              subtitle: const Text('soaringspot.com'),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () => launchUrl(
+                Uri.parse('https://www.soaringspot.com/'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text('XCSoar tasks'),
+              subtitle: const Text('soarscore.com'),
+              trailing: const Icon(Icons.open_in_new),
+              onTap: () => launchUrl(
+                Uri.parse('https://soarscore.com/'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+          ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
