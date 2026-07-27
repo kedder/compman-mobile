@@ -181,18 +181,23 @@ class MainActivity : FlutterFragmentActivity() {
         safLauncher.launch(initialUri)
     }
 
-    private fun handleWriteFile(bytes: ByteArray, filename: String, result: MethodChannel.Result) {
-        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
-        val storedUri = prefs.getString("xcsoar_tree_uri", null)
-        if (storedUri == null) {
-            result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
-            return
-        }
+    /**
+     * Returns the stored XCSoar SAF tree URI if one is configured and still
+     * holds a current read+write permission grant, or null otherwise.
+     */
+    private fun getConfiguredTreeUri(): Uri? {
+        val storedUri = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
+            .getString("xcsoar_tree_uri", null) ?: return null
         val treeUri = Uri.parse(storedUri)
         val hasGrant = contentResolver.persistedUriPermissions.any { perm ->
             perm.uri == treeUri && perm.isReadPermission && perm.isWritePermission
         }
-        if (!hasGrant) {
+        return if (hasGrant) treeUri else null
+    }
+
+    private fun handleWriteFile(bytes: ByteArray, filename: String, result: MethodChannel.Result) {
+        val treeUri = getConfiguredTreeUri()
+        if (treeUri == null) {
             result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
             return
         }
@@ -258,17 +263,8 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun handleListFlightLogs(result: MethodChannel.Result) {
-        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
-        val storedUri = prefs.getString("xcsoar_tree_uri", null)
-        if (storedUri == null) {
-            result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
-            return
-        }
-        val treeUri = Uri.parse(storedUri)
-        val hasGrant = contentResolver.persistedUriPermissions.any { perm ->
-            perm.uri == treeUri && perm.isReadPermission && perm.isWritePermission
-        }
-        if (!hasGrant) {
+        val treeUri = getConfiguredTreeUri()
+        if (treeUri == null) {
             result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
             return
         }
