@@ -139,6 +139,8 @@ Kotlin implementation lives in `android/app/src/main/kotlin/.../MainActivity.kt`
 | `clearSafPermission` | — | `"ok"` | Releases persisted URI grant and clears stored URI |
 | `isPackageInstalled` | `packageId: String` | `Boolean` | Returns `true` if the package is installed |
 | `canWriteToMediaDir` | `packageId: String` | `Boolean` | Returns `true` if `Android/media/<pkg>/` is writable via SAF |
+| `resolveFlavorPackageId` | `uri: String, candidates: List<String>` | `String?` | Returns the candidate package ID whose canonical media-directory tree URI matches `uri`, or `null` if none match |
+| `launchPackage` | `packageId: String` | `null` / error | Launches the package's default launcher activity; errors with `LAUNCH_FAILED` if there is no launcher activity or the intent cannot be started |
 
 SAF tree URI grants are stored in Android `SharedPreferences` (not Hive) so they are
 accessible from Kotlin before Flutter initialises.
@@ -160,3 +162,5 @@ provider wrapping inside the class itself. Exposed for injection via
 | `clearSafPermission()` | `clearSafPermission` |
 | `isPackageInstalled(packageId)` | `isPackageInstalled` |
 | `canWriteToMediaDir(packageId)` | `canWriteToMediaDir` |
+| `resolveFlavorPackageId(storedUri, candidates)` | `resolveFlavorPackageId` |
+| `launchPackage(packageId)` | `launchPackage` |

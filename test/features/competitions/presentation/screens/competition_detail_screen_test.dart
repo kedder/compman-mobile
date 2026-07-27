@@ -155,6 +155,16 @@ class _NoOpSafService extends XcsoarSafService {
   Future<void> writeFile(Uint8List bytes, String filename) async {}
 }
 
+/// SAF service whose [launchPackage] always throws [_exception].
+class _ThrowingLaunchSafService extends XcsoarSafService {
+  _ThrowingLaunchSafService(this._exception);
+
+  final PlatformException _exception;
+
+  @override
+  Future<void> launchPackage(String packageId) async => throw _exception;
+}
+
 /// [DownloadAndInstallTask] that throws [PlatformException].
 class _ThrowingSafDownloadAndInstallTask extends DownloadAndInstallTask {
   _ThrowingSafDownloadAndInstallTask(this._exception)
@@ -732,6 +742,182 @@ void main() {
       await tester.pump(); // let initState run
 
       expect(fakeBox.store['lastViewedCompetitionId'], _competitionId);
+    },
+  );
+
+  // ---------------------------------------------------------------------------
+  // Fly XCSoar button tests
+  // ---------------------------------------------------------------------------
+
+  testWidgets('Fly button is hidden before a task has been downloaded', (
+    tester,
+  ) async {
+    final competition = _tCompetition.copyWith(selectedClass: 'Club');
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const ['Club'],
+          competition: competition,
+          tasks: const [_clubTask],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byIcon(Icons.flight), findsNothing);
+    expect(find.textContaining('Fly'), findsNothing);
+  });
+
+  testWidgets('Fly button hides again when a newer task version is published', (
+    tester,
+  ) async {
+    final competition = _tCompetition.copyWith(
+      selectedClass: 'Club',
+      taskVersion: 'stale-version',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const ['Club'],
+          competition: competition,
+          tasks: const [_clubTask],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byIcon(Icons.flight), findsNothing);
+  });
+
+  testWidgets(
+    'Fly button is enabled and labelled with the active flavor once resolved',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp([
+          ..._baseOverrides(
+            classes: const ['Club'],
+            competition: _selectedClassCompetition,
+            tasks: const [_clubTask],
+            xcsoarDirectoryUri: 'content://tree/some-uri',
+          ),
+          activeFlavorPackageIdProvider.overrideWith(
+            (ref) async => 'org.xcsoar.play',
+          ),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Fly XCSoar Play'), findsOneWidget);
+      final button = tester.widget<ElevatedButton>(
+        find
+            .ancestor(
+              of: find.text('Fly XCSoar Play'),
+              matching: find.byType(ElevatedButton),
+            )
+            .first,
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'Fly button is disabled with "Set up XCSoar folder first" when no SAF directory is configured',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp([
+          ..._baseOverrides(
+            classes: const ['Club'],
+            competition: _selectedClassCompetition,
+            tasks: const [_clubTask],
+          ),
+          activeFlavorPackageIdProvider.overrideWith((ref) async => null),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Fly XCSoar'), findsOneWidget);
+      expect(find.text('Set up XCSoar folder first.'), findsOneWidget);
+      final button = tester.widget<ElevatedButton>(
+        find
+            .ancestor(
+              of: find.text('Fly XCSoar'),
+              matching: find.byType(ElevatedButton),
+            )
+            .first,
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'Fly button is disabled with "XCSoar is not installed" when SAF is configured but no flavor resolves',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp([
+          ..._baseOverrides(
+            classes: const ['Club'],
+            competition: _selectedClassCompetition,
+            tasks: const [_clubTask],
+            xcsoarDirectoryUri: 'content://tree/some-uri',
+          ),
+          activeFlavorPackageIdProvider.overrideWith((ref) async => null),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Fly XCSoar'), findsOneWidget);
+      expect(find.text('XCSoar is not installed.'), findsOneWidget);
+      final button = tester.widget<ElevatedButton>(
+        find
+            .ancestor(
+              of: find.text('Fly XCSoar'),
+              matching: find.byType(ElevatedButton),
+            )
+            .first,
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'tapping the Fly button shows a dismissible error banner on PlatformException',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp([
+          ..._baseOverrides(
+            classes: const ['Club'],
+            competition: _selectedClassCompetition,
+            tasks: const [_clubTask],
+            xcsoarDirectoryUri: 'content://tree/some-uri',
+          ),
+          activeFlavorPackageIdProvider.overrideWith(
+            (ref) async => 'org.xcsoar',
+          ),
+          xcsoarSafServiceProvider.overrideWithValue(
+            _ThrowingLaunchSafService(PlatformException(code: 'LAUNCH_FAILED')),
+          ),
+        ]),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Fly XCSoar'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Could not launch XCSoar. Is it installed?'),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Dismiss error'), findsOneWidget);
     },
   );
 }

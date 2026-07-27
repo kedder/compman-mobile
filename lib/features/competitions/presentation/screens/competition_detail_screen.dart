@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_badge.dart';
 import '../../../../core/widgets/icon_meta_row.dart';
 import '../../../../core/widgets/two_tone_card.dart';
+import '../../../xcsoar/domain/xcsoar_flavor.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/downloadable_file_info.dart';
 import '../../domain/entities/pending_download.dart';
@@ -599,7 +601,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection>
   }
 }
 
-class _TaskCard extends StatelessWidget {
+class _TaskCard extends ConsumerWidget {
   const _TaskCard({
     required this.task,
     required this.downloading,
@@ -618,7 +620,7 @@ class _TaskCard extends StatelessWidget {
   bool get _hasNewUpdate => task.timestamp != installedTaskVersion;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -677,6 +679,10 @@ class _TaskCard extends StatelessWidget {
               label: Text(downloading ? 'Downloading...' : 'Download task'),
             ),
           ),
+          if (!_hasNewUpdate) ...[
+            const SizedBox(height: 8),
+            const _FlyButton(),
+          ],
           // Installed state (when installed):
           // SizedBox(
           //   width: double.infinity,
@@ -689,6 +695,78 @@ class _TaskCard extends StatelessWidget {
           // ),
         ],
       ),
+    );
+  }
+}
+
+/// Full-width "Fly XCSoar" CTA shown by [_TaskCard] once a task has been
+/// downloaded for the current version and no newer one is pending.
+///
+/// Enabled and labelled with the active flavor's name once
+/// [activeFlavorPackageIdProvider] resolves a package ID; otherwise disabled
+/// with subdued guidance text explaining what's missing.
+class _FlyButton extends ConsumerWidget {
+  const _FlyButton();
+
+  Future<void> _launch(WidgetRef ref, String packageId) async {
+    try {
+      await ref.read(xcsoarSafServiceProvider).launchPackage(packageId);
+    } on PlatformException {
+      ref
+          .read(_downloadErrorsProvider.notifier)
+          .add('Could not launch XCSoar. Is it installed?');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeFlavorAsync = ref.watch(activeFlavorPackageIdProvider);
+    final directoryUriAsync = ref.watch(xcsoarDirectoryUriProvider);
+
+    var label = 'Fly XCSoar';
+    String? helperText;
+    VoidCallback? onTap;
+
+    if (activeFlavorAsync.isLoading) {
+      helperText = 'XCSoar is not installed.';
+    } else {
+      final packageId = activeFlavorAsync.value;
+      if (packageId != null) {
+        final flavor = kKnownXcsoarFlavors.firstWhereOrNull(
+          (f) => f.packageId == packageId,
+        );
+        label = 'Fly ${flavor?.displayName ?? 'XCSoar'}';
+        onTap = () => _launch(ref, packageId);
+      } else {
+        final directoryConfigured = (directoryUriAsync.value ?? '').isNotEmpty;
+        helperText = directoryConfigured
+            ? 'XCSoar is not installed.'
+            : 'Set up XCSoar folder first.';
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: onTap,
+            style: AppButtonStyles.success(context),
+            icon: const Icon(Icons.flight),
+            label: Text(label),
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helperText,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

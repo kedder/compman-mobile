@@ -81,4 +81,11 @@ class XcsoarSafService {
     'uri': storedUri,
     'candidates': candidates,
   });
+
+  /// Launches the given Android package's default launcher activity.
+  ///
+  /// Throws [PlatformException] with code `LAUNCH_FAILED` if the package has
+  /// no launcher activity or the intent cannot be started.
+  Future<void> launchPackage(String packageId) =>
+      _channel.invokeMethod('launchPackage', {'packageId': packageId});
 }

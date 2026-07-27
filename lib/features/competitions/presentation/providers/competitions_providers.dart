@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../xcsoar/domain/xcsoar_flavor.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/competition.dart';
 import '../../domain/entities/downloadable_file_info.dart';
@@ -100,6 +101,24 @@ final competitionClassesProvider = FutureProvider.autoDispose
 /// Provider that returns the stored SAF directory URI, or null if not set.
 final xcsoarDirectoryUriProvider = FutureProvider.autoDispose<String?>((ref) {
   return ref.read(xcsoarSafServiceProvider).getSafDirectoryUri();
+});
+
+/// Resolves the package ID of the currently active XCSoar flavor.
+///
+/// Returns `null` if no SAF directory is configured, or if the configured
+/// directory does not match any [kKnownXcsoarFlavors] package ID. Mirrors
+/// `_XcsoarDirectorySettingsScreenState._resolveActiveFlavor`.
+final activeFlavorPackageIdProvider = FutureProvider.autoDispose<String?>((
+  ref,
+) async {
+  final uri = await ref.watch(xcsoarDirectoryUriProvider.future);
+  if (uri == null || uri.isEmpty) return null;
+  return ref
+      .read(xcsoarSafServiceProvider)
+      .resolveFlavorPackageId(
+        uri,
+        kKnownXcsoarFlavors.map((f) => f.packageId).toList(),
+      );
 });
 
 /// Fetches the list of downloadable airspace and waypoints files for a

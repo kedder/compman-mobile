@@ -106,6 +106,20 @@ class MainActivity : FlutterFragmentActivity() {
                                 .equals(uri, ignoreCase = true)
                         })
                     }
+                    "launchPackage" -> {
+                        val packageId = call.argument<String>("packageId")!!
+                        val intent = packageManager.getLaunchIntentForPackage(packageId)
+                        if (intent != null) {
+                            try {
+                                startActivity(intent)
+                                result.success(null)
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                result.error("LAUNCH_FAILED", "No launcher activity for $packageId", null)
+                            }
+                        } else {
+                            result.error("LAUNCH_FAILED", "No launcher activity for $packageId", null)
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }

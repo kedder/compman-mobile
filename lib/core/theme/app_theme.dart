@@ -117,6 +117,23 @@ abstract final class AppButtonStyles {
     );
   }
 
+  /// Success-coloured filled button — used for the full-width "Fly XCSoar"
+  /// CTA. Uses [AppColors.success] for background and 64dp minimum height,
+  /// per the full-width CTA touch-target rule in `docs/ui-guidelines.md`.
+  static ButtonStyle success(BuildContext context) {
+    return ElevatedButton.styleFrom(
+      backgroundColor: context.appColors.success,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      minimumSize: const Size.fromHeight(64),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      textStyle: const TextStyle(
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+      ),
+    );
+  }
+
   /// Ghost/utility button for secondary file-operation actions.
   static ButtonStyle ghost(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
