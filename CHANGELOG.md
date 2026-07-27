@@ -13,6 +13,7 @@ published as the "What's New" text on the Google Play Store listing.
 ### Changed
 
 - Show the on-device filename when an airspace or waypoints file finishes downloading
+- Hide airspace and waypoint download options until you pick your competition class
 
 ## 0.2.0 - 2026-05-10
 

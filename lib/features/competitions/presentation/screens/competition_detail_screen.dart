@@ -196,16 +196,18 @@ class _CompetitionDetailBody extends ConsumerWidget {
                 competition: competition,
                 competitionId: competitionId,
               ),
-              const SizedBox(height: 12),
-              _AirspaceCard(
-                competitionId: competitionId,
-                competition: competition,
-              ),
-              const SizedBox(height: 12),
-              _WaypointsCard(
-                competitionId: competitionId,
-                competition: competition,
-              ),
+              if (competition.selectedClass != null) ...[
+                const SizedBox(height: 12),
+                _AirspaceCard(
+                  competitionId: competitionId,
+                  competition: competition,
+                ),
+                const SizedBox(height: 12),
+                _WaypointsCard(
+                  competitionId: competitionId,
+                  competition: competition,
+                ),
+              ],
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 16),

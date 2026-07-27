@@ -485,7 +485,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp(
-        _baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        _baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tAirspaceFile],
+        ),
       ),
     );
     await tester.pump();
@@ -501,7 +505,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp(
-        _baseOverrides(classes: const [], downloads: const [tWaypointsFile]),
+        _baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tWaypointsFile],
+        ),
       ),
     );
     await tester.pump();
@@ -516,6 +524,7 @@ void main() {
     'shows NEW UPDATE badge when publishedVersion differs from installedVersion',
     (tester) async {
       final competition = _tCompetition.copyWith(
+        selectedClass: 'Club',
         airspaceVersion: 'old-version',
       );
       await tester.pumpWidget(
@@ -542,7 +551,8 @@ void main() {
         _buildApp(
           _baseOverrides(
             classes: const [],
-            competition: _tCompetition, // airspaceVersion is null
+            // airspaceVersion is null; selectedClass set so the card renders
+            competition: _tCompetition.copyWith(selectedClass: 'Club'),
             downloads: const [tAirspaceFile], // has a publishedVersion
           ),
         ),
@@ -556,6 +566,7 @@ void main() {
 
   testWidgets('hides NEW UPDATE badge when already up to date', (tester) async {
     final competition = _tCompetition.copyWith(
+      selectedClass: 'Club',
       airspaceVersion: tAirspaceFile.publishedVersion,
     );
     await tester.pumpWidget(
@@ -577,7 +588,13 @@ void main() {
     'shows "No airspace file available" when downloads list has no airspace entry',
     (tester) async {
       await tester.pumpWidget(
-        _buildApp(_baseOverrides(classes: const [], downloads: const [])),
+        _buildApp(
+          _baseOverrides(
+            classes: const [],
+            competition: _selectedClassCompetition,
+            downloads: const [],
+          ),
+        ),
       );
       await tester.pump();
       await tester.pump();
@@ -587,13 +604,58 @@ void main() {
     },
   );
 
+  testWidgets('hides Airspace and Waypoints cards when no class is selected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const [],
+          downloads: const [tAirspaceFile, tWaypointsFile],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Airspace'), findsNothing);
+    expect(find.text('Waypoints'), findsNothing);
+    expect(find.text('No airspace file available'), findsNothing);
+    expect(find.text('No waypoint file available'), findsNothing);
+    expect(find.byType(Divider), findsOneWidget);
+    expect(find.text('XCSoar folder not configured'), findsOneWidget);
+  });
+
+  testWidgets('shows Airspace and Waypoints cards once a class is selected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tAirspaceFile, tWaypointsFile],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Airspace'), findsOneWidget);
+    expect(find.text('Waypoints'), findsOneWidget);
+  });
+
   testWidgets('Download button is disabled while downloading', (tester) async {
     final completer = Completer<Either<Failure, String>>();
 
     final stubbedUseCase = _CompleterDownloadAndInstallFile(completer.future);
     await tester.pumpWidget(
       _buildApp([
-        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        ..._baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tAirspaceFile],
+        ),
         downloadAndInstallFileProvider.overrideWithValue(stubbedUseCase),
       ]),
     );
@@ -623,7 +685,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp([
-        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        ..._baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tAirspaceFile],
+        ),
         downloadAndInstallFileProvider.overrideWithValue(
           _CompleterDownloadAndInstallFile(
             Future.value(const Right('compman-airspace.txt')),
@@ -648,7 +714,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp([
-        ..._baseOverrides(classes: const [], downloads: const [tWaypointsFile]),
+        ..._baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tWaypointsFile],
+        ),
         downloadAndInstallFileProvider.overrideWithValue(
           _CompleterDownloadAndInstallFile(
             Future.value(const Right('compman-waypoints.cup')),
@@ -673,7 +743,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp([
-        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        ..._baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tAirspaceFile],
+        ),
         downloadAndInstallFileProvider.overrideWithValue(
           _ThrowingSafDownloadAndInstallFile(
             PlatformException(code: 'SAF_NOT_CONFIGURED'),
@@ -701,6 +775,7 @@ void main() {
         _buildApp([
           ..._baseOverrides(
             classes: const [],
+            competition: _selectedClassCompetition,
             downloads: const [tWaypointsFile],
           ),
           downloadAndInstallFileProvider.overrideWithValue(
@@ -755,7 +830,11 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildApp([
-        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        ..._baseOverrides(
+          classes: const [],
+          competition: _selectedClassCompetition,
+          downloads: const [tAirspaceFile],
+        ),
         downloadAndInstallFileProvider.overrideWithValue(
           _ThrowingSafDownloadAndInstallFile(
             PlatformException(code: 'SAF_NOT_CONFIGURED'),
