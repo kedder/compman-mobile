@@ -16,8 +16,10 @@ import '../../features/competitions/domain/usecases/download_task.dart';
 import '../../features/competitions/domain/usecases/fetch_competition_classes.dart';
 import '../../features/competitions/domain/usecases/fetch_downloads.dart';
 import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
+import '../../features/competitions/domain/usecases/get_todays_flight_logs.dart';
 import '../../features/competitions/domain/usecases/record_file_install.dart';
 import '../../features/competitions/domain/usecases/set_competition_class.dart';
+import '../../features/competitions/domain/usecases/set_competition_scoring_email.dart';
 import '../network/http_client.dart';
 import '../platform/xcsoar_saf_service.dart';
 
@@ -91,6 +93,11 @@ final setCompetitionClassProvider = Provider<SetCompetitionClass>(
   (ref) => SetCompetitionClass(ref.read(competitionsRepositoryProvider)),
 );
 
+/// Provides a [SetCompetitionScoringEmail] use case instance.
+final setCompetitionScoringEmailProvider = Provider<SetCompetitionScoringEmail>(
+  (ref) => SetCompetitionScoringEmail(ref.read(competitionsRepositoryProvider)),
+);
+
 /// Provides a [FetchCompetitionClasses] use case instance.
 final fetchCompetitionClassesProvider = Provider<FetchCompetitionClasses>(
   (ref) => FetchCompetitionClasses(ref.read(competitionsRepositoryProvider)),
@@ -125,6 +132,11 @@ final downloadAndInstallTaskProvider = Provider<DownloadAndInstallTask>(
     ref.read(competitionsRepositoryProvider),
     ref.read(xcsoarSafServiceProvider),
   ),
+);
+
+/// Provides a [GetTodaysFlightLogs] use case instance.
+final getTodaysFlightLogsProvider = Provider<GetTodaysFlightLogs>(
+  (ref) => GetTodaysFlightLogs(ref.read(xcsoarSafServiceProvider)),
 );
 
 /// Provides the app's [PackageInfo] metadata from the host platform.

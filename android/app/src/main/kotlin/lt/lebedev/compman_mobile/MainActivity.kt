@@ -54,6 +54,7 @@ class MainActivity : FlutterFragmentActivity() {
                         val filename = call.argument<String>("filename")!!
                         handleWriteFile(bytes, filename, result)
                     }
+                    "listFlightLogs" -> handleListFlightLogs(result)
                     "getSafDirectoryUri" -> {
                         val uri = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
                             .getString("xcsoar_tree_uri", null)
@@ -195,25 +196,9 @@ class MainActivity : FlutterFragmentActivity() {
             Log.d("CompmanSAF", "writeFile: treeUri=$treeUri bytes=${bytes.size}")
             // ExternalStorageProvider ignores selection args, so we fetch all children
             // and filter by display name in-process.
-            val cursor = contentResolver.query(
-                childDocUri,
-                arrayOf(
-                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                ),
-                null, null, null,
-            )
-            val fileUri: Uri? = cursor?.use {
-                val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-                val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-                var found: Uri? = null
-                while (it.moveToNext()) {
-                    if (it.getString(nameCol) == filename) {
-                        found = DocumentsContract.buildDocumentUriUsingTree(treeUri, it.getString(idCol))
-                        break
-                    }
-                }
-                found
+            val existingDocId = findChildDocumentId(childDocUri, filename)
+            val fileUri: Uri? = existingDocId?.let {
+                DocumentsContract.buildDocumentUriUsingTree(treeUri, it)
             }
             if (fileUri != null) {
                 // File exists — truncate and overwrite in place to avoid duplicate names.
@@ -230,6 +215,91 @@ class MainActivity : FlutterFragmentActivity() {
                 contentResolver.openOutputStream(newUri!!).use { it!!.write(bytes) }
             }
             result.success("ok")
+        } catch (e: Exception) {
+            result.error("SAF_ERROR", e.message, null)
+        }
+    }
+
+    /**
+     * Returns the document ID of the child of [childrenUri] whose display name
+     * exactly matches [displayName], or null if none is found.
+     *
+     * ExternalStorageProvider ignores selection args, so children are fetched
+     * unfiltered and matched by display name in-process.
+     */
+    private fun findChildDocumentId(childrenUri: Uri, displayName: String): String? {
+        val cursor = contentResolver.query(
+            childrenUri,
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            ),
+            null, null, null,
+        )
+        return cursor?.use {
+            val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+            val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            var found: String? = null
+            while (it.moveToNext()) {
+                if (it.getString(nameCol) == displayName) {
+                    found = it.getString(idCol)
+                    break
+                }
+            }
+            found
+        }
+    }
+
+    private fun handleListFlightLogs(result: MethodChannel.Result) {
+        val prefs = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
+        val storedUri = prefs.getString("xcsoar_tree_uri", null)
+        if (storedUri == null) {
+            result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
+            return
+        }
+        val treeUri = Uri.parse(storedUri)
+        val hasGrant = contentResolver.persistedUriPermissions.any { perm ->
+            perm.uri == treeUri && perm.isReadPermission && perm.isWritePermission
+        }
+        if (!hasGrant) {
+            result.error("SAF_NOT_CONFIGURED", "XCSoar directory not set", null)
+            return
+        }
+        try {
+            val treeDocId = DocumentsContract.getTreeDocumentId(treeUri)
+            val rootChildrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeDocId)
+            val logsDocId = findChildDocumentId(rootChildrenUri, "logs")
+            if (logsDocId == null) {
+                Log.d("CompmanSAF", "listFlightLogs: no logs folder found")
+                result.success(emptyList<Map<String, String>>())
+                return
+            }
+            val logsChildrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, logsDocId)
+            val logs = mutableListOf<Map<String, String>>()
+            val cursor = contentResolver.query(
+                logsChildrenUri,
+                arrayOf(
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                ),
+                null, null, null,
+            )
+            cursor?.use {
+                val idCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+                val nameCol = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+                while (it.moveToNext()) {
+                    val name = it.getString(nameCol) ?: continue
+                    if (name.endsWith(".igc", ignoreCase = true)) {
+                        val docUri = DocumentsContract.buildDocumentUriUsingTree(
+                            treeUri,
+                            it.getString(idCol),
+                        )
+                        logs.add(mapOf("filename" to name, "uri" to docUri.toString()))
+                    }
+                }
+            }
+            Log.d("CompmanSAF", "listFlightLogs: found ${logs.size} .igc file(s)")
+            result.success(logs)
         } catch (e: Exception) {
             result.error("SAF_ERROR", e.message, null)
         }

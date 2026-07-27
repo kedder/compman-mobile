@@ -36,6 +36,12 @@ abstract class BookmarkedCompetition with _$BookmarkedCompetition {
     /// Stored as the downloaded task's generation timestamp string at install
     /// time. Null until a task has been downloaded.
     String? taskVersion,
+
+    /// Scoring email address for this competition's organizers.
+    ///
+    /// Entered manually by the pilot the first time they send flight logs;
+    /// remembered thereafter. Null until first set.
+    String? scoringEmail,
   }) = _BookmarkedCompetition;
 
   /// Computed status based on [startDate], [endDate], and today's date.

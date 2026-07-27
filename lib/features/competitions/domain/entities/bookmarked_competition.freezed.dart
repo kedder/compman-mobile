@@ -23,7 +23,11 @@ mixin _$BookmarkedCompetition {
 ///
 /// Stored as the downloaded task's generation timestamp string at install
 /// time. Null until a task has been downloaded.
- String? get taskVersion;
+ String? get taskVersion;/// Scoring email address for this competition's organizers.
+///
+/// Entered manually by the pilot the first time they send flight logs;
+/// remembered thereafter. Null until first set.
+ String? get scoringEmail;
 /// Create a copy of BookmarkedCompetition
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,16 +38,16 @@ $BookmarkedCompetitionCopyWith<BookmarkedCompetition> get copyWith => _$Bookmark
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookmarkedCompetition&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.soaringspotUrl, soaringspotUrl) || other.soaringspotUrl == soaringspotUrl)&&(identical(other.bookmarkedAt, bookmarkedAt) || other.bookmarkedAt == bookmarkedAt)&&(identical(other.selectedClass, selectedClass) || other.selectedClass == selectedClass)&&(identical(other.description, description) || other.description == description)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.airspaceVersion, airspaceVersion) || other.airspaceVersion == airspaceVersion)&&(identical(other.waypointsVersion, waypointsVersion) || other.waypointsVersion == waypointsVersion)&&(identical(other.taskVersion, taskVersion) || other.taskVersion == taskVersion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookmarkedCompetition&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.soaringspotUrl, soaringspotUrl) || other.soaringspotUrl == soaringspotUrl)&&(identical(other.bookmarkedAt, bookmarkedAt) || other.bookmarkedAt == bookmarkedAt)&&(identical(other.selectedClass, selectedClass) || other.selectedClass == selectedClass)&&(identical(other.description, description) || other.description == description)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.airspaceVersion, airspaceVersion) || other.airspaceVersion == airspaceVersion)&&(identical(other.waypointsVersion, waypointsVersion) || other.waypointsVersion == waypointsVersion)&&(identical(other.taskVersion, taskVersion) || other.taskVersion == taskVersion)&&(identical(other.scoringEmail, scoringEmail) || other.scoringEmail == scoringEmail));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,title,soaringspotUrl,bookmarkedAt,selectedClass,description,startDate,endDate,airspaceVersion,waypointsVersion,taskVersion);
+int get hashCode => Object.hash(runtimeType,id,title,soaringspotUrl,bookmarkedAt,selectedClass,description,startDate,endDate,airspaceVersion,waypointsVersion,taskVersion,scoringEmail);
 
 @override
 String toString() {
-  return 'BookmarkedCompetition(id: $id, title: $title, soaringspotUrl: $soaringspotUrl, bookmarkedAt: $bookmarkedAt, selectedClass: $selectedClass, description: $description, startDate: $startDate, endDate: $endDate, airspaceVersion: $airspaceVersion, waypointsVersion: $waypointsVersion, taskVersion: $taskVersion)';
+  return 'BookmarkedCompetition(id: $id, title: $title, soaringspotUrl: $soaringspotUrl, bookmarkedAt: $bookmarkedAt, selectedClass: $selectedClass, description: $description, startDate: $startDate, endDate: $endDate, airspaceVersion: $airspaceVersion, waypointsVersion: $waypointsVersion, taskVersion: $taskVersion, scoringEmail: $scoringEmail)';
 }
 
 
@@ -54,7 +58,7 @@ abstract mixin class $BookmarkedCompetitionCopyWith<$Res>  {
   factory $BookmarkedCompetitionCopyWith(BookmarkedCompetition value, $Res Function(BookmarkedCompetition) _then) = _$BookmarkedCompetitionCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String soaringspotUrl, DateTime bookmarkedAt, String? selectedClass, String? description, DateTime? startDate, DateTime? endDate, String? airspaceVersion, String? waypointsVersion, String? taskVersion
+ String id, String title, String soaringspotUrl, DateTime bookmarkedAt, String? selectedClass, String? description, DateTime? startDate, DateTime? endDate, String? airspaceVersion, String? waypointsVersion, String? taskVersion, String? scoringEmail
 });
 
 
@@ -71,7 +75,7 @@ class _$BookmarkedCompetitionCopyWithImpl<$Res>
 
 /// Create a copy of BookmarkedCompetition
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? soaringspotUrl = null,Object? bookmarkedAt = null,Object? selectedClass = freezed,Object? description = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? airspaceVersion = freezed,Object? waypointsVersion = freezed,Object? taskVersion = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? soaringspotUrl = null,Object? bookmarkedAt = null,Object? selectedClass = freezed,Object? description = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? airspaceVersion = freezed,Object? waypointsVersion = freezed,Object? taskVersion = freezed,Object? scoringEmail = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -84,6 +88,7 @@ as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: ca
 as DateTime?,airspaceVersion: freezed == airspaceVersion ? _self.airspaceVersion : airspaceVersion // ignore: cast_nullable_to_non_nullable
 as String?,waypointsVersion: freezed == waypointsVersion ? _self.waypointsVersion : waypointsVersion // ignore: cast_nullable_to_non_nullable
 as String?,taskVersion: freezed == taskVersion ? _self.taskVersion : taskVersion // ignore: cast_nullable_to_non_nullable
+as String?,scoringEmail: freezed == scoringEmail ? _self.scoringEmail : scoringEmail // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -169,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String soaringspotUrl,  DateTime bookmarkedAt,  String? selectedClass,  String? description,  DateTime? startDate,  DateTime? endDate,  String? airspaceVersion,  String? waypointsVersion,  String? taskVersion)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String soaringspotUrl,  DateTime bookmarkedAt,  String? selectedClass,  String? description,  DateTime? startDate,  DateTime? endDate,  String? airspaceVersion,  String? waypointsVersion,  String? taskVersion,  String? scoringEmail)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BookmarkedCompetition() when $default != null:
-return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_that.selectedClass,_that.description,_that.startDate,_that.endDate,_that.airspaceVersion,_that.waypointsVersion,_that.taskVersion);case _:
+return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_that.selectedClass,_that.description,_that.startDate,_that.endDate,_that.airspaceVersion,_that.waypointsVersion,_that.taskVersion,_that.scoringEmail);case _:
   return orElse();
 
 }
@@ -190,10 +195,10 @@ return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String soaringspotUrl,  DateTime bookmarkedAt,  String? selectedClass,  String? description,  DateTime? startDate,  DateTime? endDate,  String? airspaceVersion,  String? waypointsVersion,  String? taskVersion)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String soaringspotUrl,  DateTime bookmarkedAt,  String? selectedClass,  String? description,  DateTime? startDate,  DateTime? endDate,  String? airspaceVersion,  String? waypointsVersion,  String? taskVersion,  String? scoringEmail)  $default,) {final _that = this;
 switch (_that) {
 case _BookmarkedCompetition():
-return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_that.selectedClass,_that.description,_that.startDate,_that.endDate,_that.airspaceVersion,_that.waypointsVersion,_that.taskVersion);case _:
+return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_that.selectedClass,_that.description,_that.startDate,_that.endDate,_that.airspaceVersion,_that.waypointsVersion,_that.taskVersion,_that.scoringEmail);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +215,10 @@ return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String soaringspotUrl,  DateTime bookmarkedAt,  String? selectedClass,  String? description,  DateTime? startDate,  DateTime? endDate,  String? airspaceVersion,  String? waypointsVersion,  String? taskVersion)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String soaringspotUrl,  DateTime bookmarkedAt,  String? selectedClass,  String? description,  DateTime? startDate,  DateTime? endDate,  String? airspaceVersion,  String? waypointsVersion,  String? taskVersion,  String? scoringEmail)?  $default,) {final _that = this;
 switch (_that) {
 case _BookmarkedCompetition() when $default != null:
-return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_that.selectedClass,_that.description,_that.startDate,_that.endDate,_that.airspaceVersion,_that.waypointsVersion,_that.taskVersion);case _:
+return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_that.selectedClass,_that.description,_that.startDate,_that.endDate,_that.airspaceVersion,_that.waypointsVersion,_that.taskVersion,_that.scoringEmail);case _:
   return null;
 
 }
@@ -225,7 +230,7 @@ return $default(_that.id,_that.title,_that.soaringspotUrl,_that.bookmarkedAt,_th
 
 
 class _BookmarkedCompetition extends BookmarkedCompetition {
-  const _BookmarkedCompetition({required this.id, required this.title, required this.soaringspotUrl, required this.bookmarkedAt, this.selectedClass, this.description, this.startDate, this.endDate, this.airspaceVersion, this.waypointsVersion, this.taskVersion}): super._();
+  const _BookmarkedCompetition({required this.id, required this.title, required this.soaringspotUrl, required this.bookmarkedAt, this.selectedClass, this.description, this.startDate, this.endDate, this.airspaceVersion, this.waypointsVersion, this.taskVersion, this.scoringEmail}): super._();
   
 
 @override final  String id;
@@ -248,6 +253,11 @@ class _BookmarkedCompetition extends BookmarkedCompetition {
 /// Stored as the downloaded task's generation timestamp string at install
 /// time. Null until a task has been downloaded.
 @override final  String? taskVersion;
+/// Scoring email address for this competition's organizers.
+///
+/// Entered manually by the pilot the first time they send flight logs;
+/// remembered thereafter. Null until first set.
+@override final  String? scoringEmail;
 
 /// Create a copy of BookmarkedCompetition
 /// with the given fields replaced by the non-null parameter values.
@@ -259,16 +269,16 @@ _$BookmarkedCompetitionCopyWith<_BookmarkedCompetition> get copyWith => __$Bookm
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookmarkedCompetition&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.soaringspotUrl, soaringspotUrl) || other.soaringspotUrl == soaringspotUrl)&&(identical(other.bookmarkedAt, bookmarkedAt) || other.bookmarkedAt == bookmarkedAt)&&(identical(other.selectedClass, selectedClass) || other.selectedClass == selectedClass)&&(identical(other.description, description) || other.description == description)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.airspaceVersion, airspaceVersion) || other.airspaceVersion == airspaceVersion)&&(identical(other.waypointsVersion, waypointsVersion) || other.waypointsVersion == waypointsVersion)&&(identical(other.taskVersion, taskVersion) || other.taskVersion == taskVersion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookmarkedCompetition&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.soaringspotUrl, soaringspotUrl) || other.soaringspotUrl == soaringspotUrl)&&(identical(other.bookmarkedAt, bookmarkedAt) || other.bookmarkedAt == bookmarkedAt)&&(identical(other.selectedClass, selectedClass) || other.selectedClass == selectedClass)&&(identical(other.description, description) || other.description == description)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.airspaceVersion, airspaceVersion) || other.airspaceVersion == airspaceVersion)&&(identical(other.waypointsVersion, waypointsVersion) || other.waypointsVersion == waypointsVersion)&&(identical(other.taskVersion, taskVersion) || other.taskVersion == taskVersion)&&(identical(other.scoringEmail, scoringEmail) || other.scoringEmail == scoringEmail));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,title,soaringspotUrl,bookmarkedAt,selectedClass,description,startDate,endDate,airspaceVersion,waypointsVersion,taskVersion);
+int get hashCode => Object.hash(runtimeType,id,title,soaringspotUrl,bookmarkedAt,selectedClass,description,startDate,endDate,airspaceVersion,waypointsVersion,taskVersion,scoringEmail);
 
 @override
 String toString() {
-  return 'BookmarkedCompetition(id: $id, title: $title, soaringspotUrl: $soaringspotUrl, bookmarkedAt: $bookmarkedAt, selectedClass: $selectedClass, description: $description, startDate: $startDate, endDate: $endDate, airspaceVersion: $airspaceVersion, waypointsVersion: $waypointsVersion, taskVersion: $taskVersion)';
+  return 'BookmarkedCompetition(id: $id, title: $title, soaringspotUrl: $soaringspotUrl, bookmarkedAt: $bookmarkedAt, selectedClass: $selectedClass, description: $description, startDate: $startDate, endDate: $endDate, airspaceVersion: $airspaceVersion, waypointsVersion: $waypointsVersion, taskVersion: $taskVersion, scoringEmail: $scoringEmail)';
 }
 
 
@@ -279,7 +289,7 @@ abstract mixin class _$BookmarkedCompetitionCopyWith<$Res> implements $Bookmarke
   factory _$BookmarkedCompetitionCopyWith(_BookmarkedCompetition value, $Res Function(_BookmarkedCompetition) _then) = __$BookmarkedCompetitionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String soaringspotUrl, DateTime bookmarkedAt, String? selectedClass, String? description, DateTime? startDate, DateTime? endDate, String? airspaceVersion, String? waypointsVersion, String? taskVersion
+ String id, String title, String soaringspotUrl, DateTime bookmarkedAt, String? selectedClass, String? description, DateTime? startDate, DateTime? endDate, String? airspaceVersion, String? waypointsVersion, String? taskVersion, String? scoringEmail
 });
 
 
@@ -296,7 +306,7 @@ class __$BookmarkedCompetitionCopyWithImpl<$Res>
 
 /// Create a copy of BookmarkedCompetition
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? soaringspotUrl = null,Object? bookmarkedAt = null,Object? selectedClass = freezed,Object? description = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? airspaceVersion = freezed,Object? waypointsVersion = freezed,Object? taskVersion = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? soaringspotUrl = null,Object? bookmarkedAt = null,Object? selectedClass = freezed,Object? description = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? airspaceVersion = freezed,Object? waypointsVersion = freezed,Object? taskVersion = freezed,Object? scoringEmail = freezed,}) {
   return _then(_BookmarkedCompetition(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -309,6 +319,7 @@ as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: ca
 as DateTime?,airspaceVersion: freezed == airspaceVersion ? _self.airspaceVersion : airspaceVersion // ignore: cast_nullable_to_non_nullable
 as String?,waypointsVersion: freezed == waypointsVersion ? _self.waypointsVersion : waypointsVersion // ignore: cast_nullable_to_non_nullable
 as String?,taskVersion: freezed == taskVersion ? _self.taskVersion : taskVersion // ignore: cast_nullable_to_non_nullable
+as String?,scoringEmail: freezed == scoringEmail ? _self.scoringEmail : scoringEmail // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

@@ -88,4 +88,21 @@ class XcsoarSafService {
   /// no launcher activity or the intent cannot be started.
   Future<void> launchPackage(String packageId) =>
       _channel.invokeMethod('launchPackage', {'packageId': packageId});
+
+  /// Returns every `.igc` file found under `logs/` in the granted XCSoar SAF
+  /// directory, regardless of date, as raw `{"filename": ..., "uri": ...}`
+  /// maps. Callers map these to domain entities and filter by date
+  /// themselves — this class must not import feature `domain/` types (see
+  /// docs/architecture.md's Platform Services dependency rule).
+  ///
+  /// Returns an empty list if the `logs/` folder does not exist yet (XCSoar
+  /// has not logged any flights). Throws [PlatformException] with code
+  /// `SAF_NOT_CONFIGURED` if no XCSoar directory has been granted.
+  Future<List<Map<String, String>>> listFlightLogs() async {
+    final result = await _channel.invokeMethod<List<Object?>>('listFlightLogs');
+    return (result ?? const [])
+        .cast<Map<Object?, Object?>>()
+        .map((m) => m.map((k, v) => MapEntry(k as String, v as String)))
+        .toList();
+  }
 }

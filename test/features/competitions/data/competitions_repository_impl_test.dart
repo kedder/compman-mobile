@@ -269,6 +269,58 @@ void main() {
     });
   });
 
+  group('setCompetitionScoringEmail', () {
+    test('updates model with new email and returns Right(unit)', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenAnswer((_) async {});
+
+      final result = await repository.setCompetitionScoringEmail(
+        'barron-2024',
+        'organizer@example.com',
+      );
+
+      expect(result, equals(const Right<Failure, Unit>(unit)));
+      verify(mockLocal.getById('barron-2024')).called(1);
+      verify(mockLocal.save(any)).called(1);
+    });
+
+    test('returns Left(StorageFailure) when competition not found', () async {
+      when(mockLocal.getById('missing')).thenAnswer((_) async => null);
+
+      final result = await repository.setCompetitionScoringEmail(
+        'missing',
+        'organizer@example.com',
+      );
+
+      expect(
+        result,
+        equals(
+          const Left<Failure, Unit>(StorageFailure('Competition not found')),
+        ),
+      );
+    });
+
+    test('returns Left(StorageFailure) on save exception', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenThrow(Exception('disk full'));
+
+      final result = await repository.setCompetitionScoringEmail(
+        'barron-2024',
+        'organizer@example.com',
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure, isA<StorageFailure>()),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
+
   group('fetchCompetitionClasses', () {
     test('calls remote.fetchClasses with the correct URL', () async {
       when(mockLocal.getAll()).thenAnswer((_) async => [tBookmarkedModel]);

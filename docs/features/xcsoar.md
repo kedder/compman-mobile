@@ -141,6 +141,7 @@ Kotlin implementation lives in `android/app/src/main/kotlin/.../MainActivity.kt`
 | `canWriteToMediaDir` | `packageId: String` | `Boolean` | Returns `true` if `Android/media/<pkg>/` is writable via SAF |
 | `resolveFlavorPackageId` | `uri: String, candidates: List<String>` | `String?` | Returns the candidate package ID whose canonical media-directory tree URI matches `uri`, or `null` if none match |
 | `launchPackage` | `packageId: String` | `null` / error | Launches the package's default launcher activity; errors with `LAUNCH_FAILED` if there is no launcher activity or the intent cannot be started |
+| `listFlightLogs` | — | `List<Map<String, String>>` / error | Lists `.igc` files under `logs/` in the stored SAF directory as `{filename, uri}` maps; returns an empty list if no `logs/` folder exists yet; errors with `SAF_NOT_CONFIGURED` if no directory is granted |
 
 SAF tree URI grants are stored in Android `SharedPreferences` (not Hive) so they are
 accessible from Kotlin before Flutter initialises.
@@ -164,3 +165,10 @@ provider wrapping inside the class itself. Exposed for injection via
 | `canWriteToMediaDir(packageId)` | `canWriteToMediaDir` |
 | `resolveFlavorPackageId(storedUri, candidates)` | `resolveFlavorPackageId` |
 | `launchPackage(packageId)` | `launchPackage` |
+| `listFlightLogs()` | `listFlightLogs` |
+
+`listFlightLogs()` returns raw `List<Map<String, String>>` rather than a domain
+entity — `core/platform/` classes must not import feature `domain/` types (see
+the dependency rule above). `GetTodaysFlightLogs`
+(`lib/features/competitions/domain/usecases/get_todays_flight_logs.dart`) maps
+each map to a `FlightLogFile` entity and filters to today's date.

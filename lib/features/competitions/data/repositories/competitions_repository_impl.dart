@@ -211,4 +211,22 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       return Left(StorageFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> setCompetitionScoringEmail(
+    String competitionId,
+    String email,
+  ) async {
+    try {
+      final existing = await local.getById(competitionId);
+      if (existing == null) {
+        return const Left(StorageFailure('Competition not found'));
+      }
+      final updated = existing.copyWith(scoringEmail: email);
+      await local.save(updated);
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure(e.toString()));
+    }
+  }
 }

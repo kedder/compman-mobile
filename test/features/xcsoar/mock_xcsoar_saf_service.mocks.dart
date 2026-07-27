@@ -111,4 +111,23 @@ class MockXcsoarSafService extends _i1.Mock implements _i2.XcsoarSafService {
             returnValue: _i3.Future<String?>.value(),
           )
           as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> launchPackage(String? packageId) =>
+      (super.noSuchMethod(
+            Invocation.method(#launchPackage, [packageId]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<List<Map<String, String>>> listFlightLogs() =>
+      (super.noSuchMethod(
+            Invocation.method(#listFlightLogs, []),
+            returnValue: _i3.Future<List<Map<String, String>>>.value(
+              <Map<String, String>>[],
+            ),
+          )
+          as _i3.Future<List<Map<String, String>>>);
 }

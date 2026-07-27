@@ -255,4 +255,26 @@ class MockCompetitionsRepository extends _i1.Mock
             ),
           )
           as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
+
+  @override
+  _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>> setCompetitionScoringEmail(
+    String? competitionId,
+    String? email,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#setCompetitionScoringEmail, [
+              competitionId,
+              email,
+            ]),
+            returnValue: _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>.value(
+              _i7.dummyValue<_i4.Either<_i5.Failure, _i4.Unit>>(
+                this,
+                Invocation.method(#setCompetitionScoringEmail, [
+                  competitionId,
+                  email,
+                ]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Either<_i5.Failure, _i4.Unit>>);
 }

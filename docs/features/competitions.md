@@ -47,6 +47,7 @@ class BookmarkedCompetition {
   final String? airspaceVersion; // version token of the last installed airspace file
   final String? waypointsVersion; // version token of the last installed waypoints file
   final String? taskVersion; // version token (task timestamp) of the last downloaded task
+  final String? scoringEmail; // organizer's scoring email address, entered manually by the pilot
 }
 ```
 
@@ -84,6 +85,7 @@ abstract class CompetitionsRepository {
 | `GetBookmarkedCompetitions` | — | `List<BookmarkedCompetition>` | Load bookmarks from local storage |
 | `BookmarkCompetition` | `Competition` | `Unit` | Add to bookmarks |
 | `RemoveBookmark` | `String competitionId` | `Unit` | Remove from bookmarks |
+| `SetCompetitionScoringEmail` | `String competitionId, String email` | `Unit` | Persist the organizer's scoring email for a bookmarked competition |
 
 ---
 
@@ -112,6 +114,7 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 | `competitionDetailProvider(id)` | `FutureProvider.autoDispose.family<BookmarkedCompetition?, String>` | Looks up a single bookmarked competition by ID |
 | `latestTasksProvider(id)` | `FutureProvider.autoDispose.family<List<TaskInfo>, String>` | Fetches task list from SoarScore for a given competition |
 | `xcsoarDirectoryUriProvider` | `FutureProvider.autoDispose<String?>` | Returns the stored SAF tree URI, or null if not configured |
+| `todaysFlightLogsProvider` | `FutureProvider.autoDispose<List<FlightLogFile>>` | Fetches today's `.igc` flight log files from the XCSoar SAF directory; not scoped to a competition ID |
 
 ---
 

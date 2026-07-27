@@ -114,6 +114,12 @@ void main() {
       expect(entity.startDate, tModel.startDate);
       expect(entity.endDate, tModel.endDate);
     });
+
+    test('old records without scoringEmail deserialise with null', () {
+      final entity = tModel.toEntity();
+
+      expect(entity.scoringEmail, isNull);
+    });
   });
 
   group('BookmarkedCompetitionModel.fromEntity', () {
@@ -132,6 +138,37 @@ void main() {
       final roundTripped = model.toEntity();
 
       expect(roundTripped, entity);
+    });
+
+    test('round-trips scoringEmail through the entity', () {
+      final entity = BookmarkedCompetition(
+        id: 'test-id',
+        title: 'Test Competition',
+        soaringspotUrl: 'https://www.soaringspot.com/en_gb/test-id/',
+        bookmarkedAt: DateTime(2025, 6, 15),
+        scoringEmail: 'organizer@example.com',
+      );
+
+      final model = BookmarkedCompetitionModel.fromEntity(entity);
+      final roundTripped = model.toEntity();
+
+      expect(roundTripped, entity);
+      expect(roundTripped.scoringEmail, 'organizer@example.com');
+    });
+  });
+
+  group('BookmarkedCompetitionModel Hive persistence', () {
+    test('persists and restores scoringEmail via the box', () async {
+      final modelWithEmail = tModel.copyWith(
+        id: 'with-email',
+        scoringEmail: 'organizer@example.com',
+      );
+
+      await dataSource.save(modelWithEmail);
+      final result = await dataSource.getAll();
+
+      final restored = result.firstWhere((m) => m.id == 'with-email');
+      expect(restored.scoringEmail, 'organizer@example.com');
     });
   });
 }

@@ -82,4 +82,12 @@ abstract class CompetitionsRepository {
     String competitionId,
     String? version,
   );
+
+  /// Persists the scoring email address for a bookmarked competition. Called
+  /// after the pilot successfully sends flight logs so the address is
+  /// remembered and pre-filled next time (see docs/features/competitions.md).
+  Future<Either<Failure, Unit>> setCompetitionScoringEmail(
+    String competitionId,
+    String email,
+  );
 }

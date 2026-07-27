@@ -56,6 +56,11 @@ abstract class BookmarkedCompetitionModel with _$BookmarkedCompetitionModel {
     ///
     /// Old records without this field deserialise with null.
     @HiveField(10) String? taskVersion,
+
+    /// Scoring email address for this competition's organizers.
+    ///
+    /// Old records without this field deserialise with null.
+    @HiveField(11) String? scoringEmail,
   }) = _BookmarkedCompetitionModel;
 
   /// Converts this model to the domain [BookmarkedCompetition] entity.
@@ -71,6 +76,7 @@ abstract class BookmarkedCompetitionModel with _$BookmarkedCompetitionModel {
     airspaceVersion: airspaceVersion,
     waypointsVersion: waypointsVersion,
     taskVersion: taskVersion,
+    scoringEmail: scoringEmail,
   );
 
   /// Creates a [BookmarkedCompetitionModel] from a domain [BookmarkedCompetition].
@@ -87,5 +93,6 @@ abstract class BookmarkedCompetitionModel with _$BookmarkedCompetitionModel {
         airspaceVersion: entity.airspaceVersion,
         waypointsVersion: entity.waypointsVersion,
         taskVersion: entity.taskVersion,
+        scoringEmail: entity.scoringEmail,
       );
 }

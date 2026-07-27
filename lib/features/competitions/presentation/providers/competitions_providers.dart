@@ -5,6 +5,7 @@ import '../../../xcsoar/domain/xcsoar_flavor.dart';
 import '../../domain/entities/bookmarked_competition.dart';
 import '../../domain/entities/competition.dart';
 import '../../domain/entities/downloadable_file_info.dart';
+import '../../domain/entities/flight_log_file.dart';
 import '../../domain/entities/task_info.dart';
 import '../../domain/usecases/bookmark_competition.dart';
 import '../../domain/usecases/fetch_competitions.dart';
@@ -130,4 +131,13 @@ final downloadsProvider = FutureProvider.autoDispose
       final useCase = ref.read(fetchDownloadsProvider);
       final result = await useCase(competitionId);
       return result.fold((f) => throw f, (files) => files);
+    });
+
+/// Fetches today's flight log files from the XCSoar SAF directory. Shared by
+/// the Flight Logs panel and the Flight Log screen — not scoped to a
+/// competition ID, since the XCSoar log folder is global to the device and
+/// "today" is the only relevant filter (see docs/features/xcsoar.md).
+final todaysFlightLogsProvider =
+    FutureProvider.autoDispose<List<FlightLogFile>>((ref) {
+      return ref.read(getTodaysFlightLogsProvider)();
     });
