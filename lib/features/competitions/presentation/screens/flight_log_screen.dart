@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/error_retry.dart';
 import '../../domain/entities/flight_log_file.dart';
 import '../providers/competitions_providers.dart';
 
@@ -60,7 +60,7 @@ class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
       );
       if (!mounted) return;
       result.fold(
-        (failure) => setState(() => _sendError = _failureMessage(failure)),
+        (failure) => setState(() => _sendError = failureMessage(failure)),
         (_) {
           ref.invalidate(bookmarkedCompetitionsProvider);
           ref.invalidate(competitionDetailProvider(widget.competitionId));
@@ -100,8 +100,8 @@ class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Padding(
           padding: const EdgeInsets.all(16),
-          child: _ErrorRetry(
-            message: _failureMessage(err),
+          child: ErrorRetry(
+            message: failureMessage(err),
             onRetry: () => ref.invalidate(todaysFlightLogsProvider),
           ),
         ),
@@ -185,36 +185,4 @@ class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
       ),
     );
   }
-}
-
-/// Shared error + retry widget, mirroring
-/// `competition_detail_screen.dart`'s `_ErrorRetry`.
-class _ErrorRetry extends StatelessWidget {
-  const _ErrorRetry({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(message, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
-      ],
-    );
-  }
-}
-
-String _failureMessage(Object err) {
-  if (err is Failure) {
-    return switch (err) {
-      NetworkFailure(:final message) => message,
-      ParseFailure(:final message) => message,
-      StorageFailure(:final message) => message,
-    };
-  }
-  return err.toString();
 }

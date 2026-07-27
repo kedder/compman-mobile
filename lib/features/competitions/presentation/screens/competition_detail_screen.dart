@@ -6,10 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/providers.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/storage/last_viewed_local_datasource.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_badge.dart';
+import '../../../../core/widgets/error_retry.dart';
 import '../../../../core/widgets/icon_meta_row.dart';
 import '../../../../core/widgets/two_tone_card.dart';
 import '../../../xcsoar/domain/xcsoar_flavor.dart';
@@ -137,8 +137,8 @@ class _CompetitionDetailScreenState
       ),
       body: competitionAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => _ErrorRetry(
-          message: _failureMessage(err),
+        error: (err, _) => ErrorRetry(
+          message: failureMessage(err),
           onRetry: () =>
               ref.invalidate(competitionDetailProvider(widget.competitionId)),
         ),
@@ -377,7 +377,7 @@ class _ClassPicker extends ConsumerWidget {
         classesAsync.when(
           skipLoadingOnReload: true,
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => _ErrorRetry(
+          error: (err, _) => ErrorRetry(
             message:
                 'No classes found — tasks may not be available for this competition.',
             onRetry: () =>
@@ -385,7 +385,7 @@ class _ClassPicker extends ConsumerWidget {
           ),
           data: (classes) {
             if (classes.isEmpty) {
-              return _ErrorRetry(
+              return ErrorRetry(
                 message:
                     'No classes found — tasks may not be available for this competition.',
                 onRetry: () =>
@@ -532,7 +532,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection>
       if (!mounted) return;
       result.fold(
         (f) =>
-            ref.read(_downloadErrorsProvider.notifier).add(_failureMessage(f)),
+            ref.read(_downloadErrorsProvider.notifier).add(failureMessage(f)),
         (_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -569,15 +569,15 @@ class _TaskSectionState extends ConsumerState<_TaskSection>
 
     return tasksAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => _ErrorRetry(
-        message: _failureMessage(err),
+      error: (err, _) => ErrorRetry(
+        message: failureMessage(err),
         onRetry: () =>
             ref.invalidate(latestTasksProvider(widget.competitionId)),
       ),
       data: (tasks) {
         final TaskInfo? task = _findTask(tasks, widget.selectedClass);
         if (task == null) {
-          return _ErrorRetry(
+          return ErrorRetry(
             message: 'No task available today for ${widget.selectedClass}.',
             onRetry: () =>
                 ref.invalidate(latestTasksProvider(widget.competitionId)),
@@ -789,8 +789,8 @@ class _AirspaceCard extends ConsumerWidget {
     return downloadsAsync.when(
       skipLoadingOnReload: true,
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => _ErrorRetry(
-        message: _failureMessage(err),
+      error: (err, _) => ErrorRetry(
+        message: failureMessage(err),
         onRetry: () => ref.invalidate(downloadsProvider(competitionId)),
       ),
       data: (files) {
@@ -834,8 +834,8 @@ class _WaypointsCard extends ConsumerWidget {
     return downloadsAsync.when(
       skipLoadingOnReload: true,
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => _ErrorRetry(
-        message: _failureMessage(err),
+      error: (err, _) => ErrorRetry(
+        message: failureMessage(err),
         onRetry: () => ref.invalidate(downloadsProvider(competitionId)),
       ),
       data: (files) {
@@ -922,7 +922,7 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard>
       if (!mounted) return;
       result.fold(
         (f) =>
-            ref.read(_downloadErrorsProvider.notifier).add(_failureMessage(f)),
+            ref.read(_downloadErrorsProvider.notifier).add(failureMessage(f)),
         (filename) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -1142,42 +1142,6 @@ class _ErrorBanner extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
-
-/// Shared error + retry widget used inline throughout this screen.
-class _ErrorRetry extends StatelessWidget {
-  const _ErrorRetry({
-    required this.message,
-    required this.onRetry,
-    this.retryLabel = 'Retry',
-  });
-
-  final String message;
-  final VoidCallback onRetry;
-  final String retryLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(message, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-      ],
-    );
-  }
-}
-
-String _failureMessage(Object err) {
-  if (err is Failure) {
-    return switch (err) {
-      NetworkFailure(:final message) => message,
-      ParseFailure(:final message) => message,
-      StorageFailure(:final message) => message,
-    };
-  }
-  return err.toString();
-}
 
 /// Namespace for the set-competition-class action (avoids duplicating
 /// provider access boilerplate in multiple widgets).
