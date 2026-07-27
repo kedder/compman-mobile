@@ -74,15 +74,7 @@ void main() {
     test('overwrites existing entry with same id', () async {
       await dataSource.save(tModel);
 
-      final updated = BookmarkedCompetitionModel(
-        id: tModel.id,
-        title: 'Updated Title',
-        soaringspotUrl: tModel.soaringspotUrl,
-        bookmarkedAt: tModel.bookmarkedAt,
-        description: tModel.description,
-        startDate: tModel.startDate,
-        endDate: tModel.endDate,
-      );
+      final updated = tModel.copyWith(title: 'Updated Title');
       await dataSource.save(updated);
 
       final result = await dataSource.getAll();

@@ -120,16 +120,7 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       if (existing == null) {
         return const Left(StorageFailure('Competition not found'));
       }
-      final updated = BookmarkedCompetitionModel(
-        id: existing.id,
-        title: existing.title,
-        soaringspotUrl: existing.soaringspotUrl,
-        bookmarkedAt: existing.bookmarkedAt,
-        selectedClass: selectedClass,
-        description: existing.description,
-        startDate: existing.startDate,
-        endDate: existing.endDate,
-      );
+      final updated = existing.copyWith(selectedClass: selectedClass);
       await local.save(updated);
       return const Right(unit);
     } catch (e) {
@@ -193,22 +184,9 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       if (existing == null) {
         return const Left(StorageFailure('Competition not found'));
       }
-      final updated = BookmarkedCompetitionModel(
-        id: existing.id,
-        title: existing.title,
-        soaringspotUrl: existing.soaringspotUrl,
-        bookmarkedAt: existing.bookmarkedAt,
-        selectedClass: existing.selectedClass,
-        description: existing.description,
-        startDate: existing.startDate,
-        endDate: existing.endDate,
-        airspaceVersion: kind == DownloadableFileKind.airspace
-            ? version
-            : existing.airspaceVersion,
-        waypointsVersion: kind == DownloadableFileKind.waypoints
-            ? version
-            : existing.waypointsVersion,
-      );
+      final updated = kind == DownloadableFileKind.airspace
+          ? existing.copyWith(airspaceVersion: version)
+          : existing.copyWith(waypointsVersion: version);
       await local.save(updated);
       return const Right(unit);
     } catch (e) {
@@ -226,19 +204,7 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       if (existing == null) {
         return const Left(StorageFailure('Competition not found'));
       }
-      final updated = BookmarkedCompetitionModel(
-        id: existing.id,
-        title: existing.title,
-        soaringspotUrl: existing.soaringspotUrl,
-        bookmarkedAt: existing.bookmarkedAt,
-        selectedClass: existing.selectedClass,
-        description: existing.description,
-        startDate: existing.startDate,
-        endDate: existing.endDate,
-        airspaceVersion: existing.airspaceVersion,
-        waypointsVersion: existing.waypointsVersion,
-        taskVersion: version,
-      );
+      final updated = existing.copyWith(taskVersion: version);
       await local.save(updated);
       return const Right(unit);
     } catch (e) {
