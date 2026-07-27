@@ -123,7 +123,7 @@ final recordFileInstallProvider = Provider<RecordFileInstall>(
 final downloadAndInstallFileProvider = Provider<DownloadAndInstallFile>(
   (ref) => DownloadAndInstallFile(
     ref.read(competitionsRepositoryProvider),
-    XcsoarSafService(),
+    ref.read(xcsoarSafServiceProvider),
   ),
 );
 
