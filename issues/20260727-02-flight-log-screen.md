@@ -201,9 +201,13 @@ value, call `ref.read(sendFlightLogsProvider)(competitionId: ..., files: ..., re
 Per `AGENTS.md`'s documentation-maintenance table:
 
 - `docs/features/competitions.md` — add a new "Flight Log Screen (`/competitions/:id/flight-logs`)"
-  subsection under "Screens", following the existing per-screen documentation style (see how
-  "XCSoar Directory Settings Screen" is documented as a short pointer, or write it inline —
-  your judgment based on how much detail fits).
+  subsection under "Screens". **Read the style note at the top of that document first**: it
+  describes functional requirements from the pilot's perspective (what the screen does and
+  why), not implementation — no class names, method signatures, field lists, or provider
+  names. Describe the list-with-checkboxes behavior, the recipient email field (including
+  that it's pre-filled from a remembered address and why), the Send button's disabled
+  conditions, and the one inline-error case, in plain language — mirror the tone of the
+  existing "Class selection" / "Task" subsections, not a code reference table.
 - `docs/features/xcsoar.md` — add `shareFlightLogs` to the "Android Bridge Methods" table and
   the "Dart Service" table.
 - `docs/plan.md` — add an entry noting the Flight Log screen is done.

@@ -128,9 +128,14 @@ picks up newly-landed flight logs, not just app-resume.
 
 Per `AGENTS.md`'s documentation-maintenance table:
 
-- `docs/features/competitions.md` — add a "Flight Logs panel" bullet to the "Competition
-  Detail Screen" section, following the existing bullet style used for the Airspace/Waypoints
-  cards (placement, visibility rule, empty-state copy, and the app-resume refresh behavior).
+- `docs/features/competitions.md` — add a "Flight logs" subsection to the "Competition
+  Detail Screen" section, alongside the existing "Airspace and waypoint files" subsection.
+  **Read the style note at the top of that document first**: describe this panel as a
+  functional requirement — what it shows, when it appears relative to class selection, why
+  it doesn't hide on error (a passive background check shouldn't interrupt the pilot), and
+  why it refreshes on app resume (a pilot lands, backgrounds Compman, and expects the
+  summary to already be current when they return) — in plain language, not a code
+  reference table, and without naming providers/widgets.
 - `docs/plan.md` — mark this 3-issue batch as done with a brief implementation note, per the
   existing entry style (this can be a single combined entry covering all three issues, since
   this is the issue that completes the user-visible feature).

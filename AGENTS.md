@@ -96,6 +96,16 @@ When you make any code change, you must also:
 
 Documentation updates belong in the same commit as the code change.
 
+**`docs/features/<feature>.md` style:** these describe *what* a feature does and *why*,
+as functional requirements a reader can reason about without opening the source — not
+*how* it's implemented. Do not paste class definitions, method signatures, or field
+lists: they go stale the next time a property or method is renamed, and every past
+instance of this has already caused a doc to silently drift out of sync with the code
+(e.g. a use-case table that stopped being updated after a few issues). When code needs a
+pointer, reference a folder or file loosely ("the competitions domain layer") rather than
+an exact symbol. `docs/features/competitions.md` and `docs/features/configuration.md` are
+the current reference examples of this style.
+
 ### Changelog Maintenance
 
 `CHANGELOG.md` is published as the "What's New" text on the Google Play Store listing.
