@@ -92,8 +92,30 @@ When you make any code change, you must also:
 | Make a significant technology/design decision | Add a new `docs/adr/NNN-title.md` |
 | Complete a planned task | Mark it ✅ in `docs/plan.md` with a brief implementation note |
 | Identify new work during implementation | Add 📋 item to `docs/plan.md` |
+| Make a user-visible change | Add an entry to `CHANGELOG.md` under `Unreleased` |
 
 Documentation updates belong in the same commit as the code change.
+
+### Changelog Maintenance
+
+`CHANGELOG.md` is published as the "What's New" text on the Google Play Store listing.
+The audience is **end users (pilots), not developers**. Keep entries short, plain-language,
+and focused on what changed for them — never mention class names, files, refactors, or
+internal implementation details.
+
+- **What gets an entry**: any commit that changes what a user can see or do — new
+  features, UI changes, behavior changes, bug fixes a user would notice, removed
+  features. Skip entries for `refactor`, `test`, `docs`, `chore`, `ci`, and `plan`
+  commits, and for internal fixes with no observable effect.
+- **Where**: add the entry under the `## Unreleased` heading at the top of the file, in
+  the same commit as the change, grouped under `### Added`, `### Changed`, `### Fixed`,
+  or `### Removed` (omit empty groups).
+- **Style**: one line per entry, plain sentence a pilot would understand, capitalized,
+  no trailing period, no jargon. E.g. "Show a badge on tasks that changed since you last
+  downloaded them." not "Add version tracking to TaskModel."
+- **Cutting a release**: versions correspond to annotated git tags (`git tag -a vX.Y.Z`).
+  When tagging a release, rename `## Unreleased` to `## X.Y.Z - YYYY-MM-DD` (matching the
+  tag) and add a fresh empty `## Unreleased` section above it.
 
 ### Tests
 
