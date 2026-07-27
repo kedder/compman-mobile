@@ -46,6 +46,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Distinct application ID so debug builds install alongside a
+            // production release instead of colliding on versionCode.
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
         release {
             // Use the upload key when credentials are present; fall back to debug key otherwise.
             def hasUploadKey = System.getenv("UPLOAD_STORE_PASSWORD") != null
