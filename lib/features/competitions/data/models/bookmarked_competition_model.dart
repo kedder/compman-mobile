@@ -55,6 +55,12 @@ class BookmarkedCompetitionModel {
   @HiveField(9)
   final String? waypointsVersion;
 
+  /// Version token of the last installed task.
+  ///
+  /// Old records without this field deserialise with null.
+  @HiveField(10)
+  final String? taskVersion;
+
   /// Creates a [BookmarkedCompetitionModel].
   BookmarkedCompetitionModel({
     required this.id,
@@ -67,6 +73,7 @@ class BookmarkedCompetitionModel {
     this.endDate,
     this.airspaceVersion,
     this.waypointsVersion,
+    this.taskVersion,
   });
 
   /// Converts this model to the domain [BookmarkedCompetition] entity.
@@ -81,6 +88,7 @@ class BookmarkedCompetitionModel {
     endDate: endDate,
     airspaceVersion: airspaceVersion,
     waypointsVersion: waypointsVersion,
+    taskVersion: taskVersion,
   );
 
   /// Creates a [BookmarkedCompetitionModel] from a domain [BookmarkedCompetition].
@@ -96,5 +104,6 @@ class BookmarkedCompetitionModel {
         endDate: entity.endDate,
         airspaceVersion: entity.airspaceVersion,
         waypointsVersion: entity.waypointsVersion,
+        taskVersion: entity.taskVersion,
       );
 }

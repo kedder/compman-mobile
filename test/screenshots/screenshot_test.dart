@@ -159,7 +159,11 @@ Widget _buildBookmarksApp() {
     overrides: [
       bookmarkedCompetitionsProvider.overrideWith(() => _BookmarksNotifier()),
     ],
-    child: MaterialApp.router(routerConfig: router, theme: AppTheme.light(), debugShowCheckedModeBanner: false),
+    child: MaterialApp.router(
+      routerConfig: router,
+      theme: AppTheme.light(),
+      debugShowCheckedModeBanner: false,
+    ),
   );
 }
 
@@ -199,7 +203,11 @@ Widget _buildDetailApp() {
         _compId,
       ).overrideWith((ref) async => const [_airspaceFile, _waypointsFile]),
     ],
-    child: MaterialApp.router(routerConfig: router, theme: AppTheme.light(), debugShowCheckedModeBanner: false),
+    child: MaterialApp.router(
+      routerConfig: router,
+      theme: AppTheme.light(),
+      debugShowCheckedModeBanner: false,
+    ),
   );
 }
 

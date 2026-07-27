@@ -40,7 +40,9 @@ void main() {
   late MockCompetitionsRepository mockRepository;
   late _RecordingSafService recordingSaf;
 
+  const tCompetitionId = 'barron-2024';
   const tTaskUrl = 'https://example.com/task.tsk';
+  const tVersion = '2026-07-14 09:30';
   final tBytes = Uint8List.fromList([0x3C, 0x54, 0x61, 0x73, 0x6B]);
 
   setUp(() {
@@ -50,38 +52,49 @@ void main() {
     provideDummy<Either<Failure, Unit>>(const Right(unit));
   });
 
-  test(
-    'downloads bytes, writes Default.tsk via SAF, and returns Right(unit)',
-    () async {
-      when(
-        mockRepository.downloadTask(tTaskUrl),
-      ).thenAnswer((_) async => Right(tBytes));
+  test('downloads bytes, writes Default.tsk via SAF, records the install '
+      'version, and returns Right(unit)', () async {
+    when(
+      mockRepository.downloadTask(tTaskUrl),
+    ).thenAnswer((_) async => Right(tBytes));
+    when(
+      mockRepository.recordTaskInstall(tCompetitionId, tVersion),
+    ).thenAnswer((_) async => const Right(unit));
 
-      final useCase = DownloadAndInstallTask(mockRepository, recordingSaf);
-      final result = await useCase(tTaskUrl);
+    final useCase = DownloadAndInstallTask(mockRepository, recordingSaf);
+    final result = await useCase(
+      competitionId: tCompetitionId,
+      taskUrl: tTaskUrl,
+      version: tVersion,
+    );
 
-      expect(result, const Right<Failure, Unit>(unit));
-      expect(recordingSaf.calls, hasLength(1));
-      expect(recordingSaf.calls.first.$2, 'Default.tsk');
-      expect(recordingSaf.calls.first.$1, tBytes);
-    },
-  );
+    expect(result, const Right<Failure, Unit>(unit));
+    expect(recordingSaf.calls, hasLength(1));
+    expect(recordingSaf.calls.first.$2, 'Default.tsk');
+    expect(recordingSaf.calls.first.$1, tBytes);
+    verify(
+      mockRepository.recordTaskInstall(tCompetitionId, tVersion),
+    ).called(1);
+  });
 
-  test(
-    'returns Left(Failure) when download fails without calling writeFile',
-    () async {
-      const failure = NetworkFailure('connection refused');
-      when(
-        mockRepository.downloadTask(tTaskUrl),
-      ).thenAnswer((_) async => const Left(failure));
+  test('returns Left(Failure) when download fails without calling writeFile '
+      'or recordTaskInstall', () async {
+    const failure = NetworkFailure('connection refused');
+    when(
+      mockRepository.downloadTask(tTaskUrl),
+    ).thenAnswer((_) async => const Left(failure));
 
-      final useCase = DownloadAndInstallTask(mockRepository, recordingSaf);
-      final result = await useCase(tTaskUrl);
+    final useCase = DownloadAndInstallTask(mockRepository, recordingSaf);
+    final result = await useCase(
+      competitionId: tCompetitionId,
+      taskUrl: tTaskUrl,
+      version: tVersion,
+    );
 
-      expect(result, const Left<Failure, Unit>(failure));
-      expect(recordingSaf.calls, isEmpty);
-    },
-  );
+    expect(result, const Left<Failure, Unit>(failure));
+    expect(recordingSaf.calls, isEmpty);
+    verifyNever(mockRepository.recordTaskInstall(any, any));
+  });
 
   test('propagates PlatformException from writeFile to the caller', () async {
     when(
@@ -94,8 +107,13 @@ void main() {
     final useCase = DownloadAndInstallTask(mockRepository, throwingSaf);
 
     await expectLater(
-      () => useCase(tTaskUrl),
+      () => useCase(
+        competitionId: tCompetitionId,
+        taskUrl: tTaskUrl,
+        version: tVersion,
+      ),
       throwsA(isA<PlatformException>()),
     );
+    verifyNever(mockRepository.recordTaskInstall(any, any));
   });
 }

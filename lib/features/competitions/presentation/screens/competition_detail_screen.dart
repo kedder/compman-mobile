@@ -346,6 +346,7 @@ class _ClassSection extends ConsumerWidget {
         _TaskSection(
           competitionId: competitionId,
           selectedClass: competition.selectedClass!,
+          installedTaskVersion: competition.taskVersion,
         ),
       ],
     );
@@ -501,10 +502,14 @@ class _TaskSection extends ConsumerStatefulWidget {
   const _TaskSection({
     required this.competitionId,
     required this.selectedClass,
+    required this.installedTaskVersion,
   });
 
   final String competitionId;
   final String selectedClass;
+
+  /// The version token stored on [BookmarkedCompetition] at last install.
+  final String? installedTaskVersion;
 
   @override
   ConsumerState<_TaskSection> createState() => _TaskSectionState();
@@ -516,18 +521,24 @@ class _TaskSectionState extends ConsumerState<_TaskSection>
     ref.read(_taskDownloadingProvider.notifier).value = true;
     try {
       final result = await ref.read(downloadAndInstallTaskProvider)(
-        task.taskUrl,
+        competitionId: widget.competitionId,
+        taskUrl: task.taskUrl,
+        version: task.timestamp,
       );
       if (!mounted) return;
       result.fold(
         (f) =>
             ref.read(_downloadErrorsProvider.notifier).add(_failureMessage(f)),
-        (_) => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Task downloaded'),
-            backgroundColor: context.appColors.success,
-          ),
-        ),
+        (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Task downloaded'),
+              backgroundColor: context.appColors.success,
+            ),
+          );
+          ref.invalidate(bookmarkedCompetitionsProvider);
+          ref.invalidate(competitionDetailProvider(widget.competitionId));
+        },
       );
     } on PlatformException catch (e) {
       if (!mounted) return;
@@ -572,6 +583,7 @@ class _TaskSectionState extends ConsumerState<_TaskSection>
         return _TaskCard(
           task: task,
           downloading: downloading,
+          installedTaskVersion: widget.installedTaskVersion,
           onInstall: () => _installTask(task),
         );
       },
@@ -591,12 +603,19 @@ class _TaskCard extends StatelessWidget {
   const _TaskCard({
     required this.task,
     required this.downloading,
+    required this.installedTaskVersion,
     required this.onInstall,
   });
 
   final TaskInfo task;
   final bool downloading;
+
+  /// The version token stored on [BookmarkedCompetition] at last install.
+  final String? installedTaskVersion;
   final VoidCallback onInstall;
+
+  /// True when the fetched task's timestamp differs from the stored install token.
+  bool get _hasNewUpdate => task.timestamp != installedTaskVersion;
 
   @override
   Widget build(BuildContext context) {
@@ -616,12 +635,13 @@ class _TaskCard extends StatelessWidget {
                   style: textTheme.headlineSmall,
                 ),
               ),
-              // TODO(new-update): show when newer version available
-              // AppBadge(
-              //   label: 'NEW UPDATE',
-              //   backgroundColor: colorScheme.error,
-              //   foregroundColor: colorScheme.onError,
-              // ),
+              if (_hasNewUpdate)
+                AppBadge(
+                  label: 'NEW UPDATE',
+                  backgroundColor: colorScheme.error,
+                  foregroundColor: colorScheme.onError,
+                  hasRing: true,
+                ),
             ],
           ),
           const SizedBox(height: 8),

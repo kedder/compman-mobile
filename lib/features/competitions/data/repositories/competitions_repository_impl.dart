@@ -215,4 +215,34 @@ class CompetitionsRepositoryImpl implements CompetitionsRepository {
       return Left(StorageFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> recordTaskInstall(
+    String competitionId,
+    String? version,
+  ) async {
+    try {
+      final existing = await local.getById(competitionId);
+      if (existing == null) {
+        return const Left(StorageFailure('Competition not found'));
+      }
+      final updated = BookmarkedCompetitionModel(
+        id: existing.id,
+        title: existing.title,
+        soaringspotUrl: existing.soaringspotUrl,
+        bookmarkedAt: existing.bookmarkedAt,
+        selectedClass: existing.selectedClass,
+        description: existing.description,
+        startDate: existing.startDate,
+        endDate: existing.endDate,
+        airspaceVersion: existing.airspaceVersion,
+        waypointsVersion: existing.waypointsVersion,
+        taskVersion: version,
+      );
+      await local.save(updated);
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure(e.toString()));
+    }
+  }
 }

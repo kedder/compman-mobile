@@ -485,4 +485,68 @@ void main() {
       );
     });
   });
+
+  group('recordTaskInstall', () {
+    const tVersion = '2026-07-14 09:30';
+
+    test('updates taskVersion and returns Right(unit)', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenAnswer((_) async {});
+
+      final result = await repository.recordTaskInstall(
+        'barron-2024',
+        tVersion,
+      );
+
+      expect(result, equals(const Right<Failure, Unit>(unit)));
+      verify(
+        mockLocal.save(
+          argThat(
+            predicate<BookmarkedCompetitionModel>(
+              (m) =>
+                  m.taskVersion == tVersion &&
+                  m.airspaceVersion == null &&
+                  m.waypointsVersion == null,
+            ),
+          ),
+        ),
+      ).called(1);
+    });
+
+    test(
+      'returns Left(StorageFailure) when competition not bookmarked',
+      () async {
+        when(mockLocal.getById('missing')).thenAnswer((_) async => null);
+
+        final result = await repository.recordTaskInstall('missing', tVersion);
+
+        expect(
+          result,
+          equals(
+            const Left<Failure, Unit>(StorageFailure('Competition not found')),
+          ),
+        );
+      },
+    );
+
+    test('returns Left(StorageFailure) on save exception', () async {
+      when(
+        mockLocal.getById('barron-2024'),
+      ).thenAnswer((_) async => tBookmarkedModel);
+      when(mockLocal.save(any)).thenThrow(Exception('disk full'));
+
+      final result = await repository.recordTaskInstall(
+        'barron-2024',
+        tVersion,
+      );
+
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure, isA<StorageFailure>()),
+        (_) => fail('expected Left'),
+      );
+    });
+  });
 }

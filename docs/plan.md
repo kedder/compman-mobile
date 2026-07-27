@@ -104,6 +104,7 @@
 - ✅ **Competition status domain/data enrichment** — added computed `CompetitionStatus`, nullable `startDate`/`endDate` on competition entities and bookmark storage, parsed SoaringSpot date ranges from listing HTML, and preserved those fields when saving bookmarks
 - ✅ **Competition detail screen redesign** — updated `CompetitionDetailScreen` to use the static "Competition Details" AppBar, large-title URL header, inline selected-class row, two-tone task card, subdued XCSoar directory footer, and stacked dismissible download error banners; widget coverage added for selected-class and error-banner states
 - ✅ **Rename task download button** — button label changed from "Install XCSoar Task" to "Download task", loading state from "Installing..." to "Downloading...", and success SnackBar from "Default.tsk installed in XCSoar folder" to "Task downloaded"; widget tests and docs updated
+- ✅ **Task download version tracking and "New" badge** — `taskVersion` field added to `BookmarkedCompetition` (freezed) and `BookmarkedCompetitionModel` (HiveField 10); `recordTaskInstall` on repository interface and impl; `DownloadAndInstallTask` now takes `competitionId`/`version` and records the install; Task card shows a real "NEW UPDATE" `AppBadge` (mirrors the airspace/waypoints logic) using `TaskInfo.timestamp` vs. stored `taskVersion`; unit tests for use case and repository method, widget tests for badge show/hide; `docs/features/competitions.md` updated
 - 📋 `docs/features/tasks.md`
 
 ---

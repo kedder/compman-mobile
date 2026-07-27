@@ -8,7 +8,9 @@ import '../repositories/competitions_repository.dart';
 /// directory as `Default.tsk`.
 ///
 /// Steps: (1) download raw bytes via [CompetitionsRepository.downloadTask],
-/// (2) write to the SAF directory via [XcsoarSafService.writeFile].
+/// (2) write to the SAF directory via [XcsoarSafService.writeFile],
+/// (3) record the install version token via
+/// [CompetitionsRepository.recordTaskInstall].
 ///
 /// Returns [Right(unit)] on success. Returns [Left(Failure)] if the download
 /// fails. [PlatformException] from [XcsoarSafService] propagates to the
@@ -21,8 +23,14 @@ class DownloadAndInstallTask {
   final CompetitionsRepository _repo;
   final XcsoarSafService _safService;
 
-  /// Downloads the task at [taskUrl] and writes it as `Default.tsk`.
-  Future<Either<Failure, Unit>> call(String taskUrl) async {
+  /// Downloads the task at [taskUrl] for competition [competitionId] and
+  /// writes it as `Default.tsk`, then records [version] as the installed
+  /// task version.
+  Future<Either<Failure, Unit>> call({
+    required String competitionId,
+    required String taskUrl,
+    required String version,
+  }) async {
     final bytesResult = await _repo.downloadTask(taskUrl);
     if (bytesResult.isLeft()) {
       return Left(bytesResult.getLeft().toNullable()!);
@@ -31,6 +39,7 @@ class DownloadAndInstallTask {
       bytesResult.getRight().toNullable()!,
       'Default.tsk',
     );
+    await _repo.recordTaskInstall(competitionId, version);
     return const Right(unit);
   }
 }

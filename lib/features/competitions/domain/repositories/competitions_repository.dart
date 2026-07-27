@@ -73,4 +73,13 @@ abstract class CompetitionsRepository {
     DownloadableFileKind kind,
     String? version,
   );
+
+  /// Records the installed version token for a downloaded task.
+  ///
+  /// [version] is the raw [TaskInfo.timestamp] string captured at install
+  /// time.
+  Future<Either<Failure, Unit>> recordTaskInstall(
+    String competitionId,
+    String? version,
+  );
 }

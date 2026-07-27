@@ -53,8 +53,6 @@ final _tCompetition = BookmarkedCompetition(
   endDate: DateTime(2026, 3, 7),
 );
 
-final _selectedClassCompetition = _tCompetition.copyWith(selectedClass: 'Club');
-
 const _clubTask = TaskInfo(
   compClass: 'Club',
   title: '500km Triangle',
@@ -62,6 +60,11 @@ const _clubTask = TaskInfo(
   taskNo: 1,
   timestamp: '2026-07-14 09:30',
   taskUrl: 'https://example.com/task.tsk',
+);
+
+final _selectedClassCompetition = _tCompetition.copyWith(
+  selectedClass: 'Club',
+  taskVersion: _clubTask.timestamp,
 );
 
 // ---------------------------------------------------------------------------
@@ -160,7 +163,11 @@ class _ThrowingSafDownloadAndInstallTask extends DownloadAndInstallTask {
   final PlatformException _exception;
 
   @override
-  Future<Either<Failure, Unit>> call(String taskUrl) async => throw _exception;
+  Future<Either<Failure, Unit>> call({
+    required String competitionId,
+    required String taskUrl,
+    required String version,
+  }) async => throw _exception;
 }
 
 /// [DownloadAndInstallTask] that returns [Left(Failure)].
@@ -171,7 +178,11 @@ class _FailingDownloadAndInstallTask extends DownloadAndInstallTask {
   final Failure _failure;
 
   @override
-  Future<Either<Failure, Unit>> call(String taskUrl) async => Left(_failure);
+  Future<Either<Failure, Unit>> call({
+    required String competitionId,
+    required String taskUrl,
+    required String version,
+  }) async => Left(_failure);
 }
 
 class _RecordingSetCompetitionClass extends SetCompetitionClass {
@@ -338,6 +349,49 @@ void main() {
     expect(find.text('Download task'), findsOneWidget);
     expect(find.text('NEW UPDATE'), findsNothing);
   });
+
+  testWidgets('shows NEW UPDATE badge on task card when never downloaded', (
+    tester,
+  ) async {
+    // taskVersion is null → user has never downloaded a task.
+    final competition = _tCompetition.copyWith(selectedClass: 'Club');
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const ['Club'],
+          competition: competition,
+          tasks: const [_clubTask],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('NEW UPDATE'), findsOneWidget);
+  });
+
+  testWidgets(
+    'shows NEW UPDATE badge on task card when a newer task is published',
+    (tester) async {
+      final competition = _tCompetition.copyWith(
+        selectedClass: 'Club',
+        taskVersion: 'stale-version',
+      );
+      await tester.pumpWidget(
+        _buildApp(
+          _baseOverrides(
+            classes: const ['Club'],
+            competition: competition,
+            tasks: const [_clubTask],
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('NEW UPDATE'), findsOneWidget);
+    },
+  );
 
   testWidgets('appends a dismissible error banner when task download fails', (
     tester,

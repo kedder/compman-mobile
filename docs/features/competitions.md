@@ -44,6 +44,9 @@ class BookmarkedCompetition {
   final String? description;
   final DateTime? startDate;
   final DateTime? endDate;
+  final String? airspaceVersion; // version token of the last installed airspace file
+  final String? waypointsVersion; // version token of the last installed waypoints file
+  final String? taskVersion; // version token (task timestamp) of the last downloaded task
 }
 ```
 
@@ -138,10 +141,10 @@ Operations: `getAll()`, `getById(id)`, `save(model)`, `delete(id)`.
 - **Header:** Competition title in the large headline style and a primary-coloured `IconMetaRow` showing the SoaringSpot URL.
 - **Class selection:** If no class is chosen, fetches available class names from SoarScore and renders them as full-width tappable cards with a trophy icon and chevron. Tapping a class card persists the selection via `SetCompetitionClass` and refreshes the task section.
 - **Class display:** If a class is already set, shows a streamlined inline row with a `Class:` label, the selected class name, and a bordered "Change" button that clears the selection.
-- **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Renders the selected task in a `TwoToneCard`: header with `Day X - Task Y`, primary `IconMetaRow` route/title text, and footer metadata plus a full-width "Download task" button.
+- **Task section:** Fetches `FetchLatestTasks` and filters by the selected class. Renders the selected task in a `TwoToneCard`: header with `Day X - Task Y` and an optional "NEW UPDATE" badge, primary `IconMetaRow` route/title text, and footer metadata plus a full-width "Download task" button. Tapping "Download task" calls `DownloadAndInstallTask` via `downloadAndInstallTaskProvider`, writing `Default.tsk` and recording the task's timestamp as `BookmarkedCompetition.taskVersion`. On success, invalidates `bookmarkedCompetitionsProvider` + `competitionDetailProvider` so the badge disappears immediately.
 - **Airspace card:** Watches `downloadsProvider` and renders a `TwoToneCard` for the `.txt` (airspace) file. Header shows the section title "Airspace", an optional "NEW UPDATE" badge (`AppBadge` with error colour), and the filename + file size. Footer shows the last-published timestamp and a ghost "Download" / "Downloading…" button. Shows "No airspace file available" in muted text when no `.txt` entry is present.
 - **Waypoints card:** Same layout as the Airspace card but for the `.cup` (waypoints) file, with section title "Waypoints" and a location-pin icon.
-- **"NEW UPDATE" badge logic:** Shown when `DownloadableFileInfo.publishedVersion` is non-null and differs from the corresponding `airspaceVersion` / `waypointsVersion` stored on `BookmarkedCompetition` (string equality). Also shown when the stored version is `null`, meaning the file has never been installed.
+- **"NEW UPDATE" badge logic:** Shown when `DownloadableFileInfo.publishedVersion` is non-null and differs from the corresponding `airspaceVersion` / `waypointsVersion` stored on `BookmarkedCompetition` (string equality). Also shown when the stored version is `null`, meaning the file has never been installed. The Task card badge follows the same rule using `TaskInfo.timestamp` compared against `BookmarkedCompetition.taskVersion`.
 - **File download flow:** Tapping "Download" calls `DownloadAndInstallFile` via `downloadAndInstallFileProvider`. On success, shows a green SnackBar ("Airspace downloaded" / "Waypoints downloaded") and invalidates `bookmarkedCompetitionsProvider` + `competitionDetailProvider` so the badge disappears. Non-SAF `Failure` errors append stacked dismissible error banners.
 - **SAF_NOT_CONFIGURED flow:** When any download throws `PlatformException(code: 'SAF_NOT_CONFIGURED')`, the app navigates to `/settings/xcsoar-directory` (see **[docs/features/xcsoar.md](xcsoar.md)**) passing `?from=download&competitionId=<id>&kind=<kind>`. On return, if a SAF directory is now configured the pending download auto-resumes without user action; otherwise a dismissible error banner "XCSoar folder setup was cancelled" is shown.
 - **Download feedback:** Successful installs show a green confirmation SnackBar. Non-SAF download/install failures append stacked dismissible error banners fixed to the bottom of the screen.

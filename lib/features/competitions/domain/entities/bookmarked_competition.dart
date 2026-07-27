@@ -30,6 +30,12 @@ abstract class BookmarkedCompetition with _$BookmarkedCompetition {
 
     /// SoaringSpot version token of the last installed waypoints file.
     String? waypointsVersion,
+
+    /// Version token of the last installed task.
+    ///
+    /// Stored as the downloaded task's generation timestamp string at install
+    /// time. Null until a task has been downloaded.
+    String? taskVersion,
   }) = _BookmarkedCompetition;
 
   /// Computed status based on [startDate], [endDate], and today's date.
