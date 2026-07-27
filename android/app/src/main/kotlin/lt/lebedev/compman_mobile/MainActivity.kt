@@ -1,5 +1,6 @@
 package lt.lebedev.compman_mobile
 
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -55,6 +56,12 @@ class MainActivity : FlutterFragmentActivity() {
                         handleWriteFile(bytes, filename, result)
                     }
                     "listFlightLogs" -> handleListFlightLogs(result)
+                    "shareFlightLogs" -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val uris = call.argument<List<String>>("uris")!!
+                        val recipient = call.argument<String>("recipient")!!
+                        handleShareFlightLogs(uris, recipient, result)
+                    }
                     "getSafDirectoryUri" -> {
                         val uri = getSharedPreferences("compman_prefs", Context.MODE_PRIVATE)
                             .getString("xcsoar_tree_uri", null)
@@ -302,6 +309,27 @@ class MainActivity : FlutterFragmentActivity() {
             result.success(logs)
         } catch (e: Exception) {
             result.error("SAF_ERROR", e.message, null)
+        }
+    }
+
+    private fun handleShareFlightLogs(uris: List<String>, recipient: String, result: MethodChannel.Result) {
+        val parsedUris = uris.map { Uri.parse(it) }
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipient))
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(parsedUris))
+            clipData = ClipData.newUri(contentResolver, "Flight logs", parsedUris.first()).apply {
+                for (uri in parsedUris.drop(1)) {
+                    addItem(ClipData.Item(uri))
+                }
+            }
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(intent, "Send flight logs"))
+            result.success(null)
+        } catch (e: android.content.ActivityNotFoundException) {
+            result.error("NO_MAIL_APP", "No email app available", null)
         }
     }
 }

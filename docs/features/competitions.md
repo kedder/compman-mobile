@@ -171,6 +171,35 @@ this up before ever picking a class.
 Pulling to refresh, or using the refresh action in the app bar, re-checks for updated
 tasks and downloadable files without navigating away or losing the pilot's place.
 
+### Flight Log Screen — `/competitions/:id/flight-logs`
+
+Purpose: let the pilot review today's flight logs after landing and hand them off to
+their mail app for scoring, without leaving Compman to hunt for the files themselves.
+
+The screen lists every `.igc` file XCSoar recorded today, one row per flight, each with a
+checkbox and showing the exact on-disk filename — the pilot needs to see precisely what
+will be attached before it's sent, not a friendlier made-up label. Every row starts
+checked, since organizers usually want all of the day's flights and re-sending a log that
+was already sent is harmless if one gets missed.
+
+Below the list, a recipient email field is pre-filled from the address remembered for
+this competition the last time a log was sent successfully, but stays editable — the
+common case for changing it is correcting a mistake, so whatever is sent successfully
+becomes the new remembered address for next time. The field is required and must look
+like a valid email address.
+
+A full-width "Send" button hands the checked files off to the device's own mail app via a
+share/send intent, addressed to the recipient. It's disabled whenever nothing is checked
+or the email field is empty or invalid. Compman's involvement ends the moment the intent
+is launched — there's no in-app send confirmation, failure, or retry loop, since the mail
+app owns the actual sending from that point on. The only failure this screen handles
+itself is no mail app being available to receive the intent, shown as a plain inline
+message so the pilot isn't left wondering why nothing happened.
+
+If the screen is ever opened with no flight logs recorded for today (normally prevented
+by its entry point, but possible if the last log is removed while the screen is open), it
+shows a single plain sentence saying so instead of an empty list.
+
 ### XCSoar Directory Settings Screen — `/settings/xcsoar-directory`
 
 Setting up (or changing) the folder Compman uses to exchange files with XCSoar is a

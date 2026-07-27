@@ -18,6 +18,7 @@ import '../../features/competitions/domain/usecases/fetch_downloads.dart';
 import '../../features/competitions/domain/usecases/fetch_latest_tasks.dart';
 import '../../features/competitions/domain/usecases/get_todays_flight_logs.dart';
 import '../../features/competitions/domain/usecases/record_file_install.dart';
+import '../../features/competitions/domain/usecases/send_flight_logs.dart';
 import '../../features/competitions/domain/usecases/set_competition_class.dart';
 import '../../features/competitions/domain/usecases/set_competition_scoring_email.dart';
 import '../network/http_client.dart';
@@ -137,6 +138,14 @@ final downloadAndInstallTaskProvider = Provider<DownloadAndInstallTask>(
 /// Provides a [GetTodaysFlightLogs] use case instance.
 final getTodaysFlightLogsProvider = Provider<GetTodaysFlightLogs>(
   (ref) => GetTodaysFlightLogs(ref.read(xcsoarSafServiceProvider)),
+);
+
+/// Provides a [SendFlightLogs] use case instance.
+final sendFlightLogsProvider = Provider<SendFlightLogs>(
+  (ref) => SendFlightLogs(
+    ref.read(competitionsRepositoryProvider),
+    ref.read(xcsoarSafServiceProvider),
+  ),
 );
 
 /// Provides the app's [PackageInfo] metadata from the host platform.

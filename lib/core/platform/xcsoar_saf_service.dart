@@ -105,4 +105,17 @@ class XcsoarSafService {
         .map((m) => m.map((k, v) => MapEntry(k as String, v as String)))
         .toList();
   }
+
+  /// Launches the device's share/send intent (typically resolving to the
+  /// user's mail app) with [uris] attached and addressed to [recipient].
+  ///
+  /// Throws [PlatformException] with code `NO_MAIL_APP` if no app can handle
+  /// the intent.
+  Future<void> shareFlightLogs({
+    required List<String> uris,
+    required String recipient,
+  }) => _channel.invokeMethod<void>('shareFlightLogs', {
+    'uris': uris,
+    'recipient': recipient,
+  });
 }

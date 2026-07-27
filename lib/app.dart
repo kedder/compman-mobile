@@ -9,6 +9,7 @@ import 'core/theme/app_theme.dart';
 import 'features/competitions/presentation/screens/bookmarks_screen.dart';
 import 'features/competitions/presentation/screens/competition_detail_screen.dart';
 import 'features/competitions/presentation/screens/competition_list_screen.dart';
+import 'features/competitions/presentation/screens/flight_log_screen.dart';
 
 /// Root application widget with GoRouter-based navigation.
 class CompmanApp extends StatefulWidget {
@@ -70,6 +71,11 @@ GoRouter _buildRouter() => GoRouter(
       path: '/competitions/:id',
       builder: (context, state) =>
           CompetitionDetailScreen(competitionId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/competitions/:id/flight-logs',
+      builder: (context, state) =>
+          FlightLogScreen(competitionId: state.pathParameters['id']!),
     ),
     GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
     GoRoute(

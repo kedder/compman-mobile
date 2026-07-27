@@ -1,0 +1,220 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/di/providers.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../domain/entities/flight_log_file.dart';
+import '../providers/competitions_providers.dart';
+
+final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+/// Screen listing today's `.igc` flight log files for a competition, letting
+/// the pilot pick which ones to send and to which email address.
+///
+/// Reachable at `/competitions/:id/flight-logs`.
+class FlightLogScreen extends ConsumerStatefulWidget {
+  /// Creates the [FlightLogScreen].
+  const FlightLogScreen({super.key, required this.competitionId});
+
+  /// The SoaringSpot slug / SoarScore competition ID.
+  final String competitionId;
+
+  @override
+  ConsumerState<FlightLogScreen> createState() => _FlightLogScreenState();
+}
+
+class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
+  final _emailController = TextEditingController();
+
+  Set<String> _selectedFilenames = {};
+  bool _selectionInitialized = false;
+  bool _emailInitialized = false;
+  bool _sending = false;
+  String? _sendError;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  bool _isValidEmail(String value) => _emailRegex.hasMatch(value.trim());
+
+  Future<void> _send(List<FlightLogFile> files) async {
+    final selected = files
+        .where((f) => _selectedFilenames.contains(f.filename))
+        .toList();
+    final recipient = _emailController.text.trim();
+
+    setState(() {
+      _sending = true;
+      _sendError = null;
+    });
+    try {
+      final result = await ref.read(sendFlightLogsProvider)(
+        competitionId: widget.competitionId,
+        files: selected,
+        recipient: recipient,
+      );
+      if (!mounted) return;
+      result.fold(
+        (failure) => setState(() => _sendError = _failureMessage(failure)),
+        (_) {
+          ref.invalidate(bookmarkedCompetitionsProvider);
+          ref.invalidate(competitionDetailProvider(widget.competitionId));
+        },
+      );
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'NO_MAIL_APP') {
+        setState(
+          () => _sendError = 'No email app available to send flight logs.',
+        );
+      } else {
+        setState(() => _sendError = e.message ?? 'Send failed');
+      }
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final competitionAsync = ref.watch(
+      competitionDetailProvider(widget.competitionId),
+    );
+    competitionAsync.whenData((competition) {
+      if (!_emailInitialized && competition != null) {
+        _emailController.text = competition.scoringEmail ?? '';
+        _emailInitialized = true;
+      }
+    });
+
+    final logsAsync = ref.watch(todaysFlightLogsProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Flight Logs')),
+      body: logsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: _ErrorRetry(
+            message: _failureMessage(err),
+            onRetry: () => ref.invalidate(todaysFlightLogsProvider),
+          ),
+        ),
+        data: (files) {
+          if (files.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text('No flight logs found for today.'),
+              ),
+            );
+          }
+
+          if (!_selectionInitialized) {
+            _selectedFilenames = files.map((f) => f.filename).toSet();
+            _selectionInitialized = true;
+          }
+
+          final emailValid = _isValidEmail(_emailController.text);
+          final canSend =
+              _selectedFilenames.isNotEmpty && emailValid && !_sending;
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ListView(
+                    children: [
+                      for (final file in files)
+                        CheckboxListTile(
+                          title: Text(file.filename),
+                          value: _selectedFilenames.contains(file.filename),
+                          onChanged: (checked) => setState(() {
+                            _sendError = null;
+                            if (checked ?? false) {
+                              _selectedFilenames.add(file.filename);
+                            } else {
+                              _selectedFilenames.remove(file.filename);
+                            }
+                          }),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Recipient email',
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) => _isValidEmail(value ?? '')
+                      ? null
+                      : 'Enter a valid email address',
+                  onChanged: (_) => setState(() => _sendError = null),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: canSend ? () => _send(files) : null,
+                    style: AppButtonStyles.primary(context),
+                    child: const Text('Send'),
+                  ),
+                ),
+                if (_sendError != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _sendError!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Shared error + retry widget, mirroring
+/// `competition_detail_screen.dart`'s `_ErrorRetry`.
+class _ErrorRetry extends StatelessWidget {
+  const _ErrorRetry({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(message, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 8),
+        OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+      ],
+    );
+  }
+}
+
+String _failureMessage(Object err) {
+  if (err is Failure) {
+    return switch (err) {
+      NetworkFailure(:final message) => message,
+      ParseFailure(:final message) => message,
+      StorageFailure(:final message) => message,
+    };
+  }
+  return err.toString();
+}
