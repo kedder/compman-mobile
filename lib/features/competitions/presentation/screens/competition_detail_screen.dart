@@ -810,7 +810,7 @@ class _AirspaceCard extends ConsumerWidget {
           downloadKind: _DownloadKind.airspace,
           sectionTitle: 'Airspace',
           sectionIcon: Icons.public,
-          successMessage: 'Airspace downloaded',
+          successMessagePrefix: 'Airspace downloaded as ',
         );
       },
     );
@@ -855,7 +855,7 @@ class _WaypointsCard extends ConsumerWidget {
           downloadKind: _DownloadKind.waypoints,
           sectionTitle: 'Waypoints',
           sectionIcon: Icons.location_on_outlined,
-          successMessage: 'Waypoints downloaded',
+          successMessagePrefix: 'Waypoints downloaded as ',
         );
       },
     );
@@ -874,7 +874,7 @@ class _FileDownloadCard extends ConsumerStatefulWidget {
     required this.downloadKind,
     required this.sectionTitle,
     required this.sectionIcon,
-    required this.successMessage,
+    required this.successMessagePrefix,
   });
 
   final String competitionId;
@@ -887,7 +887,11 @@ class _FileDownloadCard extends ConsumerStatefulWidget {
   final _DownloadKind downloadKind;
   final String sectionTitle;
   final IconData sectionIcon;
-  final String successMessage;
+
+  /// Prefixed to the on-device filename returned by
+  /// [downloadAndInstallFileProvider] to build the confirmation SnackBar
+  /// text, e.g. `'Airspace downloaded as '` + `'compman-airspace.txt'`.
+  final String successMessagePrefix;
 
   @override
   ConsumerState<_FileDownloadCard> createState() => _FileDownloadCardState();
@@ -917,10 +921,10 @@ class _FileDownloadCardState extends ConsumerState<_FileDownloadCard>
       result.fold(
         (f) =>
             ref.read(_downloadErrorsProvider.notifier).add(_failureMessage(f)),
-        (_) {
+        (filename) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(widget.successMessage),
+              content: Text('${widget.successMessagePrefix}$filename'),
               backgroundColor: context.appColors.success,
             ),
           );

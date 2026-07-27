@@ -10,6 +10,10 @@ published as the "What's New" text on the Google Play Store listing.
 - Fly XCSoar button on task cards to launch a downloaded task straight into XCSoar
 - "New" badge on tasks that changed since you last downloaded them
 
+### Changed
+
+- Show the on-device filename when an airspace or waypoints file finishes downloading
+
 ## 0.2.0 - 2026-05-10
 
 ### Added

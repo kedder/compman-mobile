@@ -67,39 +67,37 @@ void main() {
   });
 
   group('DownloadAndInstallFile — airspace', () {
-    test(
-      'downloads bytes, writes compman-airspace.txt, records install, returns Right(unit)',
-      () async {
-        when(
-          mockRepository.downloadFile(tAirspaceFile.downloadUrl),
-        ).thenAnswer((_) async => Right(tBytes));
-        when(
-          mockRepository.recordFileInstall(
-            tCompetitionId,
-            DownloadableFileKind.airspace,
-            tAirspaceFile.publishedVersion,
-          ),
-        ).thenAnswer((_) async => const Right(unit));
+    test('downloads bytes, writes compman-airspace.txt, records install, '
+        "returns Right('compman-airspace.txt')", () async {
+      when(
+        mockRepository.downloadFile(tAirspaceFile.downloadUrl),
+      ).thenAnswer((_) async => Right(tBytes));
+      when(
+        mockRepository.recordFileInstall(
+          tCompetitionId,
+          DownloadableFileKind.airspace,
+          tAirspaceFile.publishedVersion,
+        ),
+      ).thenAnswer((_) async => const Right(unit));
 
-        final useCase = DownloadAndInstallFile(mockRepository, recordingSaf);
-        final result = await useCase.call(
-          competitionId: tCompetitionId,
-          fileInfo: tAirspaceFile,
-        );
+      final useCase = DownloadAndInstallFile(mockRepository, recordingSaf);
+      final result = await useCase.call(
+        competitionId: tCompetitionId,
+        fileInfo: tAirspaceFile,
+      );
 
-        expect(result, const Right<Failure, Unit>(unit));
-        expect(recordingSaf.calls, hasLength(1));
-        expect(recordingSaf.calls.first.$2, 'compman-airspace.txt');
-        expect(recordingSaf.calls.first.$1, tBytes);
-        verify(
-          mockRepository.recordFileInstall(
-            tCompetitionId,
-            DownloadableFileKind.airspace,
-            tAirspaceFile.publishedVersion,
-          ),
-        ).called(1);
-      },
-    );
+      expect(result, const Right<Failure, String>('compman-airspace.txt'));
+      expect(recordingSaf.calls, hasLength(1));
+      expect(recordingSaf.calls.first.$2, 'compman-airspace.txt');
+      expect(recordingSaf.calls.first.$1, tBytes);
+      verify(
+        mockRepository.recordFileInstall(
+          tCompetitionId,
+          DownloadableFileKind.airspace,
+          tAirspaceFile.publishedVersion,
+        ),
+      ).called(1);
+    });
   });
 
   group('DownloadAndInstallFile — waypoints', () {
@@ -117,7 +115,7 @@ void main() {
         fileInfo: tWaypointsFile,
       );
 
-      expect(result, const Right<Failure, Unit>(unit));
+      expect(result, const Right<Failure, String>('compman-waypoints.cup'));
       expect(recordingSaf.calls.first.$2, 'compman-waypoints.cup');
       verify(
         mockRepository.recordFileInstall(
@@ -142,7 +140,7 @@ void main() {
         fileInfo: tAirspaceFile,
       );
 
-      expect(result, const Left<Failure, Unit>(failure));
+      expect(result, const Left<Failure, String>(failure));
       expect(recordingSaf.calls, isEmpty);
       verifyNever(mockRepository.recordFileInstall(any, any, any));
     });

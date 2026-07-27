@@ -125,10 +125,10 @@ class _CompleterDownloadAndInstallFile extends DownloadAndInstallFile {
   _CompleterDownloadAndInstallFile(this._future)
     : super(MockCompetitionsRepository(), _NoOpSafService());
 
-  final Future<Either<Failure, Unit>> _future;
+  final Future<Either<Failure, String>> _future;
 
   @override
-  Future<Either<Failure, Unit>> call({
+  Future<Either<Failure, String>> call({
     required String competitionId,
     required DownloadableFileInfo fileInfo,
   }) => _future;
@@ -141,7 +141,7 @@ class _ThrowingSafDownloadAndInstallFile extends DownloadAndInstallFile {
   final PlatformException _exception;
 
   @override
-  Future<Either<Failure, Unit>> call({
+  Future<Either<Failure, String>> call({
     required String competitionId,
     required DownloadableFileInfo fileInfo,
   }) async {
@@ -588,7 +588,7 @@ void main() {
   );
 
   testWidgets('Download button is disabled while downloading', (tester) async {
-    final completer = Completer<Either<Failure, Unit>>();
+    final completer = Completer<Either<Failure, String>>();
 
     final stubbedUseCase = _CompleterDownloadAndInstallFile(completer.future);
     await tester.pumpWidget(
@@ -614,8 +614,58 @@ void main() {
     );
     expect(button.onPressed, isNull);
 
-    completer.complete(const Right(unit));
+    completer.complete(const Right('compman-airspace.txt'));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('shows on-device filename in airspace download confirmation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(classes: const [], downloads: const [tAirspaceFile]),
+        downloadAndInstallFileProvider.overrideWithValue(
+          _CompleterDownloadAndInstallFile(
+            Future.value(const Right('compman-airspace.txt')),
+          ),
+        ),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Download'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Airspace downloaded as compman-airspace.txt'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows on-device filename in waypoints download confirmation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp([
+        ..._baseOverrides(classes: const [], downloads: const [tWaypointsFile]),
+        downloadAndInstallFileProvider.overrideWithValue(
+          _CompleterDownloadAndInstallFile(
+            Future.value(const Right('compman-waypoints.cup')),
+          ),
+        ),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Download'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Waypoints downloaded as compman-waypoints.cup'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('SAF_NOT_CONFIGURED on airspace download navigates to settings', (
