@@ -32,14 +32,21 @@ it refresh when the app resumes from the background (not just on fresh navigatio
 
 ### 1. Placement
 
-Read the current `_CompetitionDetailBody.build` method first — its `ListView` currently
-renders, in order: `_HeaderSection`, `_ClassSection` (which internally renders the Task
-card), then, only `if (competition.selectedClass != null)`, `_AirspaceCard` and
-`_WaypointsCard`, then a `Divider` and `_XcsoarDirectoryRow`.
+**Note:** `competition_detail_screen.dart` has since been split up — it is now a thin
+orchestrator (`CompetitionDetailScreen` + the private `_CompetitionDetailBody`) that
+composes widgets from `lib/features/competitions/presentation/widgets/competition_detail/`.
+Read `_CompetitionDetailBody.build` in `competition_detail_screen.dart` first — its
+`ListView` currently renders, in order: `HeaderSection` (from `header_section.dart`),
+`ClassSection` (from `class_section.dart`, which internally renders the Task card via
+`task_section.dart`), then, only `if (competition.selectedClass != null)`, `AirspaceCard`
+and `WaypointsCard` (both from `file_download_card.dart`), then a `Divider` and
+`XcsoarDirectoryRow` (from `xcsoar_directory_row.dart`). All of these are now public
+classes (no leading underscore) so they can live in separate files — follow the same
+convention for the new panel widget.
 
 Insert the new Flight Logs panel **after** that `if (competition.selectedClass != null)`
 block (i.e. it is a sibling of that block, not inside its `if`), and **before** the final
-`Divider`/`_XcsoarDirectoryRow`. Unlike the Airspace/Waypoints cards, the Flight Logs panel
+`Divider`/`XcsoarDirectoryRow`. Unlike the Airspace/Waypoints cards, the Flight Logs panel
 is **not** gated by class selection — it always renders regardless of whether a class has
 been picked yet. (This is intentionally different from the class-selection gate implemented
 per `issues/userstories/2026-07-25-hide-download-panels-before-class-selection.md` — that
@@ -47,14 +54,20 @@ gate is unrelated to this panel; see the story's "Related stories" section for w
 
 ### 2. Panel widget
 
-New private widget in `competition_detail_screen.dart` (or split into its own file under
-`lib/features/competitions/presentation/widgets/` if you find that cleaner — follow whichever
-convention keeps the file sizes reasonable; other cards for this screen currently live
-inline as private widgets in the screen file itself, so inline is the path of least
-resistance).
+New widget in
+`lib/features/competitions/presentation/widgets/competition_detail/flight_logs_panel.dart`,
+following the convention established by the sibling files in that same folder (public,
+non-underscore class name; see `header_section.dart` or `xcsoar_directory_row.dart` for the
+simplest examples to mirror). Import it into `competition_detail_screen.dart`'s
+`_CompetitionDetailBody` alongside the other `widgets/competition_detail/` imports already
+there. If the panel needs any of the cross-widget internals in
+`widgets/competition_detail/shared.dart` (e.g. `downloadErrorsProvider`) — it shouldn't, per
+the Error state below, but check if your implementation ends up needing something — import
+`shared.dart` rather than duplicating.
 
-Watches `todaysFlightLogsProvider` (from issue 1 — do not create a duplicate/local version of
-this provider).
+Watches `todaysFlightLogsProvider` (from issue 1, exposed via
+`lib/features/competitions/presentation/providers/competitions_providers.dart` — do not
+create a duplicate/local version of this provider).
 
 **Visual treatment:** the story asks for the same surface/border/elevation treatment as the
 Airspace/Waypoints cards (`Card` on `surface-container-lowest` with a 1dp `outline-variant`
@@ -70,7 +83,8 @@ region, no separate section-title header row (the story's own example is just
 **States:**
 
 - **Loading:** small `Center(child: CircularProgressIndicator())`, matching how
-  `_AirspaceCard`/`_WaypointsCard` handle their own `downloadsProvider` loading state
+  `AirspaceCard`/`WaypointsCard` (in `file_download_card.dart`) handle their own
+  `downloadsProvider` loading state
   (`skipLoadingOnReload: true` on the `.when(...)` so pull-to-refresh/app-resume reloads
   don't flash a spinner over existing content).
 - **Error (including `SAF_NOT_CONFIGURED`):** unlike the Airspace/Waypoints download errors
@@ -82,7 +96,7 @@ region, no separate section-title header row (the story's own example is just
   show a dismissible error banner or force navigation to XCSoar folder setup; this panel
   should never interrupt the pilot).
 - **Zero files:** muted text, exact style/color already used for `"No airspace file
-  available"` / `"No waypoint file available"` in `_AirspaceCard`/`_WaypointsCard` (`Text`
+  available"` / `"No waypoint file available"` in `AirspaceCard`/`WaypointsCard` (`Text`
   with `theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)`). Copy:
   `"No flight logs recorded today"`. **No button, no tappable action** — this state has no
   way into the Flight Log screen (confirmed decision; see the correction note at the top of
@@ -109,8 +123,8 @@ its mixins, register it in `initState` (`WidgetsBinding.instance.addObserver(thi
 unregister in `dispose` (`WidgetsBinding.instance.removeObserver(this)`, remembering to
 still call `super.dispose()`). Override `didChangeAppLifecycleState`: when the new state is
 `AppLifecycleState.resumed`, call `ref.invalidate(todaysFlightLogsProvider)` (guard with a
-`mounted` check, matching the existing guard style used elsewhere in this file, e.g. in
-`_navigateToSettings`).
+`mounted` check, matching the existing guard style used elsewhere, e.g. `navigateToSettings`
+in `widgets/competition_detail/shared.dart`'s `SafNavigationMixin`).
 
 Do not touch any other providers in this lifecycle callback — only
 `todaysFlightLogsProvider` needs the resume-triggered refresh; the rest of the screen
@@ -157,7 +171,7 @@ are already faked in that file). Cover:
 - `files.length > 1` → plural "N flight logs recorded" text.
 - Zero files → muted "No flight logs recorded today" text, and no "Email" button present.
 - A `SAF_NOT_CONFIGURED`/other error from the provider → same muted empty-state text (no
-  error banner appended to `_downloadErrorsProvider`).
+  error banner appended to `downloadErrorsProvider`).
 - Tapping "Email" navigates to `/competitions/:id/flight-logs` (register a stub route in the
   test's `GoRouter`, matching how the test file already stubs `/settings/xcsoar-directory`).
 - Panel renders regardless of whether `competition.selectedClass` is null or set (i.e. not
