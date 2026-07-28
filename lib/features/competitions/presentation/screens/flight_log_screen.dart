@@ -148,36 +148,44 @@ class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Recipient email',
+                SafeArea(
+                  top: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Recipient email',
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) => _isValidEmail(value ?? '')
+                            ? null
+                            : 'Enter a valid email address',
+                        onChanged: (_) => setState(() => _sendError = null),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: canSend ? () => _send(files) : null,
+                          style: AppButtonStyles.primary(context),
+                          child: const Text('Send'),
+                        ),
+                      ),
+                      if (_sendError != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _sendError!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) => _isValidEmail(value ?? '')
-                      ? null
-                      : 'Enter a valid email address',
-                  onChanged: (_) => setState(() => _sendError = null),
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: canSend ? () => _send(files) : null,
-                    style: AppButtonStyles.primary(context),
-                    child: const Text('Send'),
-                  ),
-                ),
-                if (_sendError != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _sendError!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ],
               ],
             ),
           );
