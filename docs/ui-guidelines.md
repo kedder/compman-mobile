@@ -44,7 +44,7 @@ The app uses **Inter** as its primary typeface. Type scale and weights are defin
 This is the most critical dimension of the design.
 
 - **Minimum touch target: 48 × 48 dp** (Material baseline). Prefer 56 dp for primary actions.
-- Full-width action buttons (e.g. primary CTAs on detail screens) must be at least **64 dp tall**.
+- Full-width action buttons (e.g. primary CTAs on detail screens) must be at least **48 dp tall**, and all full-width buttons on the same screen must share a consistent height.
 - Icon buttons must be wrapped in a hit area of at least 48 × 48 dp — the icon itself (24 dp) is not a sufficient target.
 - `ListTile` rows are acceptable at their default height (56 dp). Do not reduce list row height.
 - Avoid placing two tappable elements within 8 dp of each other.
