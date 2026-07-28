@@ -134,6 +134,25 @@ abstract final class AppButtonStyles {
     );
   }
 
+  /// Full-width white/outlined button — used for secondary-weight CTAs that
+  /// still need a comfortable, easy-to-hit target (e.g. "Email flight
+  /// logs"), sized to match the full-width "Download task" button.
+  static ButtonStyle outlinedFullWidth(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return OutlinedButton.styleFrom(
+      foregroundColor: primary,
+      backgroundColor: Colors.white,
+      side: BorderSide(color: primary.withValues(alpha: 0.3)),
+      minimumSize: const Size.fromHeight(48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      textStyle: const TextStyle(
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.w600,
+        fontSize: 16,
+      ),
+    );
+  }
+
   /// Ghost/utility button for secondary file-operation actions.
   static ButtonStyle ghost(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;

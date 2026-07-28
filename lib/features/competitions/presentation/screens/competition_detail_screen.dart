@@ -35,16 +35,31 @@ class CompetitionDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CompetitionDetailScreenState
-    extends ConsumerState<CompetitionDetailScreen> {
+    extends ConsumerState<CompetitionDetailScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // whenData is a no-op when the provider is still AsyncLoading (e.g. in
     // widget tests that do not override settingsBoxProvider), avoiding any
     // platform-channel calls or FakeAsync deadlocks.
     ref.read(settingsBoxProvider).whenData((box) {
       LastViewedLocalDataSource(box).writeLastViewedId(widget.competitionId);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      ref.invalidate(todaysFlightLogsProvider);
+    }
   }
 
   @override
@@ -78,6 +93,7 @@ class _CompetitionDetailScreenState
               onPressed: () {
                 ref.invalidate(latestTasksProvider(widget.competitionId));
                 ref.invalidate(downloadsProvider(widget.competitionId));
+                ref.invalidate(todaysFlightLogsProvider);
               },
             ),
         ],
@@ -117,6 +133,7 @@ class _CompetitionDetailBody extends ConsumerWidget {
       onRefresh: () async {
         ref.invalidate(latestTasksProvider(competitionId));
         ref.invalidate(downloadsProvider(competitionId));
+        ref.invalidate(todaysFlightLogsProvider);
         await Future.wait([
           ref
               .read(latestTasksProvider(competitionId).future)

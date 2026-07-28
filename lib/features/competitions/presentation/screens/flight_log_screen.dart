@@ -133,12 +133,12 @@ class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
                   child: ListView(
                     children: [
                       for (final file in files)
-                        CheckboxListTile(
-                          title: Text(file.filename),
-                          value: _selectedFilenames.contains(file.filename),
+                        _FlightLogCheckboxRow(
+                          filename: file.filename,
+                          checked: _selectedFilenames.contains(file.filename),
                           onChanged: (checked) => setState(() {
                             _sendError = null;
-                            if (checked ?? false) {
+                            if (checked) {
                               _selectedFilenames.add(file.filename);
                             } else {
                               _selectedFilenames.remove(file.filename);
@@ -182,6 +182,43 @@ class _FlightLogScreenState extends ConsumerState<FlightLogScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// A single file row: a checkbox flush with the screen's left padding (to
+/// line up with the recipient email field and Send button below) followed
+/// by the raw filename.
+class _FlightLogCheckboxRow extends StatelessWidget {
+  const _FlightLogCheckboxRow({
+    required this.filename,
+    required this.checked,
+    required this.onChanged,
+  });
+
+  final String filename;
+  final bool checked;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onChanged(!checked),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Checkbox(
+              value: checked,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+              onChanged: (value) => onChanged(value ?? false),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(filename)),
+          ],
+        ),
       ),
     );
   }

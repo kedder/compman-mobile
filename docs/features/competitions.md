@@ -171,6 +171,23 @@ this up before ever picking a class.
 Pulling to refresh, or using the refresh action in the app bar, re-checks for updated
 tasks and downloadable files without navigating away or losing the pilot's place.
 
+#### Flight logs
+
+A summary showing how many flight logs XCSoar has recorded today sits at the bottom of
+the task card, below the Fly XCSoar button — the natural place to look right after
+landing and putting the task away. When at least one log exists, a full-width "Email
+flight logs" button opens the Flight Log screen (below) to review and send them.
+
+Checking for today's logs is a passive background check, not something the pilot asked
+for — so nothing about it should interrupt them. If the check fails for any reason,
+including XCSoar's folder never having been set up, the summary just falls back to the
+same muted "no logs yet" text a genuinely empty day would show, rather than surfacing an
+error or forcing the pilot into folder setup they didn't ask for.
+
+The summary also refreshes on its own whenever the pilot returns to this screen after
+backgrounding Compman — for example after switching to XCSoar to fly and switching back —
+so a newly-landed flight's log shows up without a manual pull-to-refresh.
+
 ### Flight Log Screen — `/competitions/:id/flight-logs`
 
 Purpose: let the pilot review today's flight logs after landing and hand them off to

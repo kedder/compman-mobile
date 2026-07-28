@@ -6,10 +6,12 @@ import 'dart:io';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
+import 'package:compman_mobile/features/competitions/domain/entities/flight_log_file.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/presentation/providers/competitions_providers.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/bookmarks_screen.dart';
 import 'package:compman_mobile/features/competitions/presentation/screens/competition_detail_screen.dart';
+import 'package:compman_mobile/features/competitions/presentation/screens/flight_log_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,6 +90,15 @@ final _bookmarks = [
 
 const _compId = 'alpine-2026';
 
+const _task = TaskInfo(
+  compClass: 'Standard',
+  title: '250km FAI Triangle',
+  dayNo: 3,
+  taskNo: 1,
+  timestamp: '2026-07-03 09:15',
+  taskUrl: 'https://example.com/task.tsk',
+);
+
 final _competition = BookmarkedCompetition(
   id: _compId,
   title: 'Alpine Open 2026',
@@ -96,15 +107,9 @@ final _competition = BookmarkedCompetition(
   startDate: DateTime(2026, 7, 1),
   endDate: DateTime(2026, 7, 10),
   selectedClass: 'Standard',
-);
-
-const _task = TaskInfo(
-  compClass: 'Standard',
-  title: '250km FAI Triangle',
-  dayNo: 3,
-  taskNo: 1,
-  timestamp: '2026-07-03 09:15',
-  taskUrl: 'https://example.com/task.tsk',
+  // Matches _task.timestamp so the task shows as up to date (no "NEW
+  // UPDATE" badge) and the Fly XCSoar button is visible in screenshots.
+  taskVersion: _task.timestamp,
 );
 
 const _airspaceFile = DownloadableFileInfo(
@@ -121,6 +126,21 @@ const _waypointsFile = DownloadableFileInfo(
   kind: DownloadableFileKind.waypoints,
   fileSize: 48000,
   publishedVersion: '01/07/2026, 08:00',
+);
+
+const _flightLogs = [
+  FlightLogFile(
+    filename: '2026-07-03-XCS-ALP-01.igc',
+    uri: 'content://com.example.xcsoar/logs%2F2026-07-03-XCS-ALP-01.igc',
+  ),
+  FlightLogFile(
+    filename: '2026-07-03-XCS-ALP-02.igc',
+    uri: 'content://com.example.xcsoar/logs%2F2026-07-03-XCS-ALP-02.igc',
+  ),
+];
+
+final _competitionWithScoringEmail = _competition.copyWith(
+  scoringEmail: 'scoring@alpineopen.example',
 );
 
 // ---------------------------------------------------------------------------
@@ -202,6 +222,38 @@ Widget _buildDetailApp() {
       downloadsProvider(
         _compId,
       ).overrideWith((ref) async => const [_airspaceFile, _waypointsFile]),
+      todaysFlightLogsProvider.overrideWith((ref) async => _flightLogs),
+      activeFlavorPackageIdProvider.overrideWith((ref) async => 'org.xcsoar'),
+    ],
+    child: MaterialApp.router(
+      routerConfig: router,
+      theme: AppTheme.light(),
+      debugShowCheckedModeBanner: false,
+    ),
+  );
+}
+
+Widget _buildFlightLogApp() {
+  final router = GoRouter(
+    initialLocation: '/competitions/$_compId/flight-logs',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, __) => const Scaffold(body: Text('Home')),
+      ),
+      GoRoute(
+        path: '/competitions/:id/flight-logs',
+        builder: (_, __) => const FlightLogScreen(competitionId: _compId),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      competitionDetailProvider(
+        _compId,
+      ).overrideWith((ref) async => _competitionWithScoringEmail),
+      todaysFlightLogsProvider.overrideWith((ref) async => _flightLogs),
     ],
     child: MaterialApp.router(
       routerConfig: router,
@@ -262,8 +314,20 @@ void main() {
       _setSize(tester, _phoneSz, _phoneDpr);
       await tester.pumpWidget(_buildDetailApp());
       await tester.pump();
-      await tester.pump();
+      // Settles the Fly XCSoar button's disabled→enabled transition
+      // animation (it starts disabled while activeFlavorPackageIdProvider
+      // is still loading) so its foreground colour is fully white, not
+      // mid-fade, in the captured golden.
+      await tester.pumpAndSettle();
       await _capture(tester, 'phone-2');
+    });
+
+    testWidgets('phone-3 · flight logs', (tester) async {
+      _setSize(tester, _phoneSz, _phoneDpr);
+      await tester.pumpWidget(_buildFlightLogApp());
+      await tester.pump();
+      await tester.pump();
+      await _capture(tester, 'phone-3');
     });
   });
 
@@ -279,7 +343,11 @@ void main() {
       _setSize(tester, _tablet7Sz, _tablet7Dpr);
       await tester.pumpWidget(_buildDetailApp());
       await tester.pump();
-      await tester.pump();
+      // Settles the Fly XCSoar button's disabled→enabled transition
+      // animation (it starts disabled while activeFlavorPackageIdProvider
+      // is still loading) so its foreground colour is fully white, not
+      // mid-fade, in the captured golden.
+      await tester.pumpAndSettle();
       await _capture(tester, 'tablet-7in-2');
     });
   });
@@ -296,7 +364,11 @@ void main() {
       _setSize(tester, _tablet10Sz, _tablet10Dpr);
       await tester.pumpWidget(_buildDetailApp());
       await tester.pump();
-      await tester.pump();
+      // Settles the Fly XCSoar button's disabled→enabled transition
+      // animation (it starts disabled while activeFlavorPackageIdProvider
+      // is still loading) so its foreground colour is fully white, not
+      // mid-fade, in the captured golden.
+      await tester.pumpAndSettle();
       await _capture(tester, 'tablet-10in-2');
     });
   });

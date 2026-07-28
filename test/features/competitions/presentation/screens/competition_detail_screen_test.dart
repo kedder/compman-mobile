@@ -6,6 +6,7 @@ import 'package:compman_mobile/core/platform/xcsoar_saf_service.dart';
 import 'package:compman_mobile/core/theme/app_theme.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/bookmarked_competition.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/downloadable_file_info.dart';
+import 'package:compman_mobile/features/competitions/domain/entities/flight_log_file.dart';
 import 'package:compman_mobile/features/competitions/domain/entities/task_info.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_and_install_file.dart';
 import 'package:compman_mobile/features/competitions/domain/usecases/download_and_install_task.dart';
@@ -86,6 +87,13 @@ Widget _buildApp(List<Override> overrides) {
           body: Text('kind=${state.uri.queryParameters['kind'] ?? ''}'),
         ),
       ),
+      GoRoute(
+        path: '/competitions/:id/flight-logs',
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(title: const Text('Flight Logs')),
+          body: Text('flight-logs-for=${state.pathParameters['id']}'),
+        ),
+      ),
     ],
   );
 
@@ -103,6 +111,9 @@ List<Override> _baseOverrides({
   List<TaskInfo> tasks = const <TaskInfo>[],
   List<DownloadableFileInfo> downloads = const <DownloadableFileInfo>[],
   String? xcsoarDirectoryUri,
+  List<FlightLogFile> flightLogs = const <FlightLogFile>[],
+  Object? flightLogsError,
+  void Function()? onFlightLogsFetch,
 }) {
   final resolvedCompetition = competition ?? _tCompetition;
 
@@ -116,6 +127,11 @@ List<Override> _baseOverrides({
     xcsoarDirectoryUriProvider.overrideWith((ref) async => xcsoarDirectoryUri),
     latestTasksProvider(_competitionId).overrideWith((ref) async => tasks),
     downloadsProvider(_competitionId).overrideWith((ref) async => downloads),
+    todaysFlightLogsProvider.overrideWith((ref) async {
+      onFlightLogsFetch?.call();
+      if (flightLogsError != null) throw flightLogsError;
+      return flightLogs;
+    }),
   ];
 }
 
@@ -289,6 +305,7 @@ void main() {
       downloadsProvider(
         _competitionId,
       ).overrideWith((ref) async => <DownloadableFileInfo>[]),
+      todaysFlightLogsProvider.overrideWith((ref) async => <FlightLogFile>[]),
     ];
 
     await tester.pumpWidget(_buildApp(overrides));
@@ -1049,4 +1066,171 @@ void main() {
       expect(find.byTooltip('Dismiss error'), findsOneWidget);
     },
   );
+
+  // ---------------------------------------------------------------------------
+  // Flight Logs panel tests
+  //
+  // The panel lives inside the Task card footer (below the Fly button), so
+  // it only renders once a class is selected and that class's task has
+  // loaded — see _baseOverrides(classes: ['Club'], competition:
+  // _selectedClassCompetition, tasks: [_clubTask]) below.
+  // ---------------------------------------------------------------------------
+
+  const tFlightLog1 = FlightLogFile(
+    filename: '2026-07-28-XCS-WUX-01.igc',
+    uri: 'content://tree/logs%2F2026-07-28-XCS-WUX-01.igc',
+  );
+
+  const tFlightLog2 = FlightLogFile(
+    filename: '2026-07-28-XCS-WUX-02.igc',
+    uri: 'content://tree/logs%2F2026-07-28-XCS-WUX-02.igc',
+  );
+
+  /// Base overrides for a competition with a selected class and loaded task,
+  /// so the Task card (and the [FlightLogsPanel] embedded in its footer)
+  /// renders.
+  List<Override> baseOverridesWithTask({
+    List<FlightLogFile> flightLogs = const <FlightLogFile>[],
+    Object? flightLogsError,
+    void Function()? onFlightLogsFetch,
+  }) => _baseOverrides(
+    classes: const ['Club'],
+    competition: _selectedClassCompetition,
+    tasks: const [_clubTask],
+    flightLogs: flightLogs,
+    flightLogsError: flightLogsError,
+    onFlightLogsFetch: onFlightLogsFetch,
+  );
+
+  testWidgets('shows singular text for a single flight log', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(baseOverridesWithTask(flightLogs: const [tFlightLog1])),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('1 flight log recorded'), findsOneWidget);
+    expect(find.text('Email flight logs'), findsOneWidget);
+  });
+
+  testWidgets('shows plural text for multiple flight logs', (tester) async {
+    await tester.pumpWidget(
+      _buildApp(
+        baseOverridesWithTask(flightLogs: const [tFlightLog1, tFlightLog2]),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('2 flight logs recorded'), findsOneWidget);
+  });
+
+  testWidgets(
+    'shows muted empty-state text and no Email button for zero flight logs',
+    (tester) async {
+      await tester.pumpWidget(_buildApp(baseOverridesWithTask()));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('No flight logs recorded today'), findsOneWidget);
+      expect(find.text('Email flight logs'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows muted empty-state text (no error banner) when todaysFlightLogsProvider throws',
+    (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          baseOverridesWithTask(
+            flightLogsError: PlatformException(code: 'SAF_NOT_CONFIGURED'),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('No flight logs recorded today'), findsOneWidget);
+      expect(find.text('Email flight logs'), findsNothing);
+      expect(find.byTooltip('Dismiss error'), findsNothing);
+    },
+  );
+
+  testWidgets('tapping Email navigates to the Flight Log screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(baseOverridesWithTask(flightLogs: const [tFlightLog1])),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Email flight logs'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('flight-logs-for=$_competitionId'), findsOneWidget);
+  });
+
+  testWidgets('Flight log summary is hidden before a class is selected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildApp(
+        _baseOverrides(
+          classes: const [],
+          competition: _tCompetition,
+          flightLogs: const [tFlightLog1],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('1 flight log recorded'), findsNothing);
+  });
+
+  /// [baseOverridesWithTask] overrides, counting [todaysFlightLogsProvider]
+  /// fetches via [onCall].
+  List<Override> overridesCountingFlightLogsCalls(void Function() onCall) =>
+      baseOverridesWithTask(onFlightLogsFetch: onCall);
+
+  testWidgets('pull-to-refresh invalidates todaysFlightLogsProvider', (
+    tester,
+  ) async {
+    var callCount = 0;
+    await tester.pumpWidget(
+      _buildApp(overridesCountingFlightLogsCalls(() => callCount++)),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(callCount, 1);
+
+    await tester.fling(find.byType(ListView), const Offset(0, 300), 1000);
+    await tester.pumpAndSettle();
+
+    expect(callCount, 2);
+  });
+
+  testWidgets('app resume invalidates todaysFlightLogsProvider', (
+    tester,
+  ) async {
+    var callCount = 0;
+    await tester.pumpWidget(
+      _buildApp(overridesCountingFlightLogsCalls(() => callCount++)),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(callCount, 1);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump();
+
+    expect(callCount, 2);
+  });
 }

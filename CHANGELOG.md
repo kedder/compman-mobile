@@ -9,6 +9,8 @@ published as the "What's New" text on the Google Play Store listing.
 
 - Fly XCSoar button on task cards to launch a downloaded task straight into XCSoar
 - "New" badge on tasks that changed since you last downloaded them
+- Show today's flight logs on the competition screen, with a one-tap way to email them to
+  organizers for scoring
 
 ### Changed
 

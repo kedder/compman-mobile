@@ -132,11 +132,11 @@ void main() {
     expect(find.text('2026-07-27-XCS-WUX-01.igc'), findsOneWidget);
     expect(find.text('2026-07-27-XCS-WUX-02.igc'), findsOneWidget);
 
-    final tiles = tester
-        .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+    final checkboxes = tester
+        .widgetList<Checkbox>(find.byType(Checkbox))
         .toList();
-    expect(tiles, hasLength(2));
-    expect(tiles.every((t) => t.value == true), isTrue);
+    expect(checkboxes, hasLength(2));
+    expect(checkboxes.every((c) => c.value == true), isTrue);
   });
 
   testWidgets('unchecking all files disables Send', (tester) async {
@@ -150,7 +150,7 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    for (final finder in find.byType(CheckboxListTile).evaluate().toList()) {
+    for (final finder in find.byType(Checkbox).evaluate().toList()) {
       await tester.tap(find.byWidget(finder.widget));
       await tester.pump();
     }
@@ -263,7 +263,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('No flight logs found for today.'), findsOneWidget);
-      expect(find.byType(CheckboxListTile), findsNothing);
+      expect(find.byType(Checkbox), findsNothing);
       expect(find.byType(TextFormField), findsNothing);
       expect(find.widgetWithText(ElevatedButton, 'Send'), findsNothing);
     },

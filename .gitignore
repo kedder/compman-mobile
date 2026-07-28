@@ -31,3 +31,6 @@ tmp
 
 # Local developer config (copy sample.env → .env and fill in your UID/GID)
 .env
+
+# Failures from screenshot comparisons
+test/screenshots/failures/

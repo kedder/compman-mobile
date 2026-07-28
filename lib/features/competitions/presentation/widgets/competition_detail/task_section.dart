@@ -12,6 +12,7 @@ import '../../../../../core/widgets/two_tone_card.dart';
 import '../../../../xcsoar/domain/xcsoar_flavor.dart';
 import '../../../domain/entities/task_info.dart';
 import '../../providers/competitions_providers.dart';
+import 'flight_logs_panel.dart';
 import 'shared.dart';
 
 /// Shows the current task for [selectedClass] and lets the pilot download and
@@ -100,6 +101,7 @@ class _TaskSectionState extends ConsumerState<TaskSection>
           );
         }
         return _TaskCard(
+          competitionId: widget.competitionId,
           task: task,
           downloading: downloading,
           installedTaskVersion: widget.installedTaskVersion,
@@ -120,12 +122,14 @@ class _TaskSectionState extends ConsumerState<TaskSection>
 
 class _TaskCard extends ConsumerWidget {
   const _TaskCard({
+    required this.competitionId,
     required this.task,
     required this.downloading,
     required this.installedTaskVersion,
     required this.onInstall,
   });
 
+  final String competitionId;
   final TaskInfo task;
   final bool downloading;
 
@@ -200,6 +204,8 @@ class _TaskCard extends ConsumerWidget {
             const SizedBox(height: 8),
             const _FlyButton(),
           ],
+          const SizedBox(height: 8),
+          FlightLogsPanel(competitionId: competitionId),
           // Installed state (when installed):
           // SizedBox(
           //   width: double.infinity,
